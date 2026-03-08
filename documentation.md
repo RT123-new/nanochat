@@ -90,3 +90,14 @@
 - Results: Syntax check passed; router scenario tests passed.
 - Known issues: Heuristics are intentionally conservative and may need tuning with eval data in later milestones.
 - Next step: Milestone 4+ workspace modules and optional cognition adapter integration around existing `Engine`.
+
+#### 2026-03-08 22:27
+- Milestone: Milestone 6 (Consolidation and skill reuse)
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `docs/architecture.md`, `docs/evals.md`, `nanochat/cognition/schemas.py`, `nanochat/cognition/memory.py`, `nanochat/cognition/router.py`, `nanochat/cognition/__init__.py`
+- Files changed: `nanochat/cognition/consolidation.py`, `nanochat/cognition/skills.py`, `nanochat/cognition/__init__.py`, `tests/test_cognition_consolidation.py`, `documentation.md`
+- Summary: Implemented consolidation logic that detects repeated successful episode patterns and emits reusable `SkillArtifact` records; added an in-memory skill registry with query-time discovery; and persisted consolidated skills into semantic memory with provenance metadata.
+- Decisions made: Kept design isolated and replaceable with pure in-memory stores; required configurable repetition threshold before skill creation; used explicit trigger/strategy metadata for inspectable consolidation decisions.
+- Commands run: `python -m compileall nanochat/cognition tests/test_cognition_consolidation.py`; `python -m pytest -q tests/test_cognition_consolidation.py tests/test_cognition_memory.py tests/test_cognition_router.py tests/test_cognition_schemas.py tests/test_cognition_smoke.py`
+- Results: Syntax check passed; cognition regression suite passed (15 tests).
+- Known issues: Consolidation heuristics are intentionally simple (metadata and substring matching) and may need refinement with real eval traces.
+- Next step: Implement Milestone 7 end-to-end cognition loop wiring these modules through an adapter-driven demo path.
