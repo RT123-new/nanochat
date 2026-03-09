@@ -124,3 +124,14 @@
 - Results: Syntax check passed; cognition regression tests passed; eval script produced comparison summary and JSON artifact.
 - Known issues: Evaluation uses synthetic prompt cases and simple keyword metrics, so results are directional rather than benchmark-grade.
 - Next step: Milestone 9 polish, docs cleanup, and optional deeper integration hooks.
+
+#### 2026-03-09 00:10
+- Milestone: Targeted mathematical consistency fixes for eval/train scripts.
+- Repo files inspected: `scripts/base_eval.py`, `scripts/base_train.py`, `scripts/chat_sft.py`, `nanochat/gpt.py`, `nanochat/engine.py`.
+- Files changed: `scripts/base_eval.py`, `scripts/base_train.py`, `scripts/chat_sft.py`, `tests/test_base_eval_baseline_normalization.py`, `documentation.md`.
+- Summary: Added normalized CORE random-baseline handling (fraction in [0,1) with backward-compatible percent parsing), switched base train/SFT grad accumulation to ceil-based realization with explicit requested vs effective total batch logging, and made FLOPs/throughput/token accounting use the effective realized batch consistently.
+- Decisions made: Kept `nanochat/gpt.py` initialization and optimizer grouping unchanged after audit; kept temperature==0 argmax sampling unchanged in `nanochat/engine.py` and `nanochat/gpt.py`.
+- Commands run: `python -m py_compile scripts/base_eval.py scripts/base_train.py scripts/chat_sft.py nanochat/gpt.py nanochat/engine.py`; `python -m pytest -q tests/test_base_eval_baseline_normalization.py`; `rg -n "total_batch_size % world_tokens_per_fwdbwd|// world_tokens_per_fwdbwd|assert .*world_tokens_per_fwdbwd|assert .*total_batch_size" scripts/base_train.py scripts/chat_sft.py || true`.
+- Results: Syntax checks passed; baseline normalization sanity tests passed (4/4); no remaining divisibility-based total-batch assumptions in `base_train.py` or `chat_sft.py`.
+- Known issues: None found for this scoped change.
+- Next step: None for this scoped patch.
