@@ -25,6 +25,7 @@ import torch.distributed as dist
 from nanochat.common import compute_init, compute_cleanup, print0, get_base_dir, DummyWandb, autodetect_device_type
 from nanochat.checkpoint_manager import save_checkpoint, load_model
 from nanochat.engine import Engine
+from nanochat.rl_schedule import linear_rampdown_multiplier
 from tasks.gsm8k import GSM8K
 
 # -----------------------------------------------------------------------------
@@ -208,8 +209,7 @@ for group in optimizer.param_groups:
 
 # Learning rate scheduler: simple rampdown to zero over num_steps
 def get_lr_multiplier(it):
-    lrm = 1.0 - it / num_steps
-    return lrm
+    return linear_rampdown_multiplier(it, num_steps)
 
 # Calculate the number of examples each rank handles to achieve the desired examples_per_step
 print0(f"Total sequences per step: {args.examples_per_step * args.num_samples}") # total batch size in sequences/step

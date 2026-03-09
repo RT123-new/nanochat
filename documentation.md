@@ -135,3 +135,14 @@
 - Results: Syntax checks passed; baseline normalization sanity tests passed (4/4); no remaining divisibility-based total-batch assumptions in `base_train.py` or `chat_sft.py`.
 - Known issues: None found for this scoped change.
 - Next step: None for this scoped patch.
+
+#### 2026-03-09 09:02
+- Milestone: Targeted hardening patch from latest review (RL LR clamp + BPB clarification).
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `scripts/chat_rl.py`, `nanochat/loss_eval.py`.
+- Files changed: `nanochat/rl_schedule.py`, `scripts/chat_rl.py`, `nanochat/loss_eval.py`, `tests/test_chat_rl_lr_schedule.py`, `documentation.md`.
+- Summary: Added a tiny import-safe RL schedule helper with a defensive non-negative clamp, wired `scripts/chat_rl.py` to use it without changing in-range behavior, added a focused regression test for normal and overshoot cases, and clarified BPB unit conversion comments (nats to bits via ln(2)) while keeping math unchanged.
+- Decisions made: Kept `nanochat/gpt.py` untouched as requested; avoided optimizer/training-flow refactors; extracted only the schedule helper to enable side-effect-free unit testing.
+- Commands run: `python -m py_compile scripts/chat_rl.py nanochat/loss_eval.py nanochat/rl_schedule.py tests/test_chat_rl_lr_schedule.py`; `python -m pytest -q tests/test_chat_rl_lr_schedule.py`.
+- Results: Syntax/compile checks passed; targeted LR schedule regression test passed.
+- Known issues: None for this scoped patch.
+- Next step: No further changes required for this review scope.

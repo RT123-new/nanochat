@@ -61,5 +61,7 @@ def evaluate_bpb(model, batches, steps, token_bytes):
     total_bytes = total_bytes.item()
     if total_bytes == 0:
         return float('inf')
+    # Cross-entropy here is accumulated in nats. math.log(2) is the natural logarithm ln(2),
+    # and dividing by ln(2) converts nats to bits before normalizing by total bytes.
     bpb = total_nats / (math.log(2) * total_bytes)
     return bpb
