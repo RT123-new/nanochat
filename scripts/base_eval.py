@@ -92,6 +92,16 @@ def get_hf_token_bytes(tokenizer, device="cpu"):
 EVAL_BUNDLE_URL = "https://karpathy-public.s3.us-west-2.amazonaws.com/eval_bundle.zip"
 
 
+def normalize_random_baseline(raw_value):
+    """Normalize CORE random baseline to a fraction in [0, 1)."""
+    baseline = float(raw_value)
+    if baseline > 1.0:
+        baseline = baseline / 100.0
+    if not (0.0 <= baseline < 1.0):
+        raise ValueError(f"Invalid CORE random baseline {raw_value!r}; normalized value must be in [0, 1).")
+    return baseline
+
+
 def place_eval_bundle(file_path):
     """Unzip eval_bundle.zip and place it in the base directory."""
     base_dir = get_base_dir()
@@ -123,14 +133,15 @@ def evaluate_core(model, tokenizer, device, max_per_task=-1):
         config = yaml.safe_load(f)
     tasks = config['icl_tasks']
 
-    # Load random baseline values
+    # Load random baseline values as fractions in [0, 1).
+    # Values > 1 are interpreted as percentages for backward compatibility.
     random_baselines = {}
     with open(eval_meta_data, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
             task_name = row['Eval Task']
             random_baseline = row['Random baseline']
-            random_baselines[task_name] = float(random_baseline)
+            random_baselines[task_name] = normalize_random_baseline(random_baseline)
 
     # Evaluate each task
     results = {}
@@ -159,7 +170,7 @@ def evaluate_core(model, tokenizer, device, max_per_task=-1):
         accuracy = evaluate_task(model, tokenizer, data, device, task_meta)
         results[label] = accuracy
         random_baseline = random_baselines[label]
-        centered_result = (accuracy - 0.01 * random_baseline) / (1.0 - 0.01 * random_baseline)
+        centered_result = (accuracy - random_baseline) / (1.0 - random_baseline)
         centered_results[label] = centered_result
         elapsed = time.time() - start_time
         print0(f"accuracy: {accuracy:.4f} | centered: {centered_result:.4f} | time: {elapsed:.2f}s")
