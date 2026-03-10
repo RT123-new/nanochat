@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import re
 
+from .normalize import overlap_score, unique_terms
 from .schemas import SkillArtifact
 
 
@@ -45,12 +45,16 @@ class SkillRegistry:
 
 
 def _score_skill(skill: SkillArtifact, terms: list[str]) -> float:
-    if not terms:
-        return 0.0
-    text = " ".join([skill.name, skill.trigger, " ".join(skill.procedure)]).lower()
-    hits = sum(1 for term in terms if term in text)
-    return hits / len(terms)
+    return overlap_score(terms, _skill_terms(skill))
 
 
 def _terms(text: str) -> list[str]:
-    return re.findall(r"[a-z0-9]+", text.lower())
+    return unique_terms(text)
+
+
+def _skill_terms(skill: SkillArtifact) -> set[str]:
+    return {
+        *unique_terms(skill.name),
+        *unique_terms(skill.trigger),
+        *unique_terms(" ".join(skill.procedure)),
+    }

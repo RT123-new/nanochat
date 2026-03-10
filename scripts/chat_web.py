@@ -46,6 +46,7 @@ from typing import List, Optional, AsyncGenerator
 from dataclasses import dataclass
 from nanochat.common import compute_init, autodetect_device_type
 from nanochat.checkpoint_manager import load_model
+from nanochat.chat_format import normalize_chat_messages, render_messages_for_completion, validate_chat_messages
 from nanochat.engine import Engine
 
 # Abuse prevention limits
@@ -70,6 +71,7 @@ parser.add_argument('-s', '--step', type=int, default=None, help='Step to load')
 parser.add_argument('-p', '--port', type=int, default=8000, help='Port to run the server on')
 parser.add_argument('--device-type', type=str, default='', choices=['cuda', 'cpu', 'mps'], help='Device type for evaluation: cuda|cpu|mps. empty => autodetect')
 parser.add_argument('--host', type=str, default='0.0.0.0', help='Host to bind the server to')
+parser.add_argument('--cognition', action='store_true', help='Wrap each request in the optional cognition layer')
 args = parser.parse_args()
 
 # Configure logging for conversation traffic
@@ -152,42 +154,15 @@ class ChatRequest(BaseModel):
 
 def validate_chat_request(request: ChatRequest):
     """Validate chat request to prevent abuse."""
-    # Check number of messages
-    if len(request.messages) == 0:
-        raise HTTPException(status_code=400, detail="At least one message is required")
-    if len(request.messages) > MAX_MESSAGES_PER_REQUEST:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Too many messages. Maximum {MAX_MESSAGES_PER_REQUEST} messages allowed per request"
+    try:
+        validate_chat_messages(
+            request.messages,
+            max_messages=MAX_MESSAGES_PER_REQUEST,
+            max_message_length=MAX_MESSAGE_LENGTH,
+            max_total_conversation_length=MAX_TOTAL_CONVERSATION_LENGTH,
         )
-
-    # Check individual message lengths and total conversation length
-    total_length = 0
-    for i, message in enumerate(request.messages):
-        if not message.content:
-            raise HTTPException(status_code=400, detail=f"Message {i} has empty content")
-
-        msg_length = len(message.content)
-        if msg_length > MAX_MESSAGE_LENGTH:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Message {i} is too long. Maximum {MAX_MESSAGE_LENGTH} characters allowed per message"
-            )
-        total_length += msg_length
-
-    if total_length > MAX_TOTAL_CONVERSATION_LENGTH:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Total conversation is too long. Maximum {MAX_TOTAL_CONVERSATION_LENGTH} characters allowed"
-        )
-
-    # Validate role values
-    for i, message in enumerate(request.messages):
-        if message.role not in ["user", "assistant"]:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Message {i} has invalid role. Must be 'user', 'assistant', or 'system'"
-            )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     # Validate temperature
     if request.temperature is not None:
@@ -302,6 +277,75 @@ async def generate_stream(
 
     yield f"data: {json.dumps({'done': True})}\n\n"
 
+
+def build_conversation_tokens(worker: Worker, messages: list[ChatMessage]) -> list[int]:
+    prompt_max_tokens = getattr(worker.engine.model.config, "sequence_len", None)
+    try:
+        return render_messages_for_completion(
+            worker.tokenizer,
+            messages,
+            max_tokens=prompt_max_tokens,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+def generate_cognition_response(
+    worker: Worker,
+    messages: list[ChatMessage],
+    *,
+    temperature: float | None,
+    max_new_tokens: int | None,
+    top_k: int | None,
+) -> str:
+    from nanochat.cognition.agent import CognitionAgent
+    from nanochat.cognition.backend import BackendAdapter, EngineBackend
+    from nanochat.cognition.schemas import Episode
+
+    system_prompt = messages[0].content if messages and messages[0].role == "system" else None
+    try:
+        normalized = normalize_chat_messages(messages)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if normalized and normalized[-1]["role"] == "assistant":
+        normalized = normalized[:-1]
+    if not normalized or normalized[-1]["role"] != "user":
+        raise HTTPException(status_code=400, detail="Conversation must end with a user message")
+
+    backend = BackendAdapter(
+        backend=EngineBackend(
+            engine=worker.engine,
+            tokenizer=worker.tokenizer,
+            system_prompt=system_prompt,
+            max_tokens=max_new_tokens if max_new_tokens is not None else args.max_tokens,
+            temperature=temperature if temperature is not None else args.temperature,
+            top_k=top_k if top_k is not None else args.top_k,
+        )
+    )
+    agent = CognitionAgent(backend=backend)
+
+    history = normalized[:-1]
+    for idx in range(0, len(history) - 1, 2):
+        user_message = history[idx]
+        assistant_message = history[idx + 1]
+        agent.episodic.write(
+            Episode(
+                episode_id=f"history-{idx // 2 + 1}",
+                prompt=user_message["content"],
+                response=assistant_message["content"],
+                tags=["conversation_history"],
+                metadata={"success": True, "source": "chat_web"},
+            )
+        )
+
+    query = normalized[-1]["content"]
+    result = agent.run(query)
+    logger.info(
+        f"[COGNITION] route={result.decision} reused_skill={result.reused_skill_id} "
+        f"trace={result.trace.trace_id}"
+    )
+    return result.response
+
 @app.post("/chat/completions")
 async def chat_completions(request: ChatRequest):
     """Chat completion endpoint (streaming only) - uses worker pool for multi-GPU."""
@@ -320,42 +364,36 @@ async def chat_completions(request: ChatRequest):
     worker = await worker_pool.acquire_worker()
 
     try:
-        # Build conversation tokens
-        bos = worker.tokenizer.get_bos_token_id()
-        user_start = worker.tokenizer.encode_special("<|user_start|>")
-        user_end = worker.tokenizer.encode_special("<|user_end|>")
-        assistant_start = worker.tokenizer.encode_special("<|assistant_start|>")
-        assistant_end = worker.tokenizer.encode_special("<|assistant_end|>")
-
-        conversation_tokens = [bos]
-        for message in request.messages:
-            if message.role == "user":
-                conversation_tokens.append(user_start)
-                conversation_tokens.extend(worker.tokenizer.encode(message.content))
-                conversation_tokens.append(user_end)
-            elif message.role == "assistant":
-                conversation_tokens.append(assistant_start)
-                conversation_tokens.extend(worker.tokenizer.encode(message.content))
-                conversation_tokens.append(assistant_end)
-
-        conversation_tokens.append(assistant_start)
+        conversation_tokens = build_conversation_tokens(worker, request.messages)
 
         # Streaming response with worker release after completion
         response_tokens = []
         async def stream_and_release():
             try:
-                async for chunk in generate_stream(
-                    worker,
-                    conversation_tokens,
-                    temperature=request.temperature,
-                    max_new_tokens=request.max_tokens,
-                    top_k=request.top_k
-                ):
-                    # Accumulate response for logging
-                    chunk_data = json.loads(chunk.replace("data: ", "").strip())
-                    if "token" in chunk_data:
-                        response_tokens.append(chunk_data["token"])
-                    yield chunk
+                if args.cognition:
+                    response_text = generate_cognition_response(
+                        worker,
+                        request.messages,
+                        temperature=request.temperature,
+                        max_new_tokens=request.max_tokens,
+                        top_k=request.top_k,
+                    )
+                    response_tokens.append(response_text)
+                    yield f"data: {json.dumps({'token': response_text, 'gpu': worker.gpu_id}, ensure_ascii=False)}\n\n"
+                    yield f"data: {json.dumps({'done': True})}\n\n"
+                else:
+                    async for chunk in generate_stream(
+                        worker,
+                        conversation_tokens,
+                        temperature=request.temperature,
+                        max_new_tokens=request.max_tokens,
+                        top_k=request.top_k
+                    ):
+                        # Accumulate response for logging
+                        chunk_data = json.loads(chunk.replace("data: ", "").strip())
+                        if "token" in chunk_data:
+                            response_tokens.append(chunk_data["token"])
+                        yield chunk
             finally:
                 # Log the assistant response to console
                 full_response = "".join(response_tokens)

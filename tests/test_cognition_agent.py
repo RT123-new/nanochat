@@ -2,12 +2,21 @@ from __future__ import annotations
 
 from nanochat.cognition.agent import CognitionAgent
 from nanochat.cognition.backend import BackendAdapter
-from nanochat.cognition.schemas import Episode
+from nanochat.cognition.schemas import Episode, MemoryItem, SkillArtifact
 
 
 class FakeBackend:
     def generate(self, prompt: str, **kwargs: object) -> str:
         return f"generated::{prompt.splitlines()[0]}"
+
+
+class CapturingBackend:
+    def __init__(self) -> None:
+        self.prompts: list[str] = []
+
+    def generate(self, prompt: str, **kwargs: object) -> str:
+        self.prompts.append(prompt)
+        return "captured"
 
 
 def test_end_to_end_cognition_loop_produces_trace_and_records_episode() -> None:
@@ -50,8 +59,57 @@ def test_end_to_end_retrieval_and_consolidation_paths() -> None:
 
     reused = agent.run("Can you help with summarization?")
     assert reused.reused_skill_id is not None
-    assert reused.response.startswith("[Reused skill:")
+    assert reused.trace.metadata["reused_skill_ids"] == [reused.reused_skill_id]
 
     retrieval = agent.run("Can you recall previous summarization guidance?")
     assert retrieval.decision == "retrieve_memory"
-    assert retrieval.trace.metadata["confidence"] > 0
+    assert retrieval.trace.metadata["retrieved_episode_ids"]
+
+
+def test_agent_injects_semantic_memory_and_skill_into_prompt() -> None:
+    backend = CapturingBackend()
+    agent = CognitionAgent(backend=BackendAdapter(backend=backend))
+    agent.semantic.write(
+        MemoryItem(
+            item_id="semantic-summarization",
+            kind="semantic",
+            content="Summarization style: terse bullet answers.",
+        )
+    )
+    agent.registry.register(
+        SkillArtifact(
+            skill_id="skill-summarization",
+            name="Summarization checklist",
+            trigger="summarization",
+            procedure=["extract bullets", "condense the bullets"],
+        )
+    )
+
+    result = agent.run("Please summarize this draft.")
+
+    assert backend.prompts
+    assert "Relevant semantic memory:" in backend.prompts[-1]
+    assert "Relevant skill:" in backend.prompts[-1]
+    assert result.trace.metadata["retrieved_semantic_ids"] == ["semantic-summarization"]
+    assert result.trace.metadata["reused_skill_ids"] == ["skill-summarization"]
+
+
+def test_agent_injects_episodic_memory_for_ordinary_paraphrased_query() -> None:
+    backend = CapturingBackend()
+    agent = CognitionAgent(backend=BackendAdapter(backend=backend))
+    agent.episodic.write(
+        Episode(
+            episode_id="ep-style",
+            prompt="Summarize the project update",
+            response="Use terse bullet summaries with citations.",
+            tags=["summarization"],
+            metadata={"success": True, "trigger": "summarization"},
+        )
+    )
+
+    result = agent.run("Please summarize this draft for me.")
+
+    assert result.decision == "direct_answer"
+    assert backend.prompts
+    assert "Relevant episodic memory:" in backend.prompts[-1]
+    assert result.trace.metadata["retrieved_episode_ids"] == ["ep-style"]

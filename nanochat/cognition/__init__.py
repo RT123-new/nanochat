@@ -3,11 +3,11 @@
 This package is intentionally lightweight and optional.
 """
 
-from .backend import BackendAdapter, GenerationBackend
+from .backend import BackendAdapter, EngineBackend, GenerationBackend
 from .agent import CognitionAgent, CognitionResult
 from .consolidation import Consolidator
 from .creative import CreativeWorkspace
-from .memory import EpisodicMemory, SemanticMemory
+from .memory import EpisodicMemory, RankedEpisode, SemanticMemory
 from .router import ExplicitRouter
 from .sandbox import LightweightSandbox
 from .skills import SkillMatch, SkillRegistry
@@ -29,8 +29,10 @@ __all__ = [
     "CognitionResult",
     "Consolidator",
     "CreativeWorkspace",
+    "EngineBackend",
     "GenerationBackend",
     "EpisodicMemory",
+    "RankedEpisode",
     "SemanticMemory",
     "ExplicitRouter",
     "LightweightSandbox",

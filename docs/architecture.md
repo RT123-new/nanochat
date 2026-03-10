@@ -37,6 +37,10 @@ Responsibilities:
 - expose generation in a controlled, testable way
 - return structured metadata useful for traces
 
+Current implementation note:
+- the cognition layer now includes an `EngineBackend` adapter that can call the checkpoint-backed `Engine` directly for opt-in chat and eval paths
+- prompt construction should carry reusable context explicitly through sections such as relevant episodic memory, semantic memory, and skills
+
 ### 2. Episodic memory
 Stores concrete experiences such as:
 - task or prompt

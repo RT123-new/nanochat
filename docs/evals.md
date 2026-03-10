@@ -94,20 +94,33 @@ A repo-native evaluation entrypoint now exists at `scripts/cognition_eval.py`.
 - **Baseline**: direct backend generation through `BackendAdapter.run(...)`
 - **Cognition-enhanced**: `CognitionAgent.run(...)` over the same prompts
 
+### Backend modes
+- `--backend demo` uses a deterministic context-aware backend that only improves when cognition injects episodic, semantic, or skill context into the prompt
+- `--backend engine` optionally loads a real checkpoint-backed `EngineBackend` for end-to-end comparisons against live nanochat generation
+
 ### Built-in cases
-The default harness includes memory, creative, verification, and sandbox-style prompts from `nanochat.cognition.eval.DEFAULT_CASES`.
+The default harness now focuses on cases that should only improve if cognition changes the effective prompt:
+- episodic recall
+- semantic memory reuse
+- skill reuse
 
 ### Scoring and artifacts
 - Per-case keyword recall score in `[0, 1]`
 - Aggregate `baseline_mean`, `cognition_mean`, and `delta`
 - Route histogram (`route_counts`) for inspectability
 - JSON artifact containing per-case rows and aggregate summary
+- strict failure when a case marked as requiring cognition gain does not outperform baseline
 
 ### Run command
 ```bash
 python -m scripts.cognition_eval --output artifacts/cognition_eval.json
 ```
 
+Optional real-checkpoint comparison:
+```bash
+python -m scripts.cognition_eval --backend engine --source sft
+```
+
 ### Current limitations
-- Uses a deterministic demo backend for cheap and reproducible CPU-only runs.
 - Keyword scoring is intentionally simple and should be replaced with richer task metrics in future milestones.
+- The engine-backed path remains opt-in because it depends on local checkpoints and runtime setup.
