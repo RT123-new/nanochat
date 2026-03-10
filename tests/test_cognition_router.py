@@ -16,6 +16,7 @@ def test_router_routes_creative_queries() -> None:
 def test_router_routes_verify_queries() -> None:
     router = ExplicitRouter()
     assert router.decide("Please verify this proof").action == "verify"
+    assert router.decide("Please validate this answer").action == "verify"
 
 
 def test_router_routes_sandbox_queries() -> None:
@@ -31,6 +32,7 @@ def test_router_routes_consolidate_queries() -> None:
 def test_router_defaults_direct_answer_and_handles_empty() -> None:
     router = ExplicitRouter()
     assert router.decide("What is 2 + 2?").action == "direct_answer"
+    assert router.decide("Please summarize this draft for me").action == "direct_answer"
     empty = router.decide("   ")
     assert empty.action == "direct_answer"
     assert empty.confidence < 0.5

@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 import json
 from typing import Protocol
 
 from .agent import CognitionAgent
 from .backend import BackendAdapter
+from .schemas import Episode, MemoryItem, SkillArtifact
 
 
 class PromptBackend(Protocol):
@@ -25,6 +26,10 @@ class EvalCase:
     case_id: str
     prompt: str
     expected_keywords: list[str]
+    seeded_episodes: list[Episode] = field(default_factory=list)
+    seeded_semantic_items: list[MemoryItem] = field(default_factory=list)
+    seeded_skills: list[SkillArtifact] = field(default_factory=list)
+    requires_cognition_gain: bool = False
 
 
 @dataclass(slots=True)
@@ -53,25 +58,88 @@ class EvalSummary:
 DEFAULT_CASES: list[EvalCase] = [
     EvalCase(
         case_id="memory_recall",
-        prompt="Can you recall previous summarization guidance?",
-        expected_keywords=["summarization", "guidance", "memory"],
+        prompt="Can you recall the previous summarization guidance for this draft?",
+        expected_keywords=["terse", "bullet", "citations"],
+        seeded_episodes=[
+            Episode(
+                episode_id="episode-style",
+                prompt="What is our summarization style?",
+                response="Use terse bullet summaries with citations.",
+                tags=["summarization"],
+                metadata={"success": True, "trigger": "summarization"},
+            )
+        ],
+        requires_cognition_gain=True,
     ),
     EvalCase(
-        case_id="creative_ideation",
-        prompt="Brainstorm three ideas for improving routing quality",
-        expected_keywords=["ideas", "routing", "improving"],
+        case_id="memory_reuse_paraphrase",
+        prompt="Please summarize this draft for me.",
+        expected_keywords=["terse", "bullet", "citations"],
+        seeded_episodes=[
+            Episode(
+                episode_id="episode-style-paraphrase",
+                prompt="What is our summarization style?",
+                response="Use terse bullet summaries with citations.",
+                tags=["summarization"],
+                metadata={"success": True, "trigger": "summarization"},
+            )
+        ],
+        requires_cognition_gain=True,
     ),
     EvalCase(
-        case_id="verification",
-        prompt="Please verify this plan and provide the strongest option",
-        expected_keywords=["verify", "plan", "option"],
+        case_id="semantic_house_style",
+        prompt="Answer in our house style for this reply.",
+        expected_keywords=["brief", "neutral", "numbered"],
+        seeded_semantic_items=[
+            MemoryItem(
+                item_id="semantic-house-style",
+                kind="semantic",
+                content="House style: brief neutral numbered answers.",
+            )
+        ],
+        requires_cognition_gain=True,
     ),
     EvalCase(
-        case_id="sandbox_branching",
-        prompt="Try two approaches and pick the best branch",
-        expected_keywords=["best", "branch", "approach"],
+        case_id="skill_reuse_paraphrase",
+        prompt="Please summarize this draft.",
+        expected_keywords=["extract", "bullets", "condense"],
+        seeded_skills=[
+            SkillArtifact(
+                skill_id="skill-summarization",
+                name="Reusable summarization checklist",
+                trigger="summarization",
+                procedure=["extract bullets", "condense the bullets"],
+            )
+        ],
+        requires_cognition_gain=True,
     ),
 ]
+
+
+class ContextAwareEvalBackend:
+    """Deterministic backend that only improves when support context is injected."""
+
+    def generate(self, prompt: str, **kwargs: object) -> str:
+        skill_lines = _extract_section(prompt, "Relevant skill:")
+        semantic_lines = _extract_section(prompt, "Relevant semantic memory:")
+        episodic_lines = _extract_section(prompt, "Relevant episodic memory:")
+
+        if skill_lines:
+            procedure_lines = [line.removeprefix("- ").strip() for line in skill_lines if "extract" in line or "condense" in line]
+            if procedure_lines:
+                return "Apply this skill: " + "; ".join(procedure_lines)
+
+        if semantic_lines:
+            cleaned = [line.split(":", 1)[-1].strip() for line in semantic_lines if ":" in line]
+            if cleaned:
+                return "Follow this stored guidance: " + " ".join(cleaned)
+
+        if episodic_lines:
+            cleaned = [line.split("->", 1)[-1].strip() for line in episodic_lines if "->" in line]
+            if cleaned:
+                return "Based on prior guidance: " + " ".join(cleaned)
+
+        return "I can answer directly, but I do not have any prior guidance to reuse yet."
 
 
 def score_keywords(response: str, expected_keywords: list[str]) -> float:
@@ -83,20 +151,37 @@ def score_keywords(response: str, expected_keywords: list[str]) -> float:
     return hits / len(expected_keywords)
 
 
-def run_eval(cases: list[EvalCase], backend: PromptBackend) -> EvalSummary:
+def run_eval(
+    cases: list[EvalCase],
+    backend: PromptBackend,
+    *,
+    enforce_improvement: bool = True,
+) -> EvalSummary:
     """Evaluate direct baseline generation against cognition-enhanced generation."""
     adapter = BackendAdapter(backend=backend)
-    agent = CognitionAgent(backend=adapter)
 
     route_counts: dict[str, int] = {}
     rows: list[EvalRow] = []
 
     for case in cases:
+        agent = CognitionAgent(backend=adapter)
+        for episode in case.seeded_episodes:
+            agent.episodic.write(episode)
+        for item in case.seeded_semantic_items:
+            agent.semantic.write(item)
+        for skill in case.seeded_skills:
+            agent.registry.register(skill)
+
         baseline_response = adapter.run(case.prompt)
         cognition_result = agent.run(case.prompt)
 
         baseline_score = score_keywords(baseline_response, case.expected_keywords)
         cognition_score = score_keywords(cognition_result.response, case.expected_keywords)
+        if enforce_improvement and case.requires_cognition_gain and cognition_score <= baseline_score:
+            raise AssertionError(
+                f"Case {case.case_id} did not improve under cognition. "
+                f"baseline={baseline_score:.3f}, cognition={cognition_score:.3f}"
+            )
         route_counts[cognition_result.decision] = route_counts.get(cognition_result.decision, 0) + 1
 
         rows.append(
@@ -134,3 +219,18 @@ def write_eval_artifact(summary: EvalSummary, output_path: str) -> Path:
     }
     output.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
     return output
+
+
+def _extract_section(prompt: str, title: str) -> list[str]:
+    lines = prompt.splitlines()
+    in_section = False
+    captured: list[str] = []
+    for line in lines:
+        if line == title:
+            in_section = True
+            continue
+        if in_section and not line.strip():
+            break
+        if in_section:
+            captured.append(line)
+    return captured

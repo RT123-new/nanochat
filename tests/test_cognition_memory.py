@@ -16,6 +16,24 @@ def test_episodic_memory_write_and_retrieve_ranked() -> None:
     assert [ep.episode_id for ep in found] == ["e3", "e1"]
 
 
+def test_episodic_memory_search_handles_paraphrase_and_returns_scores() -> None:
+    mem = EpisodicMemory()
+    mem.write(
+        Episode(
+            episode_id="e1",
+            prompt="Summarize the project update",
+            response="Use terse bullet summaries with citations",
+            tags=["summarization"],
+        )
+    )
+
+    found = mem.search("Please summarize this draft for me")
+
+    assert [match.episode.episode_id for match in found] == ["e1"]
+    assert found[0].combined_score > 0.0
+    assert "summarization" in found[0].matched_terms
+
+
 def test_episodic_memory_recent() -> None:
     mem = EpisodicMemory()
     for i in range(4):
@@ -40,3 +58,18 @@ def test_semantic_memory_retrieve_prefers_relevance_and_recency() -> None:
     ranked = mem.retrieve("router retrieval")
     assert [r.item.item_id for r in ranked][:2] == ["m2", "m1"]
     assert all(r.combined_score > 0 for r in ranked)
+
+
+def test_semantic_memory_retrieve_normalizes_aliases() -> None:
+    mem = SemanticMemory()
+    mem.write(
+        MemoryItem(
+            item_id="style",
+            content="House style: brief neutral numbered answers.",
+            kind="semantic",
+        )
+    )
+
+    ranked = mem.retrieve("Answer in our house style for this reply.")
+
+    assert [r.item.item_id for r in ranked] == ["style"]

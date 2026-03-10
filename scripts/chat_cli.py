@@ -18,6 +18,7 @@ parser.add_argument('-p', '--prompt', type=str, default='', help='Prompt the mod
 parser.add_argument('-t', '--temperature', type=float, default=0.6, help='Temperature for generation')
 parser.add_argument('-k', '--top-k', type=int, default=50, help='Top-k sampling parameter')
 parser.add_argument('--device-type', type=str, default='', choices=['cuda', 'cpu', 'mps'], help='Device type for evaluation: cuda|cpu|mps. empty => autodetect')
+parser.add_argument('--cognition', action='store_true', help='Wrap the chat loop with the optional cognition layer')
 args = parser.parse_args()
 
 # Init the model and tokenizer
@@ -34,6 +35,22 @@ assistant_start, assistant_end = tokenizer.encode_special("<|assistant_start|>")
 # Create Engine for efficient generation
 engine = Engine(model, tokenizer)
 
+
+def build_cognition_agent():
+    from nanochat.cognition.agent import CognitionAgent
+    from nanochat.cognition.backend import BackendAdapter, EngineBackend
+
+    backend = BackendAdapter(
+        backend=EngineBackend(
+            engine=engine,
+            tokenizer=tokenizer,
+            max_tokens=256,
+            temperature=args.temperature,
+            top_k=args.top_k,
+        )
+    )
+    return CognitionAgent(backend=backend)
+
 print("\nNanoChat Interactive Mode")
 print("-" * 50)
 print("Type 'quit' or 'exit' to end the conversation")
@@ -41,6 +58,7 @@ print("Type 'clear' to start a new conversation")
 print("-" * 50)
 
 conversation_tokens = [bos]
+agent = build_cognition_agent() if args.cognition else None
 
 while True:
 
@@ -62,6 +80,8 @@ while True:
 
     if user_input.lower() == 'clear':
         conversation_tokens = [bos]
+        if args.cognition:
+            agent = build_cognition_agent()
         print("Conversation cleared.")
         continue
 
@@ -72,6 +92,19 @@ while True:
     conversation_tokens.append(user_start)
     conversation_tokens.extend(tokenizer.encode(user_input))
     conversation_tokens.append(user_end)
+
+    if args.cognition:
+        print("\nAssistant: ", end="", flush=True)
+        result = agent.run(user_input)
+        print(result.response, end="", flush=True)
+        print()
+        response_tokens = tokenizer.encode(result.response)
+        conversation_tokens.append(assistant_start)
+        conversation_tokens.extend(response_tokens)
+        conversation_tokens.append(assistant_end)
+        if args.prompt:
+            break
+        continue
 
     # Kick off the assistant
     conversation_tokens.append(assistant_start)
