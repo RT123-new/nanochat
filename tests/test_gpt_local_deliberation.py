@@ -46,6 +46,7 @@ def test_local_delib_advanced_config_defaults_are_stable():
 
     assert cfg.local_delib_semantic_topk == 0
     assert cfg.local_delib_semantic_lookback == 64
+    assert cfg.local_delib_use_neighbor_graph is False
     assert cfg.local_delib_use_phrase_consensus is False
     assert cfg.local_delib_adaptive_halt is False
     assert cfg.local_delib_branch_factor == 0
@@ -105,6 +106,7 @@ def test_local_delib_advanced_fields_are_wired_into_block(monkeypatch):
             local_delib_steps=1,
             local_delib_semantic_topk=3,
             local_delib_semantic_lookback=7,
+            local_delib_use_neighbor_graph=True,
             local_delib_use_phrase_consensus=True,
             local_delib_adaptive_halt=True,
         )
@@ -113,6 +115,7 @@ def test_local_delib_advanced_fields_are_wired_into_block(monkeypatch):
     block = model.local_delib_blocks["0"]
     assert block.semantic_topk == 3
     assert block.semantic_lookback == 7
+    assert block.use_neighbor_graph is True
     assert block.use_phrase_consensus is True
     assert block.adaptive_halt is True
 
@@ -221,3 +224,48 @@ def test_no_future_token_influence_in_adaptive_halt_path(monkeypatch):
     y2 = model(x2)
 
     assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)
+
+
+def test_kv_cache_works_with_neighbor_graph_enabled(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_semantic_topk=2,
+            local_delib_use_neighbor_graph=True,
+            local_delib_use_phrase_consensus=True,
+        )
+    )
+    idx = torch.randint(0, model.config.vocab_size, (1, 4))
+
+    class DummyKVCache:
+        def __init__(self, n_layers, batch_size, seq_len, n_heads, head_dim):
+            self.n_layers = n_layers
+            self.cache_seqlens = torch.zeros(batch_size, dtype=torch.int32)
+            self.k_cache = torch.zeros(n_layers, batch_size, seq_len, n_heads, head_dim)
+            self.v_cache = torch.zeros(n_layers, batch_size, seq_len, n_heads, head_dim)
+            self.extra_caches = {}
+
+        def get_pos(self):
+            return int(self.cache_seqlens[0].item())
+
+        def get_layer_cache(self, layer_idx):
+            return self.k_cache[layer_idx], self.v_cache[layer_idx]
+
+        def advance(self, num_tokens):
+            self.cache_seqlens += num_tokens
+
+    head_dim = model.config.n_embd // model.config.n_head
+    kv_cache = DummyKVCache(
+        n_layers=model.config.n_layer,
+        batch_size=1,
+        seq_len=model.config.sequence_len,
+        n_heads=model.config.n_kv_head,
+        head_dim=head_dim,
+    )
+
+    logits = model(idx, kv_cache=kv_cache)
+
+    assert logits.shape == (1, 4, model.config.vocab_size)
+    assert kv_cache.get_pos() == 4

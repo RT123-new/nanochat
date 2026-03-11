@@ -25,7 +25,10 @@ def test_local_deliberation_block_shapes():
     assert isinstance(stats["mean_salience"], float)
     assert isinstance(stats["mean_uncertainty"], float)
     assert isinstance(stats["mean_halt"], float)
+    assert isinstance(stats["mean_neighbor_count"], float)
+    assert isinstance(stats["mean_sequence_neighbor_weight"], float)
     assert isinstance(stats["mean_semantic_neighbor_weight"], float)
+    assert isinstance(stats["mean_phrase_neighbor_weight"], float)
     assert isinstance(stats["mean_agreement_score"], float)
     assert isinstance(stats["mean_executed_steps_per_token"], float)
     assert isinstance(stats["max_executed_steps_any_token"], int)
@@ -299,3 +302,122 @@ def test_local_deliberation_reports_mean_agreement_score_when_enabled():
 
     assert isinstance(stats["mean_agreement_score"], float)
     assert -1.0 <= stats["mean_agreement_score"] <= 1.0
+
+
+def test_neighbor_graph_disabled_matches_semantic_path():
+    torch.manual_seed(11)
+    x = torch.randn(2, 7, 10)
+
+    block_sem = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=2,
+        use_token_gate=False,
+        semantic_topk=2,
+        semantic_lookback=4,
+        use_neighbor_graph=False,
+    )
+    y_sem, stats_sem = block_sem(x)
+
+    torch.manual_seed(11)
+    block_same = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=2,
+        use_token_gate=False,
+        semantic_topk=2,
+        semantic_lookback=4,
+    )
+    y_same, stats_same = block_same(x)
+
+    assert torch.allclose(y_sem, y_same, atol=1e-8)
+    assert stats_sem["semantic_topk_used"] == stats_same["semantic_topk_used"]
+
+
+def test_neighbor_graph_enabled_reports_graph_stats_and_bounds():
+    torch.manual_seed(0)
+    block = LocalDeliberationBlock(
+        model_dim=12,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=1,
+        use_token_gate=False,
+        semantic_topk=2,
+        semantic_lookback=3,
+        use_neighbor_graph=True,
+        use_phrase_consensus=True,
+    )
+    x = torch.randn(2, 6, 12)
+
+    y, stats = block(x)
+
+    assert y.shape == x.shape
+    assert stats["semantic_topk_used"] <= 2
+    assert stats["mean_neighbor_count"] <= 1.0 + 2.0 + 1.0
+    assert 0.0 <= stats["mean_sequence_neighbor_weight"] <= 1.0
+    assert 0.0 <= stats["mean_semantic_neighbor_weight"] <= 1.0
+    assert 0.0 <= stats["mean_phrase_neighbor_weight"] <= 1.0
+
+
+def test_neighbor_graph_strict_causality():
+    torch.manual_seed(4)
+    block = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=1,
+        use_token_gate=False,
+        semantic_topk=3,
+        semantic_lookback=5,
+        use_neighbor_graph=True,
+        use_phrase_consensus=True,
+    )
+
+    x1 = torch.randn(1, 8, 10)
+    x2 = x1.clone()
+    x2[:, 5:, :] = torch.randn(1, 3, 10)
+
+    y1, _ = block(x1)
+    y2, _ = block(x2)
+
+    assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)
+
+
+def test_neighbor_graph_phrase_locality_stronger_than_distant_effects():
+    torch.manual_seed(7)
+    block = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=1,
+        use_token_gate=False,
+        semantic_topk=0,
+        use_neighbor_graph=True,
+        use_phrase_consensus=True,
+    )
+
+    base = torch.randn(1, 9, 10)
+    local = base.clone()
+    far = base.clone()
+    local[:, 0:3, :] += 2.0
+    far[:, 6:9, :] += 2.0
+
+    y_base, _ = block(base)
+    y_local, _ = block(local)
+    y_far, _ = block(far)
+
+    local_self = (y_local[:, 0:3, :] - y_base[:, 0:3, :]).norm().item()
+    local_far = (y_local[:, 6:9, :] - y_base[:, 6:9, :]).norm().item()
+
+    far_self = (y_far[:, 6:9, :] - y_base[:, 6:9, :]).norm().item()
+    far_local = (y_far[:, 0:3, :] - y_base[:, 0:3, :]).norm().item()
+
+    assert local_self > local_far
+    assert far_self > far_local

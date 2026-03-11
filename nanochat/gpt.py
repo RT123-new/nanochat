@@ -48,6 +48,7 @@ class GPTConfig:
     local_delib_debug_stats: bool = False
     local_delib_semantic_topk: int = 0
     local_delib_semantic_lookback: int = 64
+    local_delib_use_neighbor_graph: bool = False
     local_delib_use_phrase_consensus: bool = False
     local_delib_adaptive_halt: bool = False
     local_delib_branch_factor: int = 0
@@ -200,6 +201,7 @@ class GPT(nn.Module):
                 use_token_gate=config.local_delib_use_token_gate,
                 semantic_topk=config.local_delib_semantic_topk,
                 semantic_lookback=config.local_delib_semantic_lookback,
+                use_neighbor_graph=config.local_delib_use_neighbor_graph,
                 use_phrase_consensus=config.local_delib_use_phrase_consensus,
                 adaptive_halt=config.local_delib_adaptive_halt,
             )
