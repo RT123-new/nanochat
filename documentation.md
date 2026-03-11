@@ -179,3 +179,13 @@
 - Results: Documentation now distinguishes wrapper cognition behavior from model-core local deliberation behavior and points to train-script enablement flags.
 - Known issues: The local deliberation path is off-by-default (`--local-delib` plus nonzero `--local-delib-steps` required), remains intentionally lightweight/approximate, and is not a full external reasoning graph.
 - Next step: Enable from training via `scripts/base_train.py` flags (minimum: `--local-delib --local-delib-steps <N>`; optionally `--local-delib-every`, `--local-delib-state-dim`, `--local-delib-kernel-size`, `--local-delib-phrase-chunk-size`, `--local-delib-use-token-gate`, and `--local-delib-debug-stats`) and validate in targeted experiments.
+
+#### 2026-03-11 00:20
+- Milestone: Local deliberation agreement/consensus wiring (token proposals -> phrase consensus -> token feedback).
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `nanochat/local_deliberation.py`, `tests/test_local_deliberation.py`.
+- Files changed: `nanochat/local_deliberation.py`, `tests/test_local_deliberation.py`, `documentation.md`.
+- Summary: Added an explicit `PhraseConsensusHead` that builds token proposals, aggregates per-chunk phrase consensus nodes, broadcasts consensus to tokens with a learned acceptance gate, computes mean agreement via cosine similarity, and feeds consensus feedback into the local-deliberation update path when enabled.
+- Decisions made: Kept consensus path off-by-default through a new `use_phrase_consensus=False` flag in `LocalDeliberationBlock`; initialized the agreement gate near-disabled (`weight=0`, `bias=-8`) so existing behavior is effectively preserved at init when enabled; kept output projection near-zero init unchanged.
+- Commands run: `python -m py_compile nanochat/local_deliberation.py tests/test_local_deliberation.py`; `python -m pytest -q tests/test_local_deliberation.py`.
+- Results: Syntax compilation passed; pytest could not run because the environment lacks torch (`ModuleNotFoundError: No module named 'torch'`).
+- Next step: Re-run `python -m pytest -q tests/test_local_deliberation.py` in an environment with torch installed.
