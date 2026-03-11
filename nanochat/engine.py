@@ -15,6 +15,7 @@ import torch
 import torch.nn.functional as F
 import signal
 import warnings
+import copy
 from contextlib import contextmanager
 from collections import deque
 from nanochat.common import compute_init, autodetect_device_type
@@ -100,10 +101,13 @@ class KVCache:
         self.v_cache = torch.zeros(num_layers, batch_size, seq_len, num_heads, head_dim, device=device, dtype=dtype)
         # Current sequence length per batch element (FA3 needs int32)
         self.cache_seqlens = torch.zeros(batch_size, dtype=torch.int32, device=device)
+        # Optional model-side caches (e.g. local deliberation decode state)
+        self.extra_caches = {}
 
     def reset(self):
         """Reset cache to empty state."""
         self.cache_seqlens.zero_()
+        self.extra_caches.clear()
 
     def get_pos(self):
         """Get current position (assumes all batch elements at same position)."""
@@ -129,6 +133,7 @@ class KVCache:
         self.k_cache[:, :, :other_pos, :, :] = other.k_cache[:, :, :other_pos, :, :]
         self.v_cache[:, :, :other_pos, :, :] = other.v_cache[:, :, :other_pos, :, :]
         self.cache_seqlens.fill_(other_pos)
+        self.extra_caches = copy.deepcopy(other.extra_caches)
 
 # -----------------------------------------------------------------------------
 @torch.inference_mode()

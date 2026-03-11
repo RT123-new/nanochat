@@ -187,6 +187,9 @@ class GPT(nn.Module):
                 phrase_chunk_size=config.local_delib_phrase_chunk_size,
                 micro_steps=config.local_delib_steps,
                 use_token_gate=config.local_delib_use_token_gate,
+                semantic_topk=getattr(config, "local_delib_semantic_topk", getattr(config, "semantic_topk", 0)),
+                semantic_lookback=getattr(config, "local_delib_semantic_lookback", getattr(config, "semantic_lookback", 64)),
+                use_phrase_consensus=getattr(config, "local_delib_use_phrase_consensus", False),
             )
             for layer_idx in self._get_local_delib_layer_indices(config)
         })
@@ -437,6 +440,79 @@ class GPT(nn.Module):
             group["initial_lr"] = group["lr"]
         return optimizer
 
+    def _get_local_delib_cache(self, kv_cache, layer_idx, bsz, dtype, device):
+        if kv_cache is None:
+            return None
+        layer_key = str(layer_idx)
+        root = kv_cache.extra_caches.setdefault("local_delib", {})
+        cache = root.get(layer_key)
+        if cache is None:
+            block = self.local_delib_blocks[layer_key]
+            cache = {
+                "state": torch.zeros(bsz, 0, block.in_proj.out_features, dtype=dtype, device=device),
+                "token_count": 0,
+            }
+            root[layer_key] = cache
+        return cache
+
+    def _run_local_delib_cached(self, block, x, cache):
+        # x: (B, T, C), supports T>=1 for prefill and T==1 decode continuation.
+        h_new = block.in_proj(x)
+        h = torch.cat([cache["state"], h_new], dim=1)
+        seq_len = h.size(1)
+        tail_start = seq_len - h_new.size(1)
+
+        semantic_topk_used = 0
+        mean_semantic_neighbor_weight = 0.0
+        mean_agreement_score = 0.0
+        head_states = block.state_head(h)
+
+        for _ in range(block.micro_steps):
+            mixed = block.mixer(h)
+            _, phrase_broadcast = block.phrase_pool(h)
+            if block.use_phrase_consensus:
+                _, consensus_feedback, step_agreement_score, _ = block.phrase_consensus(h)
+                mean_agreement_score += float(step_agreement_score.item())
+            else:
+                consensus_feedback = torch.zeros_like(h)
+            if block.semantic_topk > 0:
+                semantic_summary, _, semantic_weights, semantic_topk_used = block._semantic_neighbor_summary(h)
+                used_weight_mask = (semantic_weights > 0).to(semantic_weights.dtype)
+                used_weight_count = used_weight_mask.sum().clamp_min(1.0)
+                mean_semantic_neighbor_weight = float((semantic_weights * used_weight_mask).sum().item() / used_weight_count.item())
+                if block.use_phrase_consensus:
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary, consensus_feedback], dim=-1)
+                else:
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary], dim=-1)
+            else:
+                if block.use_phrase_consensus:
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, consensus_feedback], dim=-1)
+                else:
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast], dim=-1)
+
+            delta = block.update(update_inputs)
+            if block.use_token_gate:
+                head_states = block.state_head(h)
+                delta = delta * head_states["halt_gate"]
+            h = h + delta
+
+        cache["state"] = h.detach()
+        cache["token_count"] = seq_len
+
+        if block.use_phrase_consensus:
+            mean_agreement_score /= float(block.micro_steps)
+        output = x + block.out_proj(h[:, tail_start:, :])
+        stats = {
+            "mean_salience": float(head_states["salience"].mean().item()),
+            "mean_uncertainty": float(head_states["uncertainty"].mean().item()),
+            "mean_halt": float(head_states["halt_gate"].mean().item()),
+            "executed_steps": block.micro_steps,
+            "mean_semantic_neighbor_weight": mean_semantic_neighbor_weight,
+            "semantic_topk_used": semantic_topk_used,
+            "mean_agreement_score": mean_agreement_score,
+        }
+        return output, stats
+
     def forward(self, idx, targets=None, kv_cache=None, loss_reduction='mean'):
         B, T = idx.size()
 
@@ -459,12 +535,14 @@ class GPT(nn.Module):
             ve = self.value_embeds[str(i)](idx).to(x.dtype) if str(i) in self.value_embeds else None
             x = block(x, ve, cos_sin, self.window_sizes[i], kv_cache)
             if str(i) in self.local_delib_blocks:
+                block = self.local_delib_blocks[str(i)]
                 if kv_cache is None:
-                    x, layer_stats = self.local_delib_blocks[str(i)](x)
-                    if debug_stats is not None:
-                        debug_stats.append({'layer_idx': i, **layer_stats})
-                # Temporary limitation: decode-time generation bypasses local deliberation
-                # until a dedicated deliberation cache is implemented for kv_cache mode.
+                    x, layer_stats = block(x)
+                else:
+                    cache = self._get_local_delib_cache(kv_cache, i, B, x.dtype, x.device)
+                    x, layer_stats = self._run_local_delib_cached(block, x, cache)
+                if debug_stats is not None:
+                    debug_stats.append({'layer_idx': i, **layer_stats})
         x = norm(x)
         self.last_deliberation_stats = debug_stats
 

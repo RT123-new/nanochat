@@ -189,3 +189,14 @@
 - Commands run: `python -m py_compile nanochat/local_deliberation.py tests/test_local_deliberation.py`; `python -m pytest -q tests/test_local_deliberation.py`.
 - Results: Syntax compilation passed; pytest could not run because the environment lacks torch (`ModuleNotFoundError: No module named 'torch'`).
 - Next step: Re-run `python -m pytest -q tests/test_local_deliberation.py` in an environment with torch installed.
+
+#### 2026-03-11 01:10
+- Milestone: Local deliberation decode-time cache support in KV-cached generation.
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `nanochat/engine.py`, `nanochat/gpt.py`, `tests/test_engine_local_deliberation.py`.
+- Files changed: `nanochat/engine.py`, `nanochat/gpt.py`, `tests/test_engine_local_deliberation.py`, `documentation.md`.
+- Summary: Added minimal model-side cache storage alongside KV cache (`extra_caches`) and wired GPT local deliberation to use a decode-time cache path so local deliberation runs in kv-cache mode without re-running full-sequence deliberation from scratch.
+- Decisions made: Kept the implementation bounded and minimal by caching only per-layer latent deliberation states plus token count; preserved existing KV tensor and flash-attention cache behavior; kept deliberation debug stats behavior unchanged for kv-cache mode.
+- Commands run: `python -m py_compile nanochat/engine.py nanochat/gpt.py tests/test_engine_local_deliberation.py`; `python -m pytest -q tests/test_engine_local_deliberation.py`.
+- Results: Syntax compilation passed; targeted pytest could not run in system Python due to missing torch and also failed under `uv run` due missing CUDA runtime libraries (`libcudart.so.12`/`libcublas`).
+- Known issues: Decode-time deliberation cache currently stores full per-layer token states up to current decode length (bounded by cache sequence length); this is intentionally minimal/correctness-first and not yet optimized for more aggressive state compression.
+- Next step: If needed in future milestones, optimize deliberation cache memory by retaining only the exact left-context slices required by each enabled subpath.
