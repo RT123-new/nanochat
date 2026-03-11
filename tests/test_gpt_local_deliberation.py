@@ -71,6 +71,16 @@ def test_forward_works_with_local_delib_enabled(monkeypatch):
     assert len(model.last_deliberation_stats) == len(model.local_delib_blocks)
 
 
+def test_forward_works_with_semantic_neighbor_config_enabled(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, semantic_topk=2))
+    idx = torch.randint(0, model.config.vocab_size, (2, 4))
+
+    logits = model(idx)
+
+    assert logits.shape == (2, 4, model.config.vocab_size)
+
+
 def test_local_delib_module_creation_rules(monkeypatch):
     _patch_flash_attention(monkeypatch)
 
@@ -117,3 +127,39 @@ def test_kv_cache_bypasses_local_delib(monkeypatch):
     assert logits.shape == (1, 3, model.config.vocab_size)
     assert kv_cache.get_pos() == 3
     assert model.last_deliberation_stats is None
+
+
+def test_local_delib_is_near_identity_at_init(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    idx = torch.randint(0, 32, (2, 6))
+
+    torch.manual_seed(0)
+    disabled = GPT(_tiny_config(local_delib=False, local_delib_steps=2))
+    torch.manual_seed(0)
+    enabled = GPT(_tiny_config(local_delib=True, local_delib_steps=2))
+
+    logits_disabled = disabled(idx)
+    logits_enabled = enabled(idx)
+
+    assert torch.allclose(logits_enabled, logits_disabled, atol=1e-6, rtol=1e-6)
+
+
+def test_no_future_token_influence_in_local_delib_path(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_phrase_chunk_size=1,
+            semantic_topk=2,
+        )
+    )
+
+    x1 = torch.randint(0, model.config.vocab_size, (1, 8))
+    x2 = x1.clone()
+    x2[:, 5:] = torch.randint(0, model.config.vocab_size, (1, 3))
+
+    y1 = model(x1)
+    y2 = model(x2)
+
+    assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)
