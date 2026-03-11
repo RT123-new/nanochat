@@ -27,7 +27,9 @@ class DelibMetadataBackend(CapturingBackend):
     def generate(self, prompt: str, **kwargs: object) -> str:
         self.prompts.append(prompt)
         self.last_generation_metadata = {
-            "local_deliberation_stats": [{"layer_idx": 1, "agreement": 0.75, "mean_branch_score": 0.62, "branch_factor_used": 2}]
+            "local_deliberation_stats": [{"layer_idx": 1, "agreement": 0.75, "mean_branch_score": 0.62, "branch_factor_used": 2}],
+            "model_local_delib.branch": {"agreement": 0.75, "mean_branch_score": 0.62, "branch_factor_used": 2.0},
+            "model_local_delib.adaptive_halt": {"halted_token_fraction": 0.4},
         }
         return "captured"
 
@@ -136,3 +138,5 @@ def test_agent_trace_includes_model_local_delib_metadata_when_available() -> Non
 
     assert result.response == "captured"
     assert result.trace.metadata["model_local_delib"] == [{"layer_idx": 1, "agreement": 0.75, "mean_branch_score": 0.62, "branch_factor_used": 2}]
+    assert result.trace.metadata["model_local_delib.branch"]["branch_factor_used"] == 2.0
+    assert result.trace.metadata["model_local_delib.adaptive_halt"]["halted_token_fraction"] == 0.4

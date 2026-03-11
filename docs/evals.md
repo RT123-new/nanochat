@@ -124,3 +124,40 @@ python -m scripts.cognition_eval --backend engine --source sft
 ### Current limitations
 - Keyword scoring is intentionally simple and should be replaced with richer task metrics in future milestones.
 - The engine-backed path remains opt-in because it depends on local checkpoints and runtime setup.
+
+
+## Milestone 15+ local deliberation architecture ablation (lightweight)
+
+A focused model-side ablation suite is now available through `scripts/cognition_eval.py`.
+
+### What it compares
+- `local_delib_off`
+- `local_delib_basic`
+- `local_delib_adaptive_halt`
+- `local_delib_branch`
+- `local_delib_hierarchy`
+- `local_delib_scratchpad`
+
+### Run command
+```bash
+python -m scripts.cognition_eval   --suite local-delib-ablation   --backend demo   --output artifacts/local_delib_ablation_eval.json
+```
+
+Optional checkpoint-backed run (requires local model + torch runtime):
+```bash
+python -m scripts.cognition_eval   --suite local-delib-ablation   --backend engine   --source sft   --output artifacts/local_delib_ablation_engine.json
+```
+
+### Artifact fields and interpretation
+- `variant_mean_scores`: mean keyword score per variant across included prompts.
+- Per-row advanced model metadata:
+  - `model_local_delib_branch`
+  - `model_local_delib_hierarchy`
+  - `model_local_delib_scratchpad`
+  - `model_local_delib_adaptive_halt`
+
+Interpretation guidance:
+- Use `branch_factor_used` and `mean_branch_score` to verify branch mode activation.
+- Use `hierarchy_levels_used` and hierarchy feedback norms to confirm hierarchy participation.
+- Use `scratch_slots_used` and read/write weights to confirm scratchpad activity.
+- Use halt fraction / mean steps to compare fixed-step vs adaptive-halt compute behavior.

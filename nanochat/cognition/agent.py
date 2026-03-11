@@ -132,8 +132,12 @@ class CognitionAgent:
             "reused_skill_ids": [reused_skill.skill_id] if reused_skill else [],
         }
         backend_metadata = getattr(self.backend.backend, "last_generation_metadata", None)
-        if backend_metadata and backend_metadata.get("local_deliberation_stats") is not None:
-            metadata["model_local_delib"] = backend_metadata["local_deliberation_stats"]
+        if backend_metadata:
+            if backend_metadata.get("local_deliberation_stats") is not None:
+                metadata["model_local_delib"] = backend_metadata["local_deliberation_stats"]
+            for key, value in backend_metadata.items():
+                if key.startswith("model_local_delib."):
+                    metadata[key] = value
 
         trace = self.traces.build(
             query=query,
