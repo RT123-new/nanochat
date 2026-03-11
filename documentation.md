@@ -301,3 +301,14 @@
 - Results: `py_compile` passed; targeted pytest collection is blocked in this environment due to missing `torch` (`ModuleNotFoundError`).
 - Known issues: Full runtime validation of new aux numerical tests requires a torch-enabled environment.
 - Next step: Re-run the targeted local deliberation and GPT local deliberation tests in an environment with `torch` installed.
+
+#### 2026-03-11 13:05
+- Milestone: Eval/tracing expansion for advanced local deliberation architecture ablations.
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `docs/architecture.md`, `docs/evals.md`, `nanochat/cognition/backend.py`, `nanochat/cognition/agent.py`, `nanochat/cognition/eval.py`, `scripts/cognition_eval.py`, `tests/test_cognition_backend.py`, `tests/test_cognition_agent.py`, `tests/test_cognition_eval.py`, `tests/test_gpt_local_deliberation.py`, `tests/test_engine_local_deliberation.py`.
+- Files changed: `nanochat/cognition/backend.py`, `nanochat/cognition/agent.py`, `nanochat/cognition/eval.py`, `scripts/cognition_eval.py`, `tests/test_cognition_backend.py`, `tests/test_cognition_agent.py`, `tests/test_cognition_eval.py`, `docs/evals.md`, `documentation.md`.
+- Summary: Extended Engine-backed metadata capture to emit namespaced local deliberation telemetry buckets (`branch`, `hierarchy`, `scratchpad`, `adaptive_halt`) while preserving existing `local_deliberation_stats`; propagated namespaced keys into cognition trace metadata; added a lightweight local-deliberation ablation eval suite with six architecture variants and JSON artifact export of advanced per-row stats; and updated eval docs with concrete commands plus interpretation notes.
+- Decisions made: Kept changes milestone-scoped to evaluation/tracing/docs, implemented deterministic demo backend for CPU-friendly ablation coverage, and kept existing cognition baseline-vs-enhanced harness intact.
+- Commands run: `python -m py_compile nanochat/cognition/backend.py nanochat/cognition/agent.py nanochat/cognition/eval.py scripts/cognition_eval.py tests/test_cognition_backend.py tests/test_cognition_agent.py tests/test_cognition_eval.py`; `python -m pytest -q tests/test_cognition_backend.py tests/test_cognition_agent.py tests/test_cognition_eval.py`.
+- Results: `py_compile` passed; targeted cognition backend/agent/eval tests passed.
+- Known issues: Full model-runtime validation of GPT/engine local deliberation behavior still requires a torch-enabled environment for `tests/test_gpt_local_deliberation.py` and `tests/test_engine_local_deliberation.py`.
+- Next step: Run optional engine-backed ablation eval and broader local deliberation tests in a torch-enabled setup.
