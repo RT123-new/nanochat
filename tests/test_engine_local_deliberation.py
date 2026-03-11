@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import torch
 
-from nanochat.engine import Engine
+from nanochat.engine import Engine, KVCache
 from nanochat.gpt import GPT, GPTConfig
 
 
@@ -93,3 +93,30 @@ def test_engine_generate_batch_runs_with_local_delib_enabled(monkeypatch):
     for row, row_mask in zip(results, masks):
         assert len(row) >= len(prompt)
         assert len(row_mask) == len(row)
+
+
+def test_decode_cache_path_populates_deliberation_cache(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, semantic_topk=2))
+
+    idx_prefill = torch.tensor([[1, 2, 3]], dtype=torch.long)
+    idx_decode = torch.tensor([[4]], dtype=torch.long)
+    head_dim = model.config.n_embd // model.config.n_head
+    kv_cache = KVCache(
+        batch_size=1,
+        num_heads=model.config.n_kv_head,
+        seq_len=model.config.sequence_len,
+        head_dim=head_dim,
+        num_layers=model.config.n_layer,
+        device=idx_prefill.device,
+        dtype=torch.float32,
+    )
+
+    prefill_logits = model(idx_prefill, kv_cache=kv_cache)
+    decode_logits = model(idx_decode, kv_cache=kv_cache)
+
+    assert prefill_logits.shape == (1, 3, model.config.vocab_size)
+    assert decode_logits.shape == (1, 1, model.config.vocab_size)
+    assert kv_cache.get_pos() == 4
+    assert "local_delib" in kv_cache.extra_caches
+    assert len(kv_cache.extra_caches["local_delib"]) == len(model.local_delib_blocks)
