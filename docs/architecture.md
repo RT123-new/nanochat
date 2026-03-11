@@ -292,3 +292,17 @@ Evaluation additions:
 
 This preserves nanochat's incremental philosophy: each mechanism lands as a small optional extension, is measurable, and can be disabled without disturbing established paths.
 
+
+## Local deliberation multi-scale hierarchy (optional)
+
+The model-core local deliberation block now supports an optional hierarchy stack configured by `GPTConfig.local_delib_hierarchy_chunk_sizes` (comma-separated string such as `"4,16"`). When enabled, each hierarchy level performs:
+- chunk pooling from token states to latent nodes,
+- lightweight node refinement,
+- causal broadcast back to tokens via per-level prefix summaries.
+
+Per-step level feedback is averaged across levels and passed through a bounded nonlinearity before being merged with other local deliberation signals. When disabled (empty config string), existing phrase-chunk behavior remains unchanged.
+
+Debug stats include:
+- `hierarchy_levels_used`
+- `mean_hierarchy_feedback_norm`
+- `hierarchy_level_chunk_counts`

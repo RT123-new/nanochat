@@ -63,6 +63,42 @@ class PhrasePool(nn.Module):
         return phrase_states_t, token_broadcast
 
 
+class HierarchyPoolBroadcast(nn.Module):
+    """Pools chunk-level latent nodes and broadcasts causal level summaries."""
+
+    def __init__(self, state_dim: int, chunk_size: int) -> None:
+        super().__init__()
+        if chunk_size < 1:
+            raise ValueError("chunk_size must be >= 1")
+        self.chunk_size = chunk_size
+        self.refine = nn.Linear(state_dim, state_dim)
+        self.broadcast_proj = nn.Linear(state_dim, state_dim)
+
+    def forward(self, h: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        # h: (B, T, C)
+        _, seq_len, _ = h.shape
+        num_chunks = math.ceil(seq_len / self.chunk_size)
+
+        nodes = []
+        token_broadcast = torch.empty_like(h)
+        for idx in range(num_chunks):
+            start = idx * self.chunk_size
+            end = min((idx + 1) * self.chunk_size, seq_len)
+            chunk = h[:, start:end, :]
+            node = torch.tanh(self.refine(chunk.mean(dim=1)))
+            nodes.append(node)
+
+        nodes_t = torch.stack(nodes, dim=1)
+        node_prefix = torch.cumsum(nodes_t, dim=1)
+        for idx in range(num_chunks):
+            start = idx * self.chunk_size
+            end = min((idx + 1) * self.chunk_size, seq_len)
+            prefix_mean = node_prefix[:, idx, :] / float(idx + 1)
+            token_broadcast[:, start:end, :] = self.broadcast_proj(prefix_mean).unsqueeze(1)
+
+        return nodes_t, token_broadcast
+
+
 class TokenStateHead(nn.Module):
     """Computes per-token scalar control states."""
 
@@ -320,6 +356,7 @@ class LocalDeliberationBlock(nn.Module):
         branch_factor: int = 0,
         branch_every: int = 1,
         branch_dim: int = 0,
+        hierarchy_chunk_sizes: list[int] | None = None,
     ) -> None:
         super().__init__()
         if micro_steps < 1:
@@ -343,6 +380,10 @@ class LocalDeliberationBlock(nn.Module):
         self.branch_factor = branch_factor
         self.branch_every = branch_every
         self.branch_dim = branch_dim if branch_dim > 0 else state_dim
+        self.hierarchy_chunk_sizes = tuple(hierarchy_chunk_sizes or [])
+        for chunk_size in self.hierarchy_chunk_sizes:
+            if chunk_size < 1:
+                raise ValueError("hierarchy chunk sizes must be >= 1")
 
         self.in_proj = nn.Linear(model_dim, state_dim)
         self.mixer = CausalDepthwiseMixer(state_dim, kernel_size=kernel_size)
@@ -350,8 +391,13 @@ class LocalDeliberationBlock(nn.Module):
         self.phrase_consensus = PhraseConsensusHead(state_dim, chunk_size=phrase_chunk_size)
         self.state_head = TokenStateHead(state_dim)
         self.halt_threshold_logit = nn.Parameter(torch.tensor(4.59511985013459))
+        self.hierarchy_levels = nn.ModuleList(
+            [HierarchyPoolBroadcast(state_dim=state_dim, chunk_size=chunk_size) for chunk_size in self.hierarchy_chunk_sizes]
+        )
 
         update_in_dim = state_dim * 3
+        if self.hierarchy_levels:
+            update_in_dim += state_dim
         if self.use_phrase_consensus:
             update_in_dim += state_dim
         if self.semantic_topk > 0:
@@ -441,6 +487,9 @@ class LocalDeliberationBlock(nn.Module):
         fraction_tokens_branched_accum = 0.0
         branch_steps = 0
         branch_factor_used = 0
+        hierarchy_feedback_norm_accum = 0.0
+        hierarchy_feedback_steps = 0
+        hierarchy_level_chunk_counts = [0 for _ in self.hierarchy_levels]
         executed_steps_per_token = torch.zeros(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.float32)
         active_mask = torch.ones(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.bool)
         halt_threshold = torch.sigmoid(self.halt_threshold_logit)
@@ -448,6 +497,16 @@ class LocalDeliberationBlock(nn.Module):
         for step_idx in range(self.micro_steps):
             mixed = self.mixer(h)
             _, phrase_broadcast = self.phrase_pool(h)
+            hierarchy_feedback = torch.zeros_like(h)
+            if self.hierarchy_levels:
+                level_feedbacks = []
+                for level_idx, level in enumerate(self.hierarchy_levels):
+                    nodes, level_feedback = level(h)
+                    hierarchy_level_chunk_counts[level_idx] = nodes.shape[1]
+                    level_feedbacks.append(level_feedback)
+                hierarchy_feedback = torch.tanh(torch.stack(level_feedbacks, dim=0).mean(dim=0))
+                hierarchy_feedback_norm_accum += float(hierarchy_feedback.norm(dim=-1).mean().item())
+                hierarchy_feedback_steps += 1
             if self.use_phrase_consensus:
                 _, consensus_feedback, step_agreement_score, _ = self.phrase_consensus(h)
                 mean_agreement_score += float(step_agreement_score.item())
@@ -461,9 +520,12 @@ class LocalDeliberationBlock(nn.Module):
                 mean_semantic_neighbor_weight = float(graph_stats["mean_semantic_neighbor_weight"])
                 mean_phrase_neighbor_weight = float(graph_stats["mean_phrase_neighbor_weight"])
                 if self.use_phrase_consensus:
-                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary, consensus_feedback], dim=-1)
+                    update_inputs = torch.cat(
+                        [h, mixed, phrase_broadcast, semantic_summary, consensus_feedback, hierarchy_feedback],
+                        dim=-1,
+                    ) if self.hierarchy_levels else torch.cat([h, mixed, phrase_broadcast, semantic_summary, consensus_feedback], dim=-1)
                 else:
-                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary], dim=-1)
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary, hierarchy_feedback], dim=-1) if self.hierarchy_levels else torch.cat([h, mixed, phrase_broadcast, semantic_summary], dim=-1)
             elif self.semantic_topk > 0:
                 semantic_summary, _, semantic_weights, semantic_topk_used = self._semantic_neighbor_summary(h)
                 used_weight_mask = (semantic_weights > 0).to(semantic_weights.dtype)
@@ -471,14 +533,17 @@ class LocalDeliberationBlock(nn.Module):
                 mean_semantic_neighbor_weight = float((semantic_weights * used_weight_mask).sum().item() / used_weight_count.item())
                 mean_neighbor_count = float(semantic_topk_used)
                 if self.use_phrase_consensus:
-                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary, consensus_feedback], dim=-1)
+                    update_inputs = torch.cat(
+                        [h, mixed, phrase_broadcast, semantic_summary, consensus_feedback, hierarchy_feedback],
+                        dim=-1,
+                    ) if self.hierarchy_levels else torch.cat([h, mixed, phrase_broadcast, semantic_summary, consensus_feedback], dim=-1)
                 else:
-                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary], dim=-1)
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary, hierarchy_feedback], dim=-1) if self.hierarchy_levels else torch.cat([h, mixed, phrase_broadcast, semantic_summary], dim=-1)
             else:
                 if self.use_phrase_consensus:
-                    update_inputs = torch.cat([h, mixed, phrase_broadcast, consensus_feedback], dim=-1)
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, consensus_feedback, hierarchy_feedback], dim=-1) if self.hierarchy_levels else torch.cat([h, mixed, phrase_broadcast, consensus_feedback], dim=-1)
                 else:
-                    update_inputs = torch.cat([h, mixed, phrase_broadcast], dim=-1)
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, hierarchy_feedback], dim=-1) if self.hierarchy_levels else torch.cat([h, mixed, phrase_broadcast], dim=-1)
 
             delta = self.update(update_inputs)
 
@@ -524,6 +589,7 @@ class LocalDeliberationBlock(nn.Module):
         mean_branch_score = mean_branch_score_accum / float(max(branch_steps, 1))
         mean_merge_weight = mean_merge_weight_accum / float(max(branch_steps, 1))
         fraction_tokens_branched = fraction_tokens_branched_accum / float(max(branch_steps, 1))
+        mean_hierarchy_feedback_norm = hierarchy_feedback_norm_accum / float(max(hierarchy_feedback_steps, 1))
         stats: dict[str, torch.Tensor | float | int] = {
             "mean_salience": float(head_states["salience"].mean().item()),
             "mean_uncertainty": float(head_states["uncertainty"].mean().item()),
@@ -544,6 +610,9 @@ class LocalDeliberationBlock(nn.Module):
             "mean_merge_weight": mean_merge_weight,
             "branch_factor_used": branch_factor_used,
             "fraction_tokens_branched": fraction_tokens_branched,
+            "hierarchy_levels_used": len(self.hierarchy_levels),
+            "mean_hierarchy_feedback_norm": mean_hierarchy_feedback_norm,
+            "hierarchy_level_chunk_counts": hierarchy_level_chunk_counts,
         }
         return h, stats
 

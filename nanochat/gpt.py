@@ -207,6 +207,7 @@ class GPT(nn.Module):
                 branch_factor=config.local_delib_branch_factor,
                 branch_every=config.local_delib_branch_every,
                 branch_dim=config.local_delib_branch_dim,
+                hierarchy_chunk_sizes=self._parse_local_delib_hierarchy_chunk_sizes(config),
             )
             for layer_idx in self._get_local_delib_layer_indices(config)
         })
@@ -334,6 +335,21 @@ class GPT(nn.Module):
         # Final layer always gets full context
         window_sizes[-1] = (long_window, 0)
         return window_sizes
+
+    def _parse_local_delib_hierarchy_chunk_sizes(self, config):
+        spec = config.local_delib_hierarchy_chunk_sizes.strip()
+        if not spec:
+            return []
+        chunk_sizes = []
+        for raw in spec.split(","):
+            value = raw.strip()
+            if not value:
+                continue
+            chunk_size = int(value)
+            if chunk_size < 1:
+                raise ValueError("local_delib_hierarchy_chunk_sizes must contain positive integers")
+            chunk_sizes.append(chunk_size)
+        return chunk_sizes
 
     def _get_local_delib_layer_indices(self, config):
         if not config.local_delib or config.local_delib_steps <= 0:

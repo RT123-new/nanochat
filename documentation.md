@@ -268,3 +268,14 @@
 - Results: `py_compile` passed; local-deliberation and engine local-deliberation tests could not run in this interpreter due to missing `torch` (`ModuleNotFoundError` during collection); cognition backend/agent tests passed (`7 passed`).
 - Known issues: Cached decode compatibility is functionally preserved via existing cached deliberation execution path, but branching currently reuses the same full cached latent-state deliberation update (correct but not additionally optimized for branch-specific incremental compute).
 - Next step: Re-run local deliberation + GPT + engine local deliberation tests in a torch-enabled environment.
+
+#### 2026-03-11 00:00
+- Milestone: Model-core local deliberation hierarchy extension (multi-scale chunk stack, off-by-default).
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `docs/architecture.md`, `nanochat/local_deliberation.py`, `nanochat/gpt.py`, `tests/test_local_deliberation.py`, `tests/test_gpt_local_deliberation.py`.
+- Files changed: `nanochat/local_deliberation.py`, `nanochat/gpt.py`, `tests/test_local_deliberation.py`, `tests/test_gpt_local_deliberation.py`, `documentation.md`, `docs/architecture.md`.
+- Summary: Added an optional multi-scale hierarchy feedback path in `LocalDeliberationBlock` via per-level chunk pooling/refinement/broadcast and bounded averaged feedback; added hierarchy stats (`hierarchy_levels_used`, `mean_hierarchy_feedback_norm`, `hierarchy_level_chunk_counts`); and wired `GPTConfig.local_delib_hierarchy_chunk_sizes` parsing (`"4,16"`) into local deliberation block construction so stats surface through `last_deliberation_stats` when debug stats are enabled.
+- Decisions made: Kept hierarchy disabled by default; preserved existing single phrase-chunk path behavior when no hierarchy chunk sizes are configured; kept hierarchy broadcasting causal by using prefix means of per-level chunk nodes.
+- Commands run: `python -m py_compile nanochat/local_deliberation.py nanochat/gpt.py tests/test_local_deliberation.py tests/test_gpt_local_deliberation.py`; `pytest -q tests/test_local_deliberation.py tests/test_gpt_local_deliberation.py`.
+- Results: `py_compile` passed. `pytest` collection failed in this environment due to missing `torch`.
+- Known issues: Full targeted tests require a torch-enabled runtime.
+- Next step: Re-run local deliberation and GPT local deliberation tests in an environment with `torch` installed.
