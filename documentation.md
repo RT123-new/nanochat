@@ -235,3 +235,14 @@
 - Results: Syntax compilation passed; targeted pytest could not run in system Python due to missing torch (`ModuleNotFoundError: No module named 'torch'`).
 - Known issues: New branch/hierarchy/scratch/adaptive options are intentionally accepted and validated but not consumed by runtime local-deliberation logic yet.
 - Next step: Implement milestone-scoped runtime behavior for adaptive halt/branch/hierarchy/scratch in follow-on patches.
+
+#### 2026-03-11 03:05
+- Milestone: Milestone 10 adaptive per-token local-deliberation halting (runtime + tests).
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `docs/architecture.md`, `nanochat/local_deliberation.py`, `nanochat/gpt.py`, `nanochat/engine.py`, `tests/test_local_deliberation.py`, `tests/test_gpt_local_deliberation.py`, `tests/test_engine_local_deliberation.py`.
+- Files changed: `nanochat/local_deliberation.py`, `nanochat/gpt.py`, `tests/test_local_deliberation.py`, `tests/test_gpt_local_deliberation.py`, `tests/test_engine_local_deliberation.py`, `documentation.md`.
+- Summary: Implemented `local_delib_adaptive_halt` as an off-by-default adaptive compute path where tokens maintain an active mask across micro-steps, stop receiving updates after their halt confidence crosses a learned threshold, and preserve inactive-token latent state; added matching behavior to decode-time cached deliberation via shared block execution logic; and extended deliberation stats with `mean_executed_steps_per_token`, `max_executed_steps_any_token`, `fraction_halted_early`, and `mean_final_halt` while keeping fixed-step behavior unchanged when adaptive halt is disabled.
+- Decisions made: Kept output projection near-identity defaults unchanged (zero-init) and initialized the halt threshold parameter to a conservative high-confidence default to avoid destabilizing early halting at init.
+- Commands run: `python -m py_compile nanochat/local_deliberation.py nanochat/gpt.py tests/test_local_deliberation.py tests/test_gpt_local_deliberation.py tests/test_engine_local_deliberation.py`; `python -m pytest -q tests/test_local_deliberation.py tests/test_gpt_local_deliberation.py tests/test_engine_local_deliberation.py`.
+- Results: Syntax compilation passed; targeted pytest could not execute in this environment because `torch` is not installed in the active interpreter (`ModuleNotFoundError: No module named 'torch'` during collection).
+- Known issues: Runtime test execution remains blocked by missing `torch` in system Python.
+- Next step: Re-run the targeted local-deliberation pytest set in an environment with `torch` available.

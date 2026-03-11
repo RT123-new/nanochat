@@ -201,6 +201,7 @@ class GPT(nn.Module):
                 semantic_topk=config.local_delib_semantic_topk,
                 semantic_lookback=config.local_delib_semantic_lookback,
                 use_phrase_consensus=config.local_delib_use_phrase_consensus,
+                adaptive_halt=config.local_delib_adaptive_halt,
             )
             for layer_idx in self._get_local_delib_layer_indices(config)
         })
@@ -473,55 +474,12 @@ class GPT(nn.Module):
         seq_len = h.size(1)
         tail_start = seq_len - h_new.size(1)
 
-        semantic_topk_used = 0
-        mean_semantic_neighbor_weight = 0.0
-        mean_agreement_score = 0.0
-        head_states = block.state_head(h)
-
-        for _ in range(block.micro_steps):
-            mixed = block.mixer(h)
-            _, phrase_broadcast = block.phrase_pool(h)
-            if block.use_phrase_consensus:
-                _, consensus_feedback, step_agreement_score, _ = block.phrase_consensus(h)
-                mean_agreement_score += float(step_agreement_score.item())
-            else:
-                consensus_feedback = torch.zeros_like(h)
-            if block.semantic_topk > 0:
-                semantic_summary, _, semantic_weights, semantic_topk_used = block._semantic_neighbor_summary(h)
-                used_weight_mask = (semantic_weights > 0).to(semantic_weights.dtype)
-                used_weight_count = used_weight_mask.sum().clamp_min(1.0)
-                mean_semantic_neighbor_weight = float((semantic_weights * used_weight_mask).sum().item() / used_weight_count.item())
-                if block.use_phrase_consensus:
-                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary, consensus_feedback], dim=-1)
-                else:
-                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary], dim=-1)
-            else:
-                if block.use_phrase_consensus:
-                    update_inputs = torch.cat([h, mixed, phrase_broadcast, consensus_feedback], dim=-1)
-                else:
-                    update_inputs = torch.cat([h, mixed, phrase_broadcast], dim=-1)
-
-            delta = block.update(update_inputs)
-            if block.use_token_gate:
-                head_states = block.state_head(h)
-                delta = delta * head_states["halt_gate"]
-            h = h + delta
+        h, stats = block.deliberate_state(h)
 
         cache["state"] = h.detach()
         cache["token_count"] = seq_len
 
-        if block.use_phrase_consensus:
-            mean_agreement_score /= float(block.micro_steps)
         output = x + block.out_proj(h[:, tail_start:, :])
-        stats = {
-            "mean_salience": float(head_states["salience"].mean().item()),
-            "mean_uncertainty": float(head_states["uncertainty"].mean().item()),
-            "mean_halt": float(head_states["halt_gate"].mean().item()),
-            "executed_steps": block.micro_steps,
-            "mean_semantic_neighbor_weight": mean_semantic_neighbor_weight,
-            "semantic_topk_used": semantic_topk_used,
-            "mean_agreement_score": mean_agreement_score,
-        }
         return output, stats
 
     def forward(self, idx, targets=None, kv_cache=None, loss_reduction='mean'):

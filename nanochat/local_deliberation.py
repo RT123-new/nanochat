@@ -136,6 +136,7 @@ class LocalDeliberationBlock(nn.Module):
         semantic_topk: int = 0,
         semantic_lookback: int = 64,
         use_phrase_consensus: bool = False,
+        adaptive_halt: bool = False,
     ) -> None:
         super().__init__()
         if micro_steps < 1:
@@ -150,12 +151,14 @@ class LocalDeliberationBlock(nn.Module):
         self.semantic_topk = semantic_topk
         self.semantic_lookback = semantic_lookback
         self.use_phrase_consensus = use_phrase_consensus
+        self.adaptive_halt = adaptive_halt
 
         self.in_proj = nn.Linear(model_dim, state_dim)
         self.mixer = CausalDepthwiseMixer(state_dim, kernel_size=kernel_size)
         self.phrase_pool = PhrasePool(state_dim, chunk_size=phrase_chunk_size)
         self.phrase_consensus = PhraseConsensusHead(state_dim, chunk_size=phrase_chunk_size)
         self.state_head = TokenStateHead(state_dim)
+        self.halt_threshold_logit = nn.Parameter(torch.tensor(4.59511985013459))
 
         update_in_dim = state_dim * 3
         if self.use_phrase_consensus:
@@ -215,13 +218,15 @@ class LocalDeliberationBlock(nn.Module):
 
         return summary, topk_indices, topk_weights, min(self.semantic_topk, max(seq_len - 1, 0))
 
-    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, dict[str, torch.Tensor | float | int]]:
-        h = self.in_proj(x)
+    def deliberate_state(self, h: torch.Tensor) -> tuple[torch.Tensor, dict[str, torch.Tensor | float | int]]:
         head_states: dict[str, torch.Tensor] = self.state_head(h)
 
         semantic_topk_used = 0
         mean_semantic_neighbor_weight = 0.0
         mean_agreement_score = 0.0
+        executed_steps_per_token = torch.zeros(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.float32)
+        active_mask = torch.ones(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.bool)
+        halt_threshold = torch.sigmoid(self.halt_threshold_logit)
 
         for _ in range(self.micro_steps):
             mixed = self.mixer(h)
@@ -248,22 +253,46 @@ class LocalDeliberationBlock(nn.Module):
 
             delta = self.update(update_inputs)
 
-            if self.use_token_gate:
+            if self.use_token_gate or self.adaptive_halt:
                 head_states = self.state_head(h)
+            if self.use_token_gate:
                 delta = delta * head_states["halt_gate"]
 
-            h = h + delta
+            if self.adaptive_halt:
+                executed_steps_per_token += active_mask.to(executed_steps_per_token.dtype)
+                active_float = active_mask.to(h.dtype)
+                h = h + delta * active_float
+                halted_now = head_states["halt_gate"] >= halt_threshold
+                active_mask = active_mask & (~halted_now)
+            else:
+                h = h + delta
+                executed_steps_per_token += 1.0
 
-        output = x + self.out_proj(h)
+        head_states = self.state_head(h)
+        mean_final_halt = float(head_states["halt_gate"].mean().item())
+        mean_executed_steps_per_token = float(executed_steps_per_token.mean().item())
+        max_executed_steps_any_token = int(executed_steps_per_token.max().item())
+        fraction_halted_early = float((executed_steps_per_token < float(self.micro_steps)).to(torch.float32).mean().item())
+
         if self.use_phrase_consensus:
             mean_agreement_score /= float(self.micro_steps)
         stats: dict[str, torch.Tensor | float | int] = {
             "mean_salience": float(head_states["salience"].mean().item()),
             "mean_uncertainty": float(head_states["uncertainty"].mean().item()),
-            "mean_halt": float(head_states["halt_gate"].mean().item()),
+            "mean_halt": mean_final_halt,
+            "mean_final_halt": mean_final_halt,
             "executed_steps": self.micro_steps,
+            "mean_executed_steps_per_token": mean_executed_steps_per_token,
+            "max_executed_steps_any_token": max_executed_steps_any_token,
+            "fraction_halted_early": fraction_halted_early,
             "mean_semantic_neighbor_weight": mean_semantic_neighbor_weight,
             "semantic_topk_used": semantic_topk_used,
             "mean_agreement_score": mean_agreement_score,
         }
+        return h, stats
+
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, dict[str, torch.Tensor | float | int]]:
+        h = self.in_proj(x)
+        h, stats = self.deliberate_state(h)
+        output = x + self.out_proj(h)
         return output, stats

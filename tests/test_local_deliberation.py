@@ -27,6 +27,10 @@ def test_local_deliberation_block_shapes():
     assert isinstance(stats["mean_halt"], float)
     assert isinstance(stats["mean_semantic_neighbor_weight"], float)
     assert isinstance(stats["mean_agreement_score"], float)
+    assert isinstance(stats["mean_executed_steps_per_token"], float)
+    assert isinstance(stats["max_executed_steps_any_token"], int)
+    assert isinstance(stats["fraction_halted_early"], float)
+    assert isinstance(stats["mean_final_halt"], float)
     assert stats["executed_steps"] == 2
     assert stats["semantic_topk_used"] == 0
     assert stats["mean_agreement_score"] == 0.0
@@ -110,6 +114,67 @@ def test_semantic_topk_disabled_preserves_forward_path():
     assert stats_off["executed_steps"] == stats_default["executed_steps"]
     assert stats_off["semantic_topk_used"] == 0
     assert stats_default["semantic_topk_used"] == 0
+
+
+def test_adaptive_halt_disabled_matches_default_behavior():
+    torch.manual_seed(202)
+    x = torch.randn(2, 6, 10)
+
+    block_default = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=3,
+        use_token_gate=True,
+    )
+    y_default, stats_default = block_default(x)
+
+    torch.manual_seed(202)
+    block_explicit = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=3,
+        use_token_gate=True,
+        adaptive_halt=False,
+    )
+    y_explicit, stats_explicit = block_explicit(x)
+
+    assert torch.allclose(y_default, y_explicit, atol=1e-8)
+    assert stats_default["executed_steps"] == stats_explicit["executed_steps"]
+    assert stats_default["mean_executed_steps_per_token"] == stats_explicit["mean_executed_steps_per_token"]
+
+
+def test_adaptive_halt_can_execute_different_depths_per_token():
+    block = LocalDeliberationBlock(
+        model_dim=8,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=3,
+        use_token_gate=False,
+        adaptive_halt=True,
+    )
+    block.halt_threshold_logit.data.fill_(0.0)
+
+    def fake_state_head(h):
+        halt = torch.zeros(h.shape[0], h.shape[1], 1, device=h.device, dtype=h.dtype)
+        halt[:, 0, :] = 0.9
+        halt[:, 1, :] = 0.1
+        halt[:, 2:, :] = 0.9
+        return {"salience": halt, "uncertainty": 1.0 - halt, "halt_gate": halt}
+
+    block.state_head.forward = fake_state_head
+    x = torch.randn(1, 4, 8)
+
+    y, stats = block(x)
+
+    assert y.shape == x.shape
+    assert stats["max_executed_steps_any_token"] == 3
+    assert 1.0 < stats["mean_executed_steps_per_token"] < 3.0
+    assert 0.0 < stats["fraction_halted_early"] < 1.0
 
 
 def test_semantic_topk_enabled_shapes_and_stats():
