@@ -168,3 +168,14 @@
 - Results: Syntax checks passed; cognition eval still reports a positive gain (`baseline_mean=0.000`, `cognition_mean=1.000`, `delta=1.000`) while now covering paraphrased episodic and skill reuse cases; direct `python3` smoke checks confirmed that `Please summarize this draft for me.` remains `direct_answer` while reusing episodic support, paraphrased skill lookup now works for `summarize`, and alias-based routing maps `validate` to `verify` and `recall`/`previous` to `retrieve_memory`.
 - Known issues: `pytest` remains unavailable in the current `python3` interpreter (`python3 -m pytest -q tests/test_cognition_memory.py` fails with `No module named pytest`), so the updated pytest suite could not be executed in this environment.
 - Next step: Once the runtime is provisioned with pytest, run the targeted cognition tests and optionally rerun `python3 -m scripts.cognition_eval --backend engine --source sft` against a local checkpoint to measure prompt-context gains on a real model.
+
+#### 2026-03-11 00:00
+- Milestone: Architecture documentation update for model-core local deliberation vs cognition wrapper.
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `docs/architecture.md`, `nanochat/gpt.py`, `scripts/base_train.py`.
+- Files changed: `docs/architecture.md`, `documentation.md`.
+- Summary: Documented that the repository now has two distinct capability layers: (1) the existing wrapper-style cognition subsystem under `nanochat/cognition/` and (2) the model-core latent local deliberation path in `nanochat/gpt.py`, including token-local micro-steps, phrase pooling/consensus, optional semantic top-k neighbor path, adaptive per-token gating, and decode-time cache compatibility notes.
+- Decisions made: Kept the update docs-only and tightly scoped; explicitly clarified that local deliberation is a lightweight latent graph-of-thought approximation rather than a full explicit graph executor.
+- Commands run: `rg -n "deliber|latent|micro|phrase|semantic|top-k|topk|gate|gating|cache|cognition|local" nanochat/gpt.py scripts/base_train.py docs/architecture.md documentation.md`; `sed -n '1,260p' docs/architecture.md`; `sed -n '1,220p' documentation.md`.
+- Results: Documentation now distinguishes wrapper cognition behavior from model-core local deliberation behavior and points to train-script enablement flags.
+- Known issues: The local deliberation path is off-by-default (`--local-delib` plus nonzero `--local-delib-steps` required), remains intentionally lightweight/approximate, and is not a full external reasoning graph.
+- Next step: Enable from training via `scripts/base_train.py` flags (minimum: `--local-delib --local-delib-steps <N>`; optionally `--local-delib-every`, `--local-delib-state-dim`, `--local-delib-kernel-size`, `--local-delib-phrase-chunk-size`, `--local-delib-use-token-gate`, and `--local-delib-debug-stats`) and validate in targeted experiments.
