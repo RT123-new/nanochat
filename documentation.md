@@ -200,3 +200,14 @@
 - Results: Syntax compilation passed; targeted pytest could not run in system Python due to missing torch and also failed under `uv run` due missing CUDA runtime libraries (`libcudart.so.12`/`libcublas`).
 - Known issues: Decode-time deliberation cache currently stores full per-layer token states up to current decode length (bounded by cache sequence length); this is intentionally minimal/correctness-first and not yet optimized for more aggressive state compression.
 - Next step: If needed in future milestones, optimize deliberation cache memory by retaining only the exact left-context slices required by each enabled subpath.
+
+#### 2026-03-11 01:40
+- Milestone: Expose model-side local deliberation debug stats to cognition tracing metadata without changing generation return contracts.
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `nanochat/cognition/backend.py`, `nanochat/cognition/agent.py`, `tests/test_cognition_backend.py`, `tests/test_cognition_agent.py`.
+- Files changed: `nanochat/cognition/backend.py`, `nanochat/cognition/agent.py`, `tests/test_cognition_backend.py`, `tests/test_cognition_agent.py`, `documentation.md`.
+- Summary: Added an optional `EngineBackend.last_generation_metadata` side-channel populated from `engine.model.last_deliberation_stats` (when present), kept `EngineBackend.generate()` return type as plain `str`, and plumbed that metadata into cognition traces under `trace.metadata["model_local_delib"]` only when available.
+- Decisions made: Kept API backward-compatible and off-by-default by using a nullable side-channel; avoided any core model/cognition coupling beyond attribute introspection on the backend instance.
+- Commands run: `python -m py_compile nanochat/cognition/backend.py nanochat/cognition/agent.py tests/test_cognition_backend.py tests/test_cognition_agent.py`; `python -m pytest -q tests/test_cognition_backend.py tests/test_cognition_agent.py`.
+- Results: Syntax compilation passed; targeted cognition backend/agent tests passed (`7 passed`).
+- Known issues: None for this scoped patch.
+- Next step: If future milestones require richer diagnostics, extend side-channel keys in `last_generation_metadata` while preserving string-return generation APIs.

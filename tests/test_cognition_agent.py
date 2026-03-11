@@ -19,6 +19,19 @@ class CapturingBackend:
         return "captured"
 
 
+class DelibMetadataBackend(CapturingBackend):
+    def __init__(self) -> None:
+        super().__init__()
+        self.last_generation_metadata = None
+
+    def generate(self, prompt: str, **kwargs: object) -> str:
+        self.prompts.append(prompt)
+        self.last_generation_metadata = {
+            "local_deliberation_stats": [{"layer_idx": 1, "agreement": 0.75}]
+        }
+        return "captured"
+
+
 def test_end_to_end_cognition_loop_produces_trace_and_records_episode() -> None:
     agent = CognitionAgent(backend=BackendAdapter(backend=FakeBackend()))
 
@@ -113,3 +126,13 @@ def test_agent_injects_episodic_memory_for_ordinary_paraphrased_query() -> None:
     assert backend.prompts
     assert "Relevant episodic memory:" in backend.prompts[-1]
     assert result.trace.metadata["retrieved_episode_ids"] == ["ep-style"]
+
+
+def test_agent_trace_includes_model_local_delib_metadata_when_available() -> None:
+    backend = DelibMetadataBackend()
+    agent = CognitionAgent(backend=BackendAdapter(backend=backend))
+
+    result = agent.run("Please summarize this draft for me.")
+
+    assert result.response == "captured"
+    assert result.trace.metadata["model_local_delib"] == [{"layer_idx": 1, "agreement": 0.75}]

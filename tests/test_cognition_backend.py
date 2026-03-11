@@ -70,3 +70,18 @@ def test_engine_backend_uses_chat_serialization_and_decodes_response() -> None:
 
     assert engine.prompt_tokens == expected_tokens
     assert response == "ok"
+
+
+def test_engine_backend_captures_local_deliberation_stats_metadata() -> None:
+    tokenizer = FakeTokenizer()
+    engine = FakeEngine()
+    engine.model.last_deliberation_stats = [{"layer_idx": 0, "agreement": 0.8}]
+    backend = EngineBackend(engine=engine, tokenizer=tokenizer)
+
+    response = backend.generate("Hello there")
+
+    assert isinstance(response, str)
+    assert response == "ok"
+    assert backend.last_generation_metadata == {
+        "local_deliberation_stats": [{"layer_idx": 0, "agreement": 0.8}]
+    }
