@@ -484,3 +484,118 @@ def test_branching_enabled_surfaces_branch_stats_and_shape():
     assert 0.0 <= stats["max_branch_score"] <= 1.0
     assert 0.0 <= stats["mean_merge_weight"] <= 1.0
     assert 0.0 <= stats["fraction_tokens_branched"] <= 1.0
+
+
+def test_hierarchy_disabled_parity_with_default():
+    torch.manual_seed(91)
+    x = torch.randn(2, 7, 10)
+
+    base = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=2,
+        use_token_gate=True,
+    )
+    y_base, stats_base = base(x)
+
+    torch.manual_seed(91)
+    explicit_disabled = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=2,
+        use_token_gate=True,
+        hierarchy_chunk_sizes=[],
+    )
+    y_disabled, stats_disabled = explicit_disabled(x)
+
+    assert torch.allclose(y_base, y_disabled, atol=1e-8)
+    assert stats_base["hierarchy_levels_used"] == 0
+    assert stats_disabled["hierarchy_levels_used"] == 0
+
+
+def test_hierarchy_enabled_shapes_and_stats():
+    torch.manual_seed(92)
+    block = LocalDeliberationBlock(
+        model_dim=12,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=2,
+        use_token_gate=False,
+        hierarchy_chunk_sizes=[2, 4],
+    )
+    x = torch.randn(2, 9, 12)
+
+    y, stats = block(x)
+
+    assert y.shape == x.shape
+    assert stats["hierarchy_levels_used"] == 2
+    assert stats["mean_hierarchy_feedback_norm"] >= 0.0
+    assert len(stats["hierarchy_level_chunk_counts"]) == 2
+    assert stats["hierarchy_level_chunk_counts"][0] == 5
+    assert stats["hierarchy_level_chunk_counts"][1] == 3
+
+
+def test_hierarchy_locality_prefers_nearer_scale():
+    torch.manual_seed(93)
+    block_small = LocalDeliberationBlock(
+        model_dim=8,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=1,
+        use_token_gate=False,
+        hierarchy_chunk_sizes=[2],
+    )
+    block_large = LocalDeliberationBlock(
+        model_dim=8,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=1,
+        use_token_gate=False,
+        hierarchy_chunk_sizes=[8],
+    )
+
+    base = torch.randn(1, 8, 8)
+    perturbed = base.clone()
+    perturbed[:, 0:2, :] += 3.0
+
+    out_small_base, _ = block_small(base)
+    out_small_perturbed, _ = block_small(perturbed)
+    out_large_base, _ = block_large(base)
+    out_large_perturbed, _ = block_large(perturbed)
+
+    near_small = (out_small_perturbed[:, 0:2, :] - out_small_base[:, 0:2, :]).norm().item()
+    far_small = (out_small_perturbed[:, 6:8, :] - out_small_base[:, 6:8, :]).norm().item()
+    near_large = (out_large_perturbed[:, 0:2, :] - out_large_base[:, 0:2, :]).norm().item()
+    far_large = (out_large_perturbed[:, 6:8, :] - out_large_base[:, 6:8, :]).norm().item()
+
+    assert near_small > far_small
+    assert (near_small - far_small) > (near_large - far_large)
+
+
+def test_hierarchy_path_remains_strictly_causal():
+    torch.manual_seed(94)
+    block = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=2,
+        use_token_gate=False,
+        hierarchy_chunk_sizes=[2, 4],
+    )
+
+    x1 = torch.randn(1, 8, 10)
+    x2 = x1.clone()
+    x2[:, 5:, :] = torch.randn(1, 3, 10)
+
+    y1, _ = block(x1)
+    y2, _ = block(x2)
+
+    assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)

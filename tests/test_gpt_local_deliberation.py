@@ -151,6 +151,43 @@ def test_local_delib_module_creation_rules(monkeypatch):
     assert sorted(enabled.local_delib_blocks.keys()) == ["0", "2", "4"]
 
 
+
+
+def test_local_delib_hierarchy_chunk_sizes_parse_and_wire(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=1,
+            local_delib_hierarchy_chunk_sizes="4,16",
+        )
+    )
+
+    block = model.local_delib_blocks["0"]
+    assert block.hierarchy_chunk_sizes == (4, 16)
+    assert len(block.hierarchy_levels) == 2
+
+
+def test_gpt_surfaces_hierarchy_stats(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_debug_stats=True,
+            local_delib_hierarchy_chunk_sizes="2,4",
+        )
+    )
+    idx = torch.randint(0, model.config.vocab_size, (1, 7))
+
+    _ = model(idx)
+
+    assert isinstance(model.last_deliberation_stats, list)
+    layer_stats = model.last_deliberation_stats[0]
+    assert layer_stats["hierarchy_levels_used"] == 2
+    assert layer_stats["mean_hierarchy_feedback_norm"] >= 0.0
+    assert len(layer_stats["hierarchy_level_chunk_counts"]) == 2
+
 def test_kv_cache_bypasses_local_delib(monkeypatch):
     _patch_flash_attention(monkeypatch)
     model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, local_delib_debug_stats=True))
