@@ -453,6 +453,7 @@ class LocalDeliberationBlock(nn.Module):
         if self.scratch_slots > 0:
             nn.init.zeros_(self.scratch_to_state.weight)
             nn.init.zeros_(self.scratch_to_state.bias)
+        self.last_aux_losses: dict[str, torch.Tensor] | None = None
 
     def _compute_scratch_feedback(
         self,
@@ -534,6 +535,7 @@ class LocalDeliberationBlock(nn.Module):
 
     def deliberate_state(self, h: torch.Tensor) -> tuple[torch.Tensor, dict[str, torch.Tensor | float | int]]:
         head_states: dict[str, torch.Tensor] = self.state_head(h)
+        self.last_aux_losses = None
 
         semantic_topk_used = 0
         mean_neighbor_count = 0.0
@@ -554,6 +556,10 @@ class LocalDeliberationBlock(nn.Module):
         mean_scratch_read_weight = 0.0
         mean_scratch_write_weight = 0.0
         mean_scratch_norm = 0.0
+        consensus_disagreement_accum = h.new_zeros(())
+        branch_entropy_accum = h.new_zeros(())
+        branch_diversity_accum = h.new_zeros(())
+        scratch_utilization_accum = h.new_zeros(())
         executed_steps_per_token = torch.zeros(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.float32)
         active_mask = torch.ones(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.bool)
         halt_threshold = torch.sigmoid(self.halt_threshold_logit)
@@ -574,6 +580,7 @@ class LocalDeliberationBlock(nn.Module):
             if self.use_phrase_consensus:
                 _, consensus_feedback, step_agreement_score, _ = self.phrase_consensus(h)
                 mean_agreement_score += float(step_agreement_score.item())
+                consensus_disagreement_accum = consensus_disagreement_accum + (1.0 - step_agreement_score) * 0.5
             else:
                 consensus_feedback = torch.zeros_like(h)
             if self.use_neighbor_graph:
@@ -625,6 +632,9 @@ class LocalDeliberationBlock(nn.Module):
                 mean_scratch_write_weight += step_scratch_write_weight
                 mean_scratch_norm += step_scratch_norm
                 scratch_slots_used = max(scratch_slots_used, step_scratch_slots_used)
+                scratch_utilization_accum = scratch_utilization_accum + 0.5 * (
+                    head_states["uncertainty"].mean() + (head_states["salience"] * head_states["uncertainty"]).mean()
+                )
 
             delta = self.update(update_inputs)
 
@@ -651,6 +661,18 @@ class LocalDeliberationBlock(nn.Module):
                 branch_summary = (branch_weights.unsqueeze(-1) * branch_proposals).sum(dim=2)
                 h, merge_weight = self.branch_merge(h, branch_summary)
 
+                # Encourage branch-score entropy and proposal diversity only when branching is active.
+                entropy = -(branch_weights * torch.log(branch_weights.clamp_min(1e-8))).sum(dim=-1)
+                max_entropy = math.log(float(self.branch_factor))
+                branch_entropy_accum = branch_entropy_accum + (max_entropy - entropy).mean()
+                if self.branch_factor > 1:
+                    normalized = F.normalize(branch_proposals, dim=-1)
+                    pairwise_sim = torch.matmul(normalized, normalized.transpose(-2, -1))
+                    eye = torch.eye(self.branch_factor, device=h.device, dtype=pairwise_sim.dtype).view(1, 1, self.branch_factor, self.branch_factor)
+                    off_diag = (1.0 - eye)
+                    off_diag_mean = ((pairwise_sim.square() * off_diag).sum(dim=(-1, -2)) / float(self.branch_factor * (self.branch_factor - 1))).mean()
+                    branch_diversity_accum = branch_diversity_accum + off_diag_mean
+
                 mean_branch_score_accum += float(branch_scores.mean().item())
                 max_branch_score = max(max_branch_score, float(branch_scores.max().item()))
                 mean_merge_weight_accum += float(merge_weight.mean().item())
@@ -674,6 +696,15 @@ class LocalDeliberationBlock(nn.Module):
         mean_scratch_read_weight = mean_scratch_read_weight / float(max(self.micro_steps, 1))
         mean_scratch_write_weight = mean_scratch_write_weight / float(max(self.micro_steps, 1))
         mean_scratch_norm = mean_scratch_norm / float(max(self.micro_steps, 1))
+        steps = float(max(self.micro_steps, 1))
+        aux_losses = {
+            "local_delib_halt_sparsity_loss": head_states["halt_gate"].mean(),
+            "local_delib_branch_diversity_loss": branch_diversity_accum / float(max(branch_steps, 1)),
+            "local_delib_branch_entropy_loss": branch_entropy_accum / float(max(branch_steps, 1)),
+            "local_delib_consensus_agreement_loss": consensus_disagreement_accum / steps,
+            "local_delib_scratch_utilization_loss": 1.0 - (scratch_utilization_accum / steps),
+        }
+        self.last_aux_losses = aux_losses
         stats: dict[str, torch.Tensor | float | int] = {
             "mean_salience": float(head_states["salience"].mean().item()),
             "mean_uncertainty": float(head_states["uncertainty"].mean().item()),

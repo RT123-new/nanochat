@@ -71,6 +71,11 @@ parser.add_argument("--local-delib-hierarchy-chunk-sizes", type=str, default="",
 parser.add_argument("--local-delib-scratch-slots", type=int, default=0, help="reserved plumbing flag for latent scratch slots")
 parser.add_argument("--local-delib-scratch-dim", type=int, default=0, help="reserved plumbing flag for latent scratch dimension")
 parser.add_argument("--local-delib-debug-branch-stats", action="store_true", help="reserved plumbing flag for branch debug statistics")
+parser.add_argument("--local-delib-halt-sparsity-weight", type=float, default=0.0, help="aux loss weight for halting sparsity")
+parser.add_argument("--local-delib-branch-diversity-weight", type=float, default=0.0, help="aux loss weight for branch diversity")
+parser.add_argument("--local-delib-branch-entropy-weight", type=float, default=0.0, help="aux loss weight for branch entropy")
+parser.add_argument("--local-delib-consensus-agreement-weight", type=float, default=0.0, help="aux loss weight for phrase consensus agreement")
+parser.add_argument("--local-delib-scratch-utilization-weight", type=float, default=0.0, help="aux loss weight for scratchpad utilization")
 # Training horizon (only one used, in order of precedence)
 parser.add_argument("--num-iterations", type=int, default=-1, help="explicit number of optimization steps (-1 = disable)")
 parser.add_argument("--target-flops", type=float, default=-1.0, help="calculate num_iterations to reach target_flops (-1 = disable)")
@@ -200,6 +205,11 @@ def build_model_meta(depth):
         local_delib_scratch_slots=args.local_delib_scratch_slots,
         local_delib_scratch_dim=args.local_delib_scratch_dim,
         local_delib_debug_branch_stats=args.local_delib_debug_branch_stats,
+        local_delib_halt_sparsity_weight=args.local_delib_halt_sparsity_weight,
+        local_delib_branch_diversity_weight=args.local_delib_branch_diversity_weight,
+        local_delib_branch_entropy_weight=args.local_delib_branch_entropy_weight,
+        local_delib_consensus_agreement_weight=args.local_delib_consensus_agreement_weight,
+        local_delib_scratch_utilization_weight=args.local_delib_scratch_utilization_weight,
     )
     with torch.device("meta"):
         model_meta = GPT(config)
@@ -227,8 +237,22 @@ print0(
     f"hierarchy_chunk_sizes='{model_config.local_delib_hierarchy_chunk_sizes}', "
     f"scratch_slots={model_config.local_delib_scratch_slots}, "
     f"scratch_dim={model_config.local_delib_scratch_dim}, "
-    f"debug_branch_stats={'on' if model_config.local_delib_debug_branch_stats else 'off'}"
+    f"debug_branch_stats={'on' if model_config.local_delib_debug_branch_stats else 'off'}, "
+    f"aux_weights=(halt={model_config.local_delib_halt_sparsity_weight}, "
+    f"branch_div={model_config.local_delib_branch_diversity_weight}, "
+    f"branch_entropy={model_config.local_delib_branch_entropy_weight}, "
+    f"consensus={model_config.local_delib_consensus_agreement_weight}, "
+    f"scratch={model_config.local_delib_scratch_utilization_weight})"
 )
+
+aux_loss_weights = {
+    "local_delib_halt_sparsity_loss": model_config.local_delib_halt_sparsity_weight,
+    "local_delib_branch_diversity_loss": model_config.local_delib_branch_diversity_weight,
+    "local_delib_branch_entropy_loss": model_config.local_delib_branch_entropy_weight,
+    "local_delib_consensus_agreement_loss": model_config.local_delib_consensus_agreement_weight,
+    "local_delib_scratch_utilization_loss": model_config.local_delib_scratch_utilization_weight,
+}
+any_aux_weight_enabled = any(weight != 0.0 for weight in aux_loss_weights.values())
 model.to_empty(device=device) # 2) All tensors get storage on target device but with uninitialized (garbage) data
 model.init_weights() # 3) All tensors get initialized
 
@@ -588,6 +612,12 @@ while True:
     t0 = time.time()
     for micro_step in range(grad_accum_steps):
         loss = model(x, y)
+        if any_aux_weight_enabled:
+            aux_losses = getattr(model, "last_aux_losses", None)
+            if isinstance(aux_losses, dict):
+                for name, weight in aux_loss_weights.items():
+                    if weight != 0.0 and name in aux_losses:
+                        loss = loss + (weight * aux_losses[name])
         train_loss = loss.detach() # for logging
         loss = loss / grad_accum_steps # each .backward() is a grad sum => normalize loss here
         if scaler is not None:

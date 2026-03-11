@@ -290,3 +290,14 @@
 - Results: `py_compile` passed. Targeted pytest is blocked in this environment because `torch` is unavailable (`ModuleNotFoundError: No module named 'torch'` during test collection).
 - Known issues: Full runtime validation of scratch behavior tests requires a torch-enabled environment.
 - Next step: Re-run the targeted local deliberation/GPT tests in an environment with torch installed.
+
+#### 2026-03-11 12:11
+- Milestone: Milestone 15 optional auxiliary local-deliberation losses with minimal base-train integration.
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `docs/architecture.md`, `nanochat/gpt.py`, `nanochat/local_deliberation.py`, `scripts/base_train.py`, `tests/test_gpt_local_deliberation.py`, `tests/test_local_deliberation.py`.
+- Files changed: `nanochat/local_deliberation.py`, `nanochat/gpt.py`, `scripts/base_train.py`, `tests/test_gpt_local_deliberation.py`, `tests/test_local_deliberation.py`, `docs/architecture.md`, `documentation.md`.
+- Summary: Added model-side auxiliary local-deliberation loss surfacing via `last_aux_losses` (halt sparsity, branch diversity, branch entropy, consensus agreement, scratch utilization), aggregated the latest aux losses at GPT model scope without changing `forward()` signatures, added five off-by-default aux-weight config fields, and integrated weighted aux composition into `scripts/base_train.py` only when any aux weight is nonzero.
+- Decisions made: Kept defaults fully inert (`0.0` weights); preserved baseline train/inference behavior when weights are zero by adding aux terms conditionally; kept implementation inside existing local deliberation stats path without changing training loop structure.
+- Commands run: `python -m py_compile nanochat/local_deliberation.py nanochat/gpt.py scripts/base_train.py tests/test_gpt_local_deliberation.py tests/test_local_deliberation.py`; `python -m pytest -q tests/test_local_deliberation.py tests/test_gpt_local_deliberation.py`.
+- Results: `py_compile` passed; targeted pytest collection is blocked in this environment due to missing `torch` (`ModuleNotFoundError`).
+- Known issues: Full runtime validation of new aux numerical tests requires a torch-enabled environment.
+- Next step: Re-run the targeted local deliberation and GPT local deliberation tests in an environment with `torch` installed.
