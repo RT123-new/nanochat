@@ -21,6 +21,7 @@ import torch.nn.functional as F
 
 from nanochat.common import get_dist_info, print0, COMPUTE_DTYPE
 from nanochat.optim import MuonAdamW, DistMuonAdamW
+from nanochat.local_deliberation import LocalDeliberationBlock
 
 # Our custom Flash Attention module that automatically uses FA3 on Hopper+ and SDPA fallback elsewhere
 from nanochat.flash_attention import flash_attn
@@ -37,6 +38,14 @@ class GPTConfig:
     # Characters: L=long (full context), S=short (half context)
     # Examples: "L"=all full context, "SL"=alternating, "SSL"=two short then one long
     window_pattern: str = "SSSL"
+    local_delib: bool = False
+    local_delib_every: int = 1
+    local_delib_steps: int = 0
+    local_delib_state_dim: int = 128
+    local_delib_kernel_size: int = 5
+    local_delib_phrase_chunk_size: int = 8
+    local_delib_use_token_gate: bool = True
+    local_delib_debug_stats: bool = False
 
 
 def norm(x):
@@ -170,6 +179,18 @@ class GPT(nn.Module):
             "wte": nn.Embedding(padded_vocab_size, config.n_embd),
             "h": nn.ModuleList([Block(config, layer_idx) for layer_idx in range(config.n_layer)]),
         })
+        self.local_delib_blocks = nn.ModuleDict({
+            str(layer_idx): LocalDeliberationBlock(
+                model_dim=config.n_embd,
+                state_dim=config.local_delib_state_dim,
+                kernel_size=config.local_delib_kernel_size,
+                phrase_chunk_size=config.local_delib_phrase_chunk_size,
+                micro_steps=config.local_delib_steps,
+                use_token_gate=config.local_delib_use_token_gate,
+            )
+            for layer_idx in self._get_local_delib_layer_indices(config)
+        })
+        self.last_deliberation_stats = None
         self.lm_head = Linear(config.n_embd, padded_vocab_size, bias=False)
         # Per-layer learnable scalars (inspired by modded-nanogpt)
         # resid_lambdas: scales the residual stream at each layer (init 1.0 = neutral)
@@ -294,6 +315,12 @@ class GPT(nn.Module):
         window_sizes[-1] = (long_window, 0)
         return window_sizes
 
+    def _get_local_delib_layer_indices(self, config):
+        if not config.local_delib or config.local_delib_steps <= 0:
+            return []
+        assert config.local_delib_every > 0, "local_delib_every must be > 0"
+        return list(range(0, config.n_layer, config.local_delib_every))
+
     def get_device(self):
         return self.transformer.wte.weight.device
 
@@ -322,6 +349,10 @@ class GPT(nn.Module):
             effective_seq = t if window < 0 else min(window, t)
             attn_flops += 12 * h * q * effective_seq
         num_flops_per_token = 6 * (nparams - nparams_exclude) + attn_flops
+        if self.config.local_delib and self.config.local_delib_steps > 0:
+            delib_matrix_params = sum(p.numel() for p in self.local_delib_blocks.parameters() if p.ndim >= 2)
+            # Approximate repeated micro-step compute as extra passes over deliberation matrices.
+            num_flops_per_token += 6 * delib_matrix_params * max(0, self.config.local_delib_steps - 1)
         return num_flops_per_token
 
     def num_scaling_params(self):
@@ -341,14 +372,16 @@ class GPT(nn.Module):
         value_embeds = sum(p.numel() for p in self.value_embeds.parameters())
         lm_head = sum(p.numel() for p in self.lm_head.parameters())
         transformer_matrices = sum(p.numel() for p in self.transformer.h.parameters())
+        local_deliberation = sum(p.numel() for p in self.local_delib_blocks.parameters())
         scalars = self.resid_lambdas.numel() + self.x0_lambdas.numel()
-        total = wte + value_embeds + lm_head + transformer_matrices + scalars
+        total = wte + value_embeds + lm_head + transformer_matrices + local_deliberation + scalars
         assert total == sum(p.numel() for p in self.parameters()), "Parameter count mismatch"
         return {
             'wte': wte,
             'value_embeds': value_embeds,
             'lm_head': lm_head,
             'transformer_matrices': transformer_matrices,
+            'local_deliberation': local_deliberation,
             'scalars': scalars,
             'total': total,
         }
@@ -359,12 +392,17 @@ class GPT(nn.Module):
 
         # Separate out all parameters into groups
         matrix_params = list(self.transformer.h.parameters())
+        local_delib_matrix_params = [p for p in self.local_delib_blocks.parameters() if p.ndim >= 2]
+        local_delib_scalar_params = [p for p in self.local_delib_blocks.parameters() if p.ndim < 2]
         value_embeds_params = list(self.value_embeds.parameters())
         embedding_params = list(self.transformer.wte.parameters())
         lm_head_params = list(self.lm_head.parameters())
         resid_params = [self.resid_lambdas]
         x0_params = [self.x0_lambdas]
-        assert len(list(self.parameters())) == len(matrix_params) + len(embedding_params) + len(lm_head_params) + len(value_embeds_params) + len(resid_params) + len(x0_params)
+        assert len(list(self.parameters())) == (
+            len(matrix_params) + len(local_delib_matrix_params) + len(local_delib_scalar_params) +
+            len(embedding_params) + len(lm_head_params) + len(value_embeds_params) + len(resid_params) + len(x0_params)
+        )
 
         # Scale the LR for the AdamW parameters by ∝1/√dmodel (tuned for 768 dim model)
         dmodel_lr_scale = (model_dim / 768) ** -0.5
@@ -379,6 +417,12 @@ class GPT(nn.Module):
             dict(kind='adamw', params=resid_params, lr=scalar_lr * 0.01, betas=adam_betas, eps=1e-10, weight_decay=0.0),
             dict(kind='adamw', params=x0_params, lr=scalar_lr, betas=(0.96, 0.95), eps=1e-10, weight_decay=0.0),  # higher beta1 for x0
         ]
+        matrix_params.extend(local_delib_matrix_params)
+        if local_delib_scalar_params:
+            param_groups.append(dict(
+                kind='adamw', params=local_delib_scalar_params, lr=matrix_lr * dmodel_lr_scale,
+                betas=adam_betas, eps=1e-10, weight_decay=0.0,
+            ))
         # Muon groups (matrix params, grouped by shape for stacking)
         for shape in sorted({p.shape for p in matrix_params}):
             group_params = [p for p in matrix_params if p.shape == shape]
@@ -409,11 +453,20 @@ class GPT(nn.Module):
         x = x.to(COMPUTE_DTYPE) # ensure activations are in compute dtype (no-op usually, but active for fp16 code path)
         x = norm(x)
         x0 = x  # save initial normalized embedding for x0 residual
+        debug_stats = [] if self.config.local_delib_debug_stats and kv_cache is None else None
         for i, block in enumerate(self.transformer.h):
             x = self.resid_lambdas[i] * x + self.x0_lambdas[i] * x0
             ve = self.value_embeds[str(i)](idx).to(x.dtype) if str(i) in self.value_embeds else None
             x = block(x, ve, cos_sin, self.window_sizes[i], kv_cache)
+            if str(i) in self.local_delib_blocks:
+                if kv_cache is None:
+                    x, layer_stats = self.local_delib_blocks[str(i)](x)
+                    if debug_stats is not None:
+                        debug_stats.append({'layer_idx': i, **layer_stats})
+                # Temporary limitation: decode-time generation bypasses local deliberation
+                # until a dedicated deliberation cache is implemented for kv_cache mode.
         x = norm(x)
+        self.last_deliberation_stats = debug_stats
 
         # Forward the lm_head (compute logits)
         softcap = 20 # smoothly cap the logits to the range [-softcap, softcap]

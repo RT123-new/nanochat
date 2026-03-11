@@ -1,0 +1,119 @@
+from types import SimpleNamespace
+
+import torch
+
+from nanochat.gpt import GPT, GPTConfig
+
+
+def _patch_flash_attention(monkeypatch):
+    def fake_flash_attn_func(q, k, v, causal=False, window_size=(-1, -1)):
+        return torch.zeros_like(q)
+
+    def fake_flash_attn_with_kvcache(q, k_cache, v_cache, k=None, v=None, cache_seqlens=None, causal=False, window_size=(-1, -1)):
+        if k is not None and v is not None and cache_seqlens is not None:
+            pos = int(cache_seqlens[0].item())
+            t = q.size(1)
+            k_cache[:, pos:pos+t, :, :] = k
+            v_cache[:, pos:pos+t, :, :] = v
+        return torch.zeros_like(q)
+
+    monkeypatch.setattr(
+        "nanochat.gpt.flash_attn",
+        SimpleNamespace(
+            flash_attn_func=fake_flash_attn_func,
+            flash_attn_with_kvcache=fake_flash_attn_with_kvcache,
+        ),
+    )
+
+
+def _tiny_config(**kwargs):
+    cfg = GPTConfig(
+        sequence_len=16,
+        vocab_size=32,
+        n_layer=4,
+        n_head=2,
+        n_kv_head=2,
+        n_embd=8,
+        window_pattern="L",
+    )
+    for k, v in kwargs.items():
+        setattr(cfg, k, v)
+    return cfg
+
+
+def test_forward_works_with_local_delib_disabled(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(_tiny_config(local_delib=False, local_delib_steps=2))
+    idx = torch.randint(0, model.config.vocab_size, (2, 6))
+    targets = torch.randint(0, model.config.vocab_size, (2, 6))
+
+    logits = model(idx)
+    loss = model(idx, targets=targets)
+
+    assert logits.shape == (2, 6, model.config.vocab_size)
+    assert loss.ndim == 0
+    assert len(model.local_delib_blocks) == 0
+    assert model.last_deliberation_stats is None
+
+
+def test_forward_works_with_local_delib_enabled(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, local_delib_debug_stats=True))
+    idx = torch.randint(0, model.config.vocab_size, (2, 5))
+    targets = torch.randint(0, model.config.vocab_size, (2, 5))
+
+    logits = model(idx)
+    loss = model(idx, targets=targets)
+
+    assert logits.shape == (2, 5, model.config.vocab_size)
+    assert loss.ndim == 0
+    assert isinstance(model.last_deliberation_stats, list)
+    assert len(model.last_deliberation_stats) == len(model.local_delib_blocks)
+
+
+def test_local_delib_module_creation_rules(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+
+    disabled = GPT(_tiny_config(local_delib=False, local_delib_steps=3))
+    assert len(disabled.local_delib_blocks) == 0
+
+    enabled = GPT(_tiny_config(local_delib=True, local_delib_steps=2, local_delib_every=2, n_layer=5))
+    # layers: 0, 2, 4
+    assert sorted(enabled.local_delib_blocks.keys()) == ["0", "2", "4"]
+
+
+def test_kv_cache_bypasses_local_delib(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, local_delib_debug_stats=True))
+    idx = torch.randint(0, model.config.vocab_size, (1, 3))
+
+    class DummyKVCache:
+        def __init__(self, n_layers, batch_size, seq_len, n_heads, head_dim):
+            self.n_layers = n_layers
+            self.cache_seqlens = torch.zeros(batch_size, dtype=torch.int32)
+            self.k_cache = torch.zeros(n_layers, batch_size, seq_len, n_heads, head_dim)
+            self.v_cache = torch.zeros(n_layers, batch_size, seq_len, n_heads, head_dim)
+
+        def get_pos(self):
+            return int(self.cache_seqlens[0].item())
+
+        def get_layer_cache(self, layer_idx):
+            return self.k_cache[layer_idx], self.v_cache[layer_idx]
+
+        def advance(self, num_tokens):
+            self.cache_seqlens += num_tokens
+
+    head_dim = model.config.n_embd // model.config.n_head
+    kv_cache = DummyKVCache(
+        n_layers=model.config.n_layer,
+        batch_size=1,
+        seq_len=model.config.sequence_len,
+        n_heads=model.config.n_kv_head,
+        head_dim=head_dim,
+    )
+
+    logits = model(idx, kv_cache=kv_cache)
+
+    assert logits.shape == (1, 3, model.config.vocab_size)
+    assert kv_cache.get_pos() == 3
+    assert model.last_deliberation_stats is None
