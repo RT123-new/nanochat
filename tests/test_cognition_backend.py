@@ -75,7 +75,7 @@ def test_engine_backend_uses_chat_serialization_and_decodes_response() -> None:
 def test_engine_backend_captures_local_deliberation_stats_metadata() -> None:
     tokenizer = FakeTokenizer()
     engine = FakeEngine()
-    engine.model.last_deliberation_stats = [{"layer_idx": 0, "agreement": 0.8}]
+    engine.model.last_deliberation_stats = [{"layer_idx": 0, "agreement": 0.8, "mean_branch_score": 0.5, "branch_factor_used": 2}]
     backend = EngineBackend(engine=engine, tokenizer=tokenizer)
 
     response = backend.generate("Hello there")
@@ -83,5 +83,5 @@ def test_engine_backend_captures_local_deliberation_stats_metadata() -> None:
     assert isinstance(response, str)
     assert response == "ok"
     assert backend.last_generation_metadata == {
-        "local_deliberation_stats": [{"layer_idx": 0, "agreement": 0.8}]
+        "local_deliberation_stats": [{"layer_idx": 0, "agreement": 0.8, "mean_branch_score": 0.5, "branch_factor_used": 2}]
     }

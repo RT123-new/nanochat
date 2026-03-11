@@ -86,6 +86,8 @@ def test_forward_works_with_local_delib_enabled(monkeypatch):
     assert loss.ndim == 0
     assert isinstance(model.last_deliberation_stats, list)
     assert len(model.last_deliberation_stats) == len(model.local_delib_blocks)
+    assert "mean_branch_score" in model.last_deliberation_stats[0]
+    assert "mean_merge_weight" in model.last_deliberation_stats[0]
 
 
 def test_forward_works_with_semantic_neighbor_config_enabled(monkeypatch):
@@ -118,6 +120,24 @@ def test_local_delib_advanced_fields_are_wired_into_block(monkeypatch):
     assert block.use_neighbor_graph is True
     assert block.use_phrase_consensus is True
     assert block.adaptive_halt is True
+
+
+def test_local_delib_branch_fields_are_wired_into_block(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_branch_factor=3,
+            local_delib_branch_every=2,
+            local_delib_branch_dim=5,
+        )
+    )
+
+    block = model.local_delib_blocks["0"]
+    assert block.branch_factor == 3
+    assert block.branch_every == 2
+    assert block.branch_dim == 5
 
 
 def test_local_delib_module_creation_rules(monkeypatch):
@@ -269,3 +289,25 @@ def test_kv_cache_works_with_neighbor_graph_enabled(monkeypatch):
 
     assert logits.shape == (1, 4, model.config.vocab_size)
     assert kv_cache.get_pos() == 4
+
+
+def test_no_future_token_influence_in_branch_path(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_phrase_chunk_size=1,
+            local_delib_semantic_topk=2,
+            local_delib_branch_factor=2,
+        )
+    )
+
+    x1 = torch.randint(0, model.config.vocab_size, (1, 8))
+    x2 = x1.clone()
+    x2[:, 5:] = torch.randint(0, model.config.vocab_size, (1, 3))
+
+    y1 = model(x1)
+    y2 = model(x2)
+
+    assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)

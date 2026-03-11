@@ -204,6 +204,9 @@ class GPT(nn.Module):
                 use_neighbor_graph=config.local_delib_use_neighbor_graph,
                 use_phrase_consensus=config.local_delib_use_phrase_consensus,
                 adaptive_halt=config.local_delib_adaptive_halt,
+                branch_factor=config.local_delib_branch_factor,
+                branch_every=config.local_delib_branch_every,
+                branch_dim=config.local_delib_branch_dim,
             )
             for layer_idx in self._get_local_delib_layer_indices(config)
         })
