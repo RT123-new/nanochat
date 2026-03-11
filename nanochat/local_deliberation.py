@@ -80,6 +80,48 @@ class TokenStateHead(nn.Module):
         }
 
 
+class PhraseConsensusHead(nn.Module):
+    """Builds per-chunk phrase consensus from token-level proposals."""
+
+    def __init__(self, model_dim: int, chunk_size: int) -> None:
+        super().__init__()
+        if chunk_size < 1:
+            raise ValueError("chunk_size must be >= 1")
+        self.chunk_size = chunk_size
+        self.proposal_proj = nn.Linear(model_dim, model_dim)
+        self.consensus_proj = nn.Linear(model_dim, model_dim)
+        self.agreement_gate = nn.Linear(model_dim, 1)
+
+        # Near-disabled at init to preserve prior behavior unless this path learns to engage.
+        nn.init.zeros_(self.agreement_gate.weight)
+        nn.init.constant_(self.agreement_gate.bias, -8.0)
+
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        # x: (B, T, C)
+        bsz, seq_len, _ = x.shape
+        num_chunks = math.ceil(seq_len / self.chunk_size)
+
+        token_proposals = self.proposal_proj(x)
+        phrase_consensus_nodes = []
+        consensus_broadcast = torch.empty_like(token_proposals)
+
+        for idx in range(num_chunks):
+            start = idx * self.chunk_size
+            end = min((idx + 1) * self.chunk_size, seq_len)
+            chunk = token_proposals[:, start:end, :]
+            consensus = self.consensus_proj(chunk.mean(dim=1))
+            phrase_consensus_nodes.append(consensus)
+            consensus_broadcast[:, start:end, :] = consensus.unsqueeze(1)
+
+        phrase_consensus = torch.stack(phrase_consensus_nodes, dim=1)
+        accept_gate = torch.sigmoid(self.agreement_gate(x))
+        feedback = accept_gate * consensus_broadcast
+
+        agreement = F.cosine_similarity(token_proposals, consensus_broadcast, dim=-1)
+        mean_agreement_score = agreement.mean()
+        return phrase_consensus, feedback, mean_agreement_score, token_proposals
+
+
 class LocalDeliberationBlock(nn.Module):
     """Token-local latent deliberation with causal mixing."""
 
@@ -93,6 +135,7 @@ class LocalDeliberationBlock(nn.Module):
         use_token_gate: bool,
         semantic_topk: int = 0,
         semantic_lookback: int = 64,
+        use_phrase_consensus: bool = False,
     ) -> None:
         super().__init__()
         if micro_steps < 1:
@@ -106,19 +149,22 @@ class LocalDeliberationBlock(nn.Module):
         self.use_token_gate = use_token_gate
         self.semantic_topk = semantic_topk
         self.semantic_lookback = semantic_lookback
+        self.use_phrase_consensus = use_phrase_consensus
 
         self.in_proj = nn.Linear(model_dim, state_dim)
         self.mixer = CausalDepthwiseMixer(state_dim, kernel_size=kernel_size)
         self.phrase_pool = PhrasePool(state_dim, chunk_size=phrase_chunk_size)
+        self.phrase_consensus = PhraseConsensusHead(state_dim, chunk_size=phrase_chunk_size)
         self.state_head = TokenStateHead(state_dim)
 
+        update_in_dim = state_dim * 3
+        if self.use_phrase_consensus:
+            update_in_dim += state_dim
         if self.semantic_topk > 0:
             self.semantic_q = nn.Linear(state_dim, state_dim)
             self.semantic_k = nn.Linear(state_dim, state_dim)
             self.semantic_v = nn.Linear(state_dim, state_dim)
-            update_in_dim = state_dim * 4
-        else:
-            update_in_dim = state_dim * 3
+            update_in_dim += state_dim
 
         self.update = nn.Sequential(
             nn.Linear(update_in_dim, state_dim),
@@ -175,18 +221,30 @@ class LocalDeliberationBlock(nn.Module):
 
         semantic_topk_used = 0
         mean_semantic_neighbor_weight = 0.0
+        mean_agreement_score = 0.0
 
         for _ in range(self.micro_steps):
             mixed = self.mixer(h)
             _, phrase_broadcast = self.phrase_pool(h)
+            if self.use_phrase_consensus:
+                _, consensus_feedback, step_agreement_score, _ = self.phrase_consensus(h)
+                mean_agreement_score += float(step_agreement_score.item())
+            else:
+                consensus_feedback = torch.zeros_like(h)
             if self.semantic_topk > 0:
                 semantic_summary, _, semantic_weights, semantic_topk_used = self._semantic_neighbor_summary(h)
                 used_weight_mask = (semantic_weights > 0).to(semantic_weights.dtype)
                 used_weight_count = used_weight_mask.sum().clamp_min(1.0)
                 mean_semantic_neighbor_weight = float((semantic_weights * used_weight_mask).sum().item() / used_weight_count.item())
-                update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary], dim=-1)
+                if self.use_phrase_consensus:
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary, consensus_feedback], dim=-1)
+                else:
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary], dim=-1)
             else:
-                update_inputs = torch.cat([h, mixed, phrase_broadcast], dim=-1)
+                if self.use_phrase_consensus:
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, consensus_feedback], dim=-1)
+                else:
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast], dim=-1)
 
             delta = self.update(update_inputs)
 
@@ -197,6 +255,8 @@ class LocalDeliberationBlock(nn.Module):
             h = h + delta
 
         output = x + self.out_proj(h)
+        if self.use_phrase_consensus:
+            mean_agreement_score /= float(self.micro_steps)
         stats: dict[str, torch.Tensor | float | int] = {
             "mean_salience": float(head_states["salience"].mean().item()),
             "mean_uncertainty": float(head_states["uncertainty"].mean().item()),
@@ -204,5 +264,6 @@ class LocalDeliberationBlock(nn.Module):
             "executed_steps": self.micro_steps,
             "mean_semantic_neighbor_weight": mean_semantic_neighbor_weight,
             "semantic_topk_used": semantic_topk_used,
+            "mean_agreement_score": mean_agreement_score,
         }
         return output, stats

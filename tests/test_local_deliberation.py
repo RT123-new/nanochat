@@ -3,6 +3,7 @@ import torch
 from nanochat.local_deliberation import (
     CausalDepthwiseMixer,
     LocalDeliberationBlock,
+    PhraseConsensusHead,
     PhrasePool,
 )
 
@@ -25,8 +26,10 @@ def test_local_deliberation_block_shapes():
     assert isinstance(stats["mean_uncertainty"], float)
     assert isinstance(stats["mean_halt"], float)
     assert isinstance(stats["mean_semantic_neighbor_weight"], float)
+    assert isinstance(stats["mean_agreement_score"], float)
     assert stats["executed_steps"] == 2
     assert stats["semantic_topk_used"] == 0
+    assert stats["mean_agreement_score"] == 0.0
 
 
 def test_causal_depthwise_mixer_no_lookahead():
@@ -128,6 +131,7 @@ def test_semantic_topk_enabled_shapes_and_stats():
     assert y.shape == x.shape
     assert stats["semantic_topk_used"] == 3
     assert 0.0 <= stats["mean_semantic_neighbor_weight"] <= 1.0
+    assert stats["mean_agreement_score"] == 0.0
 
 
 def test_semantic_neighbors_strictly_causal():
@@ -175,3 +179,58 @@ def test_semantic_topk_cap_respected_with_short_lookback():
         used = (topk_indices[0, token_idx] >= 0).sum().item()
         expected = min(4, min(2, token_idx))
         assert used == expected
+
+
+def test_phrase_consensus_shapes_and_agreement_score():
+    torch.manual_seed(0)
+    head = PhraseConsensusHead(model_dim=6, chunk_size=3)
+    x = torch.randn(2, 7, 6)
+
+    phrase_consensus, feedback, mean_agreement_score, token_proposals = head(x)
+
+    assert phrase_consensus.shape == (2, 3, 6)
+    assert feedback.shape == x.shape
+    assert token_proposals.shape == x.shape
+    assert mean_agreement_score.ndim == 0
+
+
+def test_consensus_chunk_locality():
+    torch.manual_seed(1)
+    head = PhraseConsensusHead(model_dim=8, chunk_size=3)
+
+    x_base = torch.randn(1, 6, 8)
+    x_chunk0 = x_base.clone()
+    x_chunk1 = x_base.clone()
+    x_chunk0[:, 0:3, :] += 1.5
+    x_chunk1[:, 3:6, :] += 1.5
+
+    consensus_base, _, _, _ = head(x_base)
+    consensus_chunk0, _, _, _ = head(x_chunk0)
+    consensus_chunk1, _, _, _ = head(x_chunk1)
+
+    delta_chunk0_self = (consensus_chunk0[:, 0, :] - consensus_base[:, 0, :]).norm().item()
+    delta_chunk0_other = (consensus_chunk0[:, 1, :] - consensus_base[:, 1, :]).norm().item()
+    delta_chunk1_self = (consensus_chunk1[:, 1, :] - consensus_base[:, 1, :]).norm().item()
+    delta_chunk1_other = (consensus_chunk1[:, 0, :] - consensus_base[:, 0, :]).norm().item()
+
+    assert delta_chunk0_self > delta_chunk0_other
+    assert delta_chunk1_self > delta_chunk1_other
+
+
+def test_local_deliberation_reports_mean_agreement_score_when_enabled():
+    torch.manual_seed(3)
+    block = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=2,
+        use_token_gate=True,
+        use_phrase_consensus=True,
+    )
+    x = torch.randn(2, 8, 10)
+
+    _, stats = block(x)
+
+    assert isinstance(stats["mean_agreement_score"], float)
+    assert -1.0 <= stats["mean_agreement_score"] <= 1.0
