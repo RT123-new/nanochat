@@ -125,17 +125,22 @@ class CognitionAgent:
         if consolidated_skill is not None:
             steps.append(f"auto_consolidated:{consolidated_skill.skill_id}")
 
+        metadata = {
+            "confidence": decision.confidence,
+            "retrieved_episode_ids": [episode.episode_id for episode in selected_episodes],
+            "retrieved_semantic_ids": [match.item.item_id for match in semantic_hits],
+            "reused_skill_ids": [reused_skill.skill_id] if reused_skill else [],
+        }
+        backend_metadata = getattr(self.backend.backend, "last_generation_metadata", None)
+        if backend_metadata and backend_metadata.get("local_deliberation_stats") is not None:
+            metadata["model_local_delib"] = backend_metadata["local_deliberation_stats"]
+
         trace = self.traces.build(
             query=query,
             decision=decision.action,
             rationale=decision.rationale,
             steps=steps,
-            metadata={
-                "confidence": decision.confidence,
-                "retrieved_episode_ids": [episode.episode_id for episode in selected_episodes],
-                "retrieved_semantic_ids": [match.item.item_id for match in semantic_hits],
-                "reused_skill_ids": [reused_skill.skill_id] if reused_skill else [],
-            },
+            metadata=metadata,
         )
         return CognitionResult(
             response=response,

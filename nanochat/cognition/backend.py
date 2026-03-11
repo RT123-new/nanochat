@@ -43,8 +43,10 @@ class EngineBackend:
     temperature: float = 0.6
     top_k: int | None = 50
     seed: int = 42
+    last_generation_metadata: dict[str, Any] | None = None
 
     def generate(self, prompt: str, **kwargs: Any) -> str:
+        self.last_generation_metadata = None
         system_prompt = kwargs.pop("system_prompt", self.system_prompt)
         messages = kwargs.pop("messages", None)
         if messages is None:
@@ -72,7 +74,16 @@ class EngineBackend:
             top_k=top_k,
             seed=seed,
         )
+        self._capture_generation_metadata()
         return self.tokenizer.decode(results[0][len(tokens):]).strip()
+
+    def _capture_generation_metadata(self) -> None:
+        model = getattr(self.engine, "model", None)
+        local_delib_stats = getattr(model, "last_deliberation_stats", None)
+        if local_delib_stats is None:
+            self.last_generation_metadata = None
+            return
+        self.last_generation_metadata = {"local_deliberation_stats": local_delib_stats}
 
     def _prompt_max_tokens(self) -> int | None:
         if self.prompt_max_tokens is not None:
