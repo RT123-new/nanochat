@@ -26,6 +26,30 @@ That subsystem should be able to:
 - run lightweight branch experiments
 - consolidate repeated wins into reusable skills
 
+## Two capability layers (wrapper vs model-core)
+The repo now has two distinct capability layers, and they serve different purposes:
+
+1. **Cognition wrapper layer** (`nanochat/cognition/`)
+   - An external controller around model inference.
+   - Handles episodic/semantic memory, routing, candidate generation, verification, sandbox trials, and consolidation into reusable skills.
+   - Produces inspectable traces at the system level.
+
+2. **Model-core local deliberation layer** (`nanochat/gpt.py`)
+   - An internal, optional latent module that runs inside the transformer stack.
+   - Adds token-local recurrent refinement without changing tokenizer/chat formatting or requiring an external planner.
+
+The model-core layer is a **lightweight graph-of-thought approximation** implemented in latent space, not a full explicit graph executor.
+
+### Local deliberation layer in plain language
+When enabled, selected transformer layers can run small internal "thinking" updates per token:
+- **Token-local recurrent micro-steps:** each token representation is refined for a small number of internal passes.
+- **Phrase pooling / phrase consensus:** nearby tokens are pooled into short phrase chunks so the layer can blend local agreement signals.
+- **Optional semantic top-k neighbor path:** a sparse semantic neighbor lookup path can be enabled to mix in top-k latent neighbors when available.
+- **Adaptive per-token gating:** token-level gates modulate how much deliberation state should influence each token.
+- **Decode-time cache support:** the path is designed to remain compatible with incremental decoding/cache-aware inference behavior when used in decode mode.
+
+This keeps the mechanism small and inspectable: it improves local latent coordination, but does not attempt to execute a full symbolic or tool-driven reasoning graph.
+
 ## Core components
 
 ### 1. Backend adapter
