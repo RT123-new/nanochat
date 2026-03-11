@@ -106,6 +106,7 @@ def test_local_delib_advanced_fields_are_wired_into_block(monkeypatch):
             local_delib_semantic_topk=3,
             local_delib_semantic_lookback=7,
             local_delib_use_phrase_consensus=True,
+            local_delib_adaptive_halt=True,
         )
     )
 
@@ -113,6 +114,7 @@ def test_local_delib_advanced_fields_are_wired_into_block(monkeypatch):
     assert block.semantic_topk == 3
     assert block.semantic_lookback == 7
     assert block.use_phrase_consensus is True
+    assert block.adaptive_halt is True
 
 
 def test_local_delib_module_creation_rules(monkeypatch):
@@ -184,6 +186,28 @@ def test_no_future_token_influence_in_local_delib_path(monkeypatch):
         _tiny_config(
             local_delib=True,
             local_delib_steps=2,
+            local_delib_phrase_chunk_size=1,
+            local_delib_semantic_topk=2,
+        )
+    )
+
+    x1 = torch.randint(0, model.config.vocab_size, (1, 8))
+    x2 = x1.clone()
+    x2[:, 5:] = torch.randint(0, model.config.vocab_size, (1, 3))
+
+    y1 = model(x1)
+    y2 = model(x2)
+
+    assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)
+
+
+def test_no_future_token_influence_in_adaptive_halt_path(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=3,
+            local_delib_adaptive_halt=True,
             local_delib_phrase_chunk_size=1,
             local_delib_semantic_topk=2,
         )
