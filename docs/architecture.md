@@ -193,3 +193,92 @@ Track at minimum:
 8. Record the full episode
 9. Consolidate repeated successful patterns into skills over time
 10. Reuse those skills on future related tasks
+
+## Incremental target architecture: full latent hierarchical graph-of-thought (optional path)
+
+This section defines a **forward plan** for evolving the existing model-core local deliberation path into a fuller latent hierarchical graph-of-thought subsystem.
+
+Design constraints for this direction:
+- keep the existing wrapper cognition layer (`nanochat/cognition/*`) as-is and compatible
+- keep default runtime behavior close to today unless explicitly enabled
+- keep speedrun/core pretraining flow untouched by default
+- introduce changes as opt-in, milestone-scoped increments
+
+### A. Adaptive per-token halting / variable compute
+Target behavior:
+- each token maintains a halting probability and can stop local micro-steps earlier than neighbors
+- global bounds still apply (`min_steps <= token_steps <= max_steps`) for stability and reproducibility
+
+Repo-native integration pattern:
+- implement as an extension of current token state scalars (salience/uncertainty/halt)
+- preserve fixed-step fallback and current cache-compatible path
+- emit inspectable stats: mean token steps, halt distribution, late-halt ratio
+
+### B. Dynamic latent nearest-neighbor graph / flocking
+Target behavior:
+- at each local deliberation iteration, token latents form a dynamic top-k neighbor graph in latent space
+- optional flocking operators apply local alignment/cohesion/separation updates before residual merge
+
+Repo-native integration pattern:
+- keep graph building local to the existing deliberation block instead of adding a new global runtime service
+- support cheap approximate selection first (top-k over current window)
+- keep this path switchable so disabled mode equals current behavior
+
+### C. Latent branch spawning and merge
+Target behavior:
+- uncertain/high-conflict regions can spawn small latent branches (alternative local trajectories)
+- branches compete and merge back using bounded policies (gated weighted merge or consensus merge)
+
+Repo-native integration pattern:
+- no symbolic tree executor; branches are latent tensors with strict per-layer caps
+- decode-time cache includes branch metadata only when branching is enabled
+- branch provenance exposed in debug metadata for downstream cognition traces
+
+### D. Multi-scale hierarchy beyond phrase chunks
+Target behavior:
+- extend from token/phrase to deeper scales, e.g. token -> phrase -> span/segment -> sequence summary nodes
+- allow bidirectional message passing across adjacent scales each micro-step
+
+Repo-native integration pattern:
+- reuse existing phrase concepts as the first hierarchy level
+- add levels incrementally with enable flags and conservative defaults
+- keep each scale independently disable-able for ablations and rollback
+
+### E. Latent creative scratchpad slots
+Target behavior:
+- add a tiny bank of latent scratchpad slots for speculative composition and recombination
+- slots can ingest selected token/phrase/branch summaries and write back refined guidance
+
+Repo-native integration pattern:
+- keep scratchpad internal to model-core deliberation state
+- optionally export compact scratchpad summaries to wrapper cognition traces
+- preserve current prompt-level `CreativeWorkspace` as orchestrator; scratchpad augments rather than replaces it
+
+### F. Optional auxiliary losses and evaluations
+Target behavior:
+- define auxiliary objectives that improve the new mechanisms without forcing them into baseline training
+- evaluate quality/compute tradeoffs and mechanism utility with lightweight, repeatable metrics
+
+Candidate auxiliary objectives (all optional):
+- halting calibration loss (align halt confidence with utility)
+- graph consistency loss (stability of useful neighbors across steps)
+- branch utility loss (reward branches that improve final token decisions)
+- scratchpad contribution loss (penalize unused/noisy slots)
+
+Evaluation additions:
+- variable compute efficiency (quality per micro-step)
+- branch usefulness rate (spawned vs merged-helpful branches)
+- hierarchy utilization metrics (cross-scale message usage)
+- scratchpad win-rate on creative/divergent prompts
+
+## Staging strategy for this target
+1. Add instrumentation-first hooks and docs-level toggles.
+2. Introduce adaptive halting with fixed-step fallback.
+3. Add neighbor graph + flocking as optional updates.
+4. Add bounded branch spawn/merge.
+5. Add deeper hierarchy levels.
+6. Add scratchpad slots and wrapper trace surfacing.
+7. Add optional auxiliary losses/evals with explicit ablations.
+
+This preserves nanochat's incremental philosophy: each mechanism lands as a small optional extension, is measurable, and can be disabled without disturbing established paths.
+

@@ -158,3 +158,63 @@ tests/
 - docs are complete and repo-native
 - quickstart for the cognition subsystem works
 - optional integration points are documented and justified
+
+## Milestone 10 - Adaptive token compute and halting policy
+### Goals
+- Extend model-core local deliberation with adaptive per-token halting / variable compute while preserving current default behavior
+- Keep controls explicit and off-by-default behind config/flags first
+
+### Acceptance criteria
+- per-token halting policy is documented with bounded min/max micro-steps
+- implementation plan preserves deterministic fallback to fixed-step behavior
+- targeted tests cover halting edge cases (all-halt, no-halt, mixed-halt) without requiring checkpoints
+
+## Milestone 11 - Dynamic latent neighbor graph and flocking
+### Goals
+- Introduce a dynamic latent nearest-neighbor graph over token states during local deliberation
+- Add lightweight flocking-style update rules (align/cohere/separate) as optional latent operators
+
+### Acceptance criteria
+- neighbor graph construction strategy (top-k + optional radius cap) is specified and inspectable
+- flocking operators are optional and can be disabled with no behavior change to existing path
+- debug stats expose neighbor counts and flocking activation rates
+
+## Milestone 12 - Latent branch spawn, competition, and merge
+### Goals
+- Add latent branch spawning for uncertain/high-salience regions without creating an explicit symbolic executor
+- Define merge/reduction policies that collapse branches back into the main token stream
+
+### Acceptance criteria
+- spawn triggers are bounded and deterministic under fixed seeds
+- merge policy (weighted vote, gating, or verifier-guided) is documented and testable
+- cache behavior and memory bounds are defined for decode-time branch handling
+
+## Milestone 13 - Multi-scale latent hierarchy beyond phrase chunks
+### Goals
+- Expand the current phrase-level grouping into a deeper hierarchy (token -> phrase -> span/segment -> sequence summary)
+- Keep hierarchy operators modular so each scale can be enabled independently
+
+### Acceptance criteria
+- hierarchy levels and message-passing directions are documented
+- at least one cheap synthetic test validates cross-scale information flow
+- default configuration remains close to current phrase-centric behavior
+
+## Milestone 14 - Latent creative scratchpad slots
+### Goals
+- Add persistent latent scratchpad slots for creative exploration inside the model-core deliberation loop
+- Keep existing wrapper `CreativeWorkspace` intact as a higher-level orchestrator
+
+### Acceptance criteria
+- scratchpad slot lifecycle is defined (allocate, update, readout, release)
+- wrapper-level creative generation can optionally condition on scratchpad summaries
+- tests verify scratchpad isolation and reset semantics between requests
+
+## Milestone 15 - Auxiliary objectives and hierarchical eval suite
+### Goals
+- Add optional auxiliary training losses and evals for halting quality, graph consistency, branch utility, and scratchpad usefulness
+- Keep speedrun and default training path untouched unless an explicit opt-in flag is provided
+
+### Acceptance criteria
+- each auxiliary loss has a disable-by-default switch and clear weighting config
+- `docs/evals.md` includes lightweight metrics for variable compute efficiency and quality tradeoffs
+- documentation records ablation expectations and rollback criteria for each auxiliary path
