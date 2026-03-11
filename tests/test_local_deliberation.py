@@ -34,6 +34,11 @@ def test_local_deliberation_block_shapes():
     assert isinstance(stats["max_executed_steps_any_token"], int)
     assert isinstance(stats["fraction_halted_early"], float)
     assert isinstance(stats["mean_final_halt"], float)
+    assert isinstance(stats["mean_branch_score"], float)
+    assert isinstance(stats["max_branch_score"], float)
+    assert isinstance(stats["mean_merge_weight"], float)
+    assert isinstance(stats["branch_factor_used"], int)
+    assert isinstance(stats["fraction_tokens_branched"], float)
     assert stats["executed_steps"] == 2
     assert stats["semantic_topk_used"] == 0
     assert stats["mean_agreement_score"] == 0.0
@@ -421,3 +426,61 @@ def test_neighbor_graph_phrase_locality_stronger_than_distant_effects():
 
     assert local_self > local_far
     assert far_self > far_local
+
+
+def test_branching_disabled_matches_default_behavior():
+    torch.manual_seed(77)
+    x = torch.randn(2, 6, 10)
+
+    block_default = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=2,
+        use_token_gate=True,
+    )
+    y_default, stats_default = block_default(x)
+
+    torch.manual_seed(77)
+    block_disabled = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=2,
+        use_token_gate=True,
+        branch_factor=0,
+        branch_every=2,
+        branch_dim=4,
+    )
+    y_disabled, stats_disabled = block_disabled(x)
+
+    assert torch.allclose(y_default, y_disabled, atol=1e-8)
+    assert stats_default["branch_factor_used"] == 0
+    assert stats_disabled["branch_factor_used"] == 0
+
+
+def test_branching_enabled_surfaces_branch_stats_and_shape():
+    torch.manual_seed(88)
+    block = LocalDeliberationBlock(
+        model_dim=12,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=3,
+        use_token_gate=False,
+        branch_factor=2,
+        branch_every=1,
+        branch_dim=4,
+    )
+    x = torch.randn(1, 5, 12)
+
+    y, stats = block(x)
+
+    assert y.shape == x.shape
+    assert stats["branch_factor_used"] == 2
+    assert 0.0 <= stats["mean_branch_score"] <= 1.0
+    assert 0.0 <= stats["max_branch_score"] <= 1.0
+    assert 0.0 <= stats["mean_merge_weight"] <= 1.0
+    assert 0.0 <= stats["fraction_tokens_branched"] <= 1.0

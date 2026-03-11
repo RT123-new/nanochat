@@ -80,6 +80,57 @@ class TokenStateHead(nn.Module):
         }
 
 
+class BranchProposalHead(nn.Module):
+    """Produces latent branch proposals per token."""
+
+    def __init__(self, state_dim: int, branch_factor: int, branch_dim: int) -> None:
+        super().__init__()
+        self.branch_factor = branch_factor
+        self.branch_dim = branch_dim
+        self.proj = nn.Linear(state_dim, branch_factor * branch_dim)
+        self.back_proj = nn.Linear(branch_dim, state_dim)
+
+        nn.init.zeros_(self.proj.weight)
+        nn.init.zeros_(self.proj.bias)
+        nn.init.zeros_(self.back_proj.weight)
+        nn.init.zeros_(self.back_proj.bias)
+
+    def forward(self, h: torch.Tensor) -> torch.Tensor:
+        bsz, seq_len, _ = h.shape
+        proposals = self.proj(h).view(bsz, seq_len, self.branch_factor, self.branch_dim)
+        return self.back_proj(proposals)
+
+
+class BranchScorer(nn.Module):
+    """Scores branch proposals against token states."""
+
+    def __init__(self, state_dim: int) -> None:
+        super().__init__()
+        self.proj = nn.Linear(state_dim * 2, 1)
+        nn.init.zeros_(self.proj.weight)
+        nn.init.zeros_(self.proj.bias)
+
+    def forward(self, h: torch.Tensor, proposals: torch.Tensor) -> torch.Tensor:
+        # h: (B, T, C), proposals: (B, T, K, C)
+        token_context = h.unsqueeze(2).expand_as(proposals)
+        return self.proj(torch.cat([token_context, proposals], dim=-1)).squeeze(-1)
+
+
+class BranchMergeHead(nn.Module):
+    """Merges scored branch proposals back into the latent token state."""
+
+    def __init__(self, state_dim: int) -> None:
+        super().__init__()
+        self.gate = nn.Linear(state_dim * 2, 1)
+        nn.init.zeros_(self.gate.weight)
+        nn.init.constant_(self.gate.bias, -8.0)
+
+    def forward(self, h: torch.Tensor, branch_summary: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        merge_weight = torch.sigmoid(self.gate(torch.cat([h, branch_summary], dim=-1)))
+        merged = h + merge_weight * (branch_summary - h)
+        return merged, merge_weight
+
+
 class PhraseConsensusHead(nn.Module):
     """Builds per-chunk phrase consensus from token-level proposals."""
 
@@ -266,6 +317,9 @@ class LocalDeliberationBlock(nn.Module):
         use_neighbor_graph: bool = False,
         use_phrase_consensus: bool = False,
         adaptive_halt: bool = False,
+        branch_factor: int = 0,
+        branch_every: int = 1,
+        branch_dim: int = 0,
     ) -> None:
         super().__init__()
         if micro_steps < 1:
@@ -274,6 +328,10 @@ class LocalDeliberationBlock(nn.Module):
             raise ValueError("semantic_topk must be >= 0")
         if semantic_lookback < 1:
             raise ValueError("semantic_lookback must be >= 1")
+        if branch_factor < 0:
+            raise ValueError("branch_factor must be >= 0")
+        if branch_every < 1:
+            raise ValueError("branch_every must be >= 1")
 
         self.micro_steps = micro_steps
         self.use_token_gate = use_token_gate
@@ -282,6 +340,9 @@ class LocalDeliberationBlock(nn.Module):
         self.use_neighbor_graph = use_neighbor_graph
         self.use_phrase_consensus = use_phrase_consensus
         self.adaptive_halt = adaptive_halt
+        self.branch_factor = branch_factor
+        self.branch_every = branch_every
+        self.branch_dim = branch_dim if branch_dim > 0 else state_dim
 
         self.in_proj = nn.Linear(model_dim, state_dim)
         self.mixer = CausalDepthwiseMixer(state_dim, kernel_size=kernel_size)
@@ -313,6 +374,15 @@ class LocalDeliberationBlock(nn.Module):
             nn.Linear(state_dim, state_dim),
         )
         self.out_proj = nn.Linear(state_dim, model_dim)
+
+        if self.branch_factor > 0:
+            self.branch_proposal = BranchProposalHead(
+                state_dim=state_dim,
+                branch_factor=self.branch_factor,
+                branch_dim=self.branch_dim,
+            )
+            self.branch_scorer = BranchScorer(state_dim=state_dim)
+            self.branch_merge = BranchMergeHead(state_dim=state_dim)
 
         nn.init.zeros_(self.out_proj.weight)
         nn.init.zeros_(self.out_proj.bias)
@@ -365,11 +435,17 @@ class LocalDeliberationBlock(nn.Module):
         mean_semantic_neighbor_weight = 0.0
         mean_phrase_neighbor_weight = 0.0
         mean_agreement_score = 0.0
+        mean_branch_score_accum = 0.0
+        max_branch_score = 0.0
+        mean_merge_weight_accum = 0.0
+        fraction_tokens_branched_accum = 0.0
+        branch_steps = 0
+        branch_factor_used = 0
         executed_steps_per_token = torch.zeros(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.float32)
         active_mask = torch.ones(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.bool)
         halt_threshold = torch.sigmoid(self.halt_threshold_logit)
 
-        for _ in range(self.micro_steps):
+        for step_idx in range(self.micro_steps):
             mixed = self.mixer(h)
             _, phrase_broadcast = self.phrase_pool(h)
             if self.use_phrase_consensus:
@@ -421,6 +497,22 @@ class LocalDeliberationBlock(nn.Module):
                 h = h + delta
                 executed_steps_per_token += 1.0
 
+            if self.branch_factor > 0 and (step_idx % self.branch_every == 0):
+                branch_proposals = self.branch_proposal(h)
+                branch_logits = self.branch_scorer(h, branch_proposals)
+                branch_scores = torch.sigmoid(branch_logits)
+                branch_weights = torch.softmax(branch_logits, dim=-1)
+                branch_summary = (branch_weights.unsqueeze(-1) * branch_proposals).sum(dim=2)
+                h, merge_weight = self.branch_merge(h, branch_summary)
+
+                mean_branch_score_accum += float(branch_scores.mean().item())
+                max_branch_score = max(max_branch_score, float(branch_scores.max().item()))
+                mean_merge_weight_accum += float(merge_weight.mean().item())
+                token_branch_mask = (head_states["salience"] * head_states["uncertainty"]) > 0.25
+                fraction_tokens_branched_accum += float(token_branch_mask.to(torch.float32).mean().item())
+                branch_steps += 1
+                branch_factor_used = self.branch_factor
+
         head_states = self.state_head(h)
         mean_final_halt = float(head_states["halt_gate"].mean().item())
         mean_executed_steps_per_token = float(executed_steps_per_token.mean().item())
@@ -429,6 +521,9 @@ class LocalDeliberationBlock(nn.Module):
 
         if self.use_phrase_consensus:
             mean_agreement_score /= float(self.micro_steps)
+        mean_branch_score = mean_branch_score_accum / float(max(branch_steps, 1))
+        mean_merge_weight = mean_merge_weight_accum / float(max(branch_steps, 1))
+        fraction_tokens_branched = fraction_tokens_branched_accum / float(max(branch_steps, 1))
         stats: dict[str, torch.Tensor | float | int] = {
             "mean_salience": float(head_states["salience"].mean().item()),
             "mean_uncertainty": float(head_states["uncertainty"].mean().item()),
@@ -444,6 +539,11 @@ class LocalDeliberationBlock(nn.Module):
             "mean_phrase_neighbor_weight": mean_phrase_neighbor_weight,
             "semantic_topk_used": semantic_topk_used,
             "mean_agreement_score": mean_agreement_score,
+            "mean_branch_score": mean_branch_score,
+            "max_branch_score": max_branch_score,
+            "mean_merge_weight": mean_merge_weight,
+            "branch_factor_used": branch_factor_used,
+            "fraction_tokens_branched": fraction_tokens_branched,
         }
         return h, stats
 
