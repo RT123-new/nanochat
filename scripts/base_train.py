@@ -52,6 +52,14 @@ parser.add_argument("--aspect-ratio", type=int, default=64, help="model_dim = de
 parser.add_argument("--head-dim", type=int, default=128, help="target head dimension for attention")
 parser.add_argument("--max-seq-len", type=int, default=2048, help="max context length")
 parser.add_argument("--window-pattern", type=str, default="SSSL", help="sliding window pattern tiled across layers: L=full, S=half context (e.g. 'SSL')")
+parser.add_argument("--local-delib", action="store_true", help="enable local deliberation blocks")
+parser.add_argument("--local-delib-every", type=int, default=1, help="insert local deliberation every N layers")
+parser.add_argument("--local-delib-steps", type=int, default=0, help="number of local deliberation micro-steps")
+parser.add_argument("--local-delib-state-dim", type=int, default=128, help="state dimension for local deliberation blocks")
+parser.add_argument("--local-delib-kernel-size", type=int, default=5, help="depthwise temporal kernel size for local deliberation")
+parser.add_argument("--local-delib-phrase-chunk-size", type=int, default=8, help="phrase chunk size for local deliberation")
+parser.add_argument("--local-delib-use-token-gate", action="store_true", help="enable token-level gating in local deliberation")
+parser.add_argument("--local-delib-debug-stats", action="store_true", help="collect local deliberation debug stats")
 # Training horizon (only one used, in order of precedence)
 parser.add_argument("--num-iterations", type=int, default=-1, help="explicit number of optimization steps (-1 = disable)")
 parser.add_argument("--target-flops", type=float, default=-1.0, help="calculate num_iterations to reach target_flops (-1 = disable)")
@@ -81,6 +89,15 @@ parser.add_argument("--save-every", type=int, default=-1, help="save checkpoints
 parser.add_argument("--model-tag", type=str, default=None, help="override model tag for checkpoint directory name")
 args = parser.parse_args()
 user_config = vars(args).copy()  # for logging
+
+if args.local_delib_kernel_size < 1 or args.local_delib_kernel_size % 2 == 0:
+    parser.error("--local-delib-kernel-size must be odd and >= 1")
+if args.local_delib_every < 1:
+    parser.error("--local-delib-every must be >= 1")
+if args.local_delib_steps < 0:
+    parser.error("--local-delib-steps must be >= 0")
+if args.local_delib_phrase_chunk_size < 1:
+    parser.error("--local-delib-phrase-chunk-size must be >= 1")
 # -----------------------------------------------------------------------------
 # Compute init and wandb logging
 
@@ -139,6 +156,14 @@ def build_model_meta(depth):
         sequence_len=args.max_seq_len, vocab_size=vocab_size,
         n_layer=depth, n_head=num_heads, n_kv_head=num_heads, n_embd=model_dim,
         window_pattern=args.window_pattern,
+        local_delib=args.local_delib,
+        local_delib_every=args.local_delib_every,
+        local_delib_steps=args.local_delib_steps,
+        local_delib_state_dim=args.local_delib_state_dim,
+        local_delib_kernel_size=args.local_delib_kernel_size,
+        local_delib_phrase_chunk_size=args.local_delib_phrase_chunk_size,
+        local_delib_use_token_gate=args.local_delib_use_token_gate,
+        local_delib_debug_stats=args.local_delib_debug_stats,
     )
     with torch.device("meta"):
         model_meta = GPT(config)
@@ -149,6 +174,11 @@ model = build_model_meta(args.depth) # 1) Build on meta device (only shapes/dtyp
 model_config = model.config
 model_config_kwargs = asdict(model_config)
 print0(f"Model config:\n{json.dumps(model_config_kwargs, indent=2)}")
+print0(
+    "Local deliberation: "
+    f"{'enabled' if model_config.local_delib else 'disabled'} "
+    f"(every={model_config.local_delib_every}, steps={model_config.local_delib_steps})"
+)
 model.to_empty(device=device) # 2) All tensors get storage on target device but with uninitialized (garbage) data
 model.init_weights() # 3) All tensors get initialized
 
