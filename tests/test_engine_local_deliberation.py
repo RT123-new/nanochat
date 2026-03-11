@@ -82,7 +82,7 @@ def test_model_generate_runs_with_local_delib_enabled(monkeypatch):
 
 def test_engine_generate_batch_runs_with_local_delib_enabled(monkeypatch):
     _patch_flash_attention(monkeypatch)
-    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, semantic_topk=2))
+    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, local_delib_semantic_topk=2))
     engine = Engine(model, TinyTokenizer())
 
     prompt = [1, 2, 3]
@@ -97,7 +97,7 @@ def test_engine_generate_batch_runs_with_local_delib_enabled(monkeypatch):
 
 def test_decode_cache_path_populates_deliberation_cache(monkeypatch):
     _patch_flash_attention(monkeypatch)
-    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, semantic_topk=2))
+    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, local_delib_semantic_topk=2))
 
     idx_prefill = torch.tensor([[1, 2, 3]], dtype=torch.long)
     idx_decode = torch.tensor([[4]], dtype=torch.long)

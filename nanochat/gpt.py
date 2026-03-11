@@ -46,6 +46,17 @@ class GPTConfig:
     local_delib_phrase_chunk_size: int = 8
     local_delib_use_token_gate: bool = True
     local_delib_debug_stats: bool = False
+    local_delib_semantic_topk: int = 0
+    local_delib_semantic_lookback: int = 64
+    local_delib_use_phrase_consensus: bool = False
+    local_delib_adaptive_halt: bool = False
+    local_delib_branch_factor: int = 0
+    local_delib_branch_every: int = 1
+    local_delib_branch_dim: int = 0
+    local_delib_hierarchy_chunk_sizes: str = ""
+    local_delib_scratch_slots: int = 0
+    local_delib_scratch_dim: int = 0
+    local_delib_debug_branch_stats: bool = False
 
 
 def norm(x):
@@ -187,9 +198,9 @@ class GPT(nn.Module):
                 phrase_chunk_size=config.local_delib_phrase_chunk_size,
                 micro_steps=config.local_delib_steps,
                 use_token_gate=config.local_delib_use_token_gate,
-                semantic_topk=getattr(config, "local_delib_semantic_topk", getattr(config, "semantic_topk", 0)),
-                semantic_lookback=getattr(config, "local_delib_semantic_lookback", getattr(config, "semantic_lookback", 64)),
-                use_phrase_consensus=getattr(config, "local_delib_use_phrase_consensus", False),
+                semantic_topk=config.local_delib_semantic_topk,
+                semantic_lookback=config.local_delib_semantic_lookback,
+                use_phrase_consensus=config.local_delib_use_phrase_consensus,
             )
             for layer_idx in self._get_local_delib_layer_indices(config)
         })

@@ -60,6 +60,17 @@ parser.add_argument("--local-delib-kernel-size", type=int, default=5, help="dept
 parser.add_argument("--local-delib-phrase-chunk-size", type=int, default=8, help="phrase chunk size for local deliberation")
 parser.add_argument("--local-delib-use-token-gate", action="store_true", help="enable token-level gating in local deliberation")
 parser.add_argument("--local-delib-debug-stats", action="store_true", help="collect local deliberation debug stats")
+parser.add_argument("--local-delib-semantic-topk", type=int, default=0, help="top-k semantic neighbors for local deliberation (0 disables)")
+parser.add_argument("--local-delib-semantic-lookback", type=int, default=64, help="causal lookback window for semantic neighbors")
+parser.add_argument("--local-delib-use-phrase-consensus", action="store_true", help="enable phrase consensus feedback in local deliberation")
+parser.add_argument("--local-delib-adaptive-halt", action="store_true", help="reserved plumbing flag for adaptive local deliberation halting")
+parser.add_argument("--local-delib-branch-factor", type=int, default=0, help="reserved plumbing flag for latent branch spawn count")
+parser.add_argument("--local-delib-branch-every", type=int, default=1, help="reserved plumbing flag for branch insertion cadence")
+parser.add_argument("--local-delib-branch-dim", type=int, default=0, help="reserved plumbing flag for branch latent dimension")
+parser.add_argument("--local-delib-hierarchy-chunk-sizes", type=str, default="", help="reserved plumbing flag for hierarchy chunk sizes, comma-separated")
+parser.add_argument("--local-delib-scratch-slots", type=int, default=0, help="reserved plumbing flag for latent scratch slots")
+parser.add_argument("--local-delib-scratch-dim", type=int, default=0, help="reserved plumbing flag for latent scratch dimension")
+parser.add_argument("--local-delib-debug-branch-stats", action="store_true", help="reserved plumbing flag for branch debug statistics")
 # Training horizon (only one used, in order of precedence)
 parser.add_argument("--num-iterations", type=int, default=-1, help="explicit number of optimization steps (-1 = disable)")
 parser.add_argument("--target-flops", type=float, default=-1.0, help="calculate num_iterations to reach target_flops (-1 = disable)")
@@ -98,6 +109,20 @@ if args.local_delib_steps < 0:
     parser.error("--local-delib-steps must be >= 0")
 if args.local_delib_phrase_chunk_size < 1:
     parser.error("--local-delib-phrase-chunk-size must be >= 1")
+if args.local_delib_semantic_topk < 0:
+    parser.error("--local-delib-semantic-topk must be >= 0")
+if args.local_delib_semantic_lookback < 1:
+    parser.error("--local-delib-semantic-lookback must be >= 1")
+if args.local_delib_branch_factor < 0:
+    parser.error("--local-delib-branch-factor must be >= 0")
+if args.local_delib_branch_every < 1:
+    parser.error("--local-delib-branch-every must be >= 1")
+if args.local_delib_branch_dim < 0:
+    parser.error("--local-delib-branch-dim must be >= 0")
+if args.local_delib_scratch_slots < 0:
+    parser.error("--local-delib-scratch-slots must be >= 0")
+if args.local_delib_scratch_dim < 0:
+    parser.error("--local-delib-scratch-dim must be >= 0")
 # -----------------------------------------------------------------------------
 # Compute init and wandb logging
 
@@ -164,6 +189,17 @@ def build_model_meta(depth):
         local_delib_phrase_chunk_size=args.local_delib_phrase_chunk_size,
         local_delib_use_token_gate=args.local_delib_use_token_gate,
         local_delib_debug_stats=args.local_delib_debug_stats,
+        local_delib_semantic_topk=args.local_delib_semantic_topk,
+        local_delib_semantic_lookback=args.local_delib_semantic_lookback,
+        local_delib_use_phrase_consensus=args.local_delib_use_phrase_consensus,
+        local_delib_adaptive_halt=args.local_delib_adaptive_halt,
+        local_delib_branch_factor=args.local_delib_branch_factor,
+        local_delib_branch_every=args.local_delib_branch_every,
+        local_delib_branch_dim=args.local_delib_branch_dim,
+        local_delib_hierarchy_chunk_sizes=args.local_delib_hierarchy_chunk_sizes,
+        local_delib_scratch_slots=args.local_delib_scratch_slots,
+        local_delib_scratch_dim=args.local_delib_scratch_dim,
+        local_delib_debug_branch_stats=args.local_delib_debug_branch_stats,
     )
     with torch.device("meta"):
         model_meta = GPT(config)
@@ -178,6 +214,20 @@ print0(
     "Local deliberation: "
     f"{'enabled' if model_config.local_delib else 'disabled'} "
     f"(every={model_config.local_delib_every}, steps={model_config.local_delib_steps})"
+)
+print0(
+    "Local deliberation advanced: "
+    f"semantic_topk={model_config.local_delib_semantic_topk}, "
+    f"semantic_lookback={model_config.local_delib_semantic_lookback}, "
+    f"phrase_consensus={'on' if model_config.local_delib_use_phrase_consensus else 'off'}, "
+    f"adaptive_halt={'on' if model_config.local_delib_adaptive_halt else 'off'}, "
+    f"branch_factor={model_config.local_delib_branch_factor}, "
+    f"branch_every={model_config.local_delib_branch_every}, "
+    f"branch_dim={model_config.local_delib_branch_dim}, "
+    f"hierarchy_chunk_sizes='{model_config.local_delib_hierarchy_chunk_sizes}', "
+    f"scratch_slots={model_config.local_delib_scratch_slots}, "
+    f"scratch_dim={model_config.local_delib_scratch_dim}, "
+    f"debug_branch_stats={'on' if model_config.local_delib_debug_branch_stats else 'off'}"
 )
 model.to_empty(device=device) # 2) All tensors get storage on target device but with uninitialized (garbage) data
 model.init_weights() # 3) All tensors get initialized

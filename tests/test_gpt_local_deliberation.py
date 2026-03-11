@@ -41,6 +41,22 @@ def _tiny_config(**kwargs):
     return cfg
 
 
+def test_local_delib_advanced_config_defaults_are_stable():
+    cfg = GPTConfig()
+
+    assert cfg.local_delib_semantic_topk == 0
+    assert cfg.local_delib_semantic_lookback == 64
+    assert cfg.local_delib_use_phrase_consensus is False
+    assert cfg.local_delib_adaptive_halt is False
+    assert cfg.local_delib_branch_factor == 0
+    assert cfg.local_delib_branch_every == 1
+    assert cfg.local_delib_branch_dim == 0
+    assert cfg.local_delib_hierarchy_chunk_sizes == ""
+    assert cfg.local_delib_scratch_slots == 0
+    assert cfg.local_delib_scratch_dim == 0
+    assert cfg.local_delib_debug_branch_stats is False
+
+
 def test_forward_works_with_local_delib_disabled(monkeypatch):
     _patch_flash_attention(monkeypatch)
     model = GPT(_tiny_config(local_delib=False, local_delib_steps=2))
@@ -73,12 +89,30 @@ def test_forward_works_with_local_delib_enabled(monkeypatch):
 
 def test_forward_works_with_semantic_neighbor_config_enabled(monkeypatch):
     _patch_flash_attention(monkeypatch)
-    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, semantic_topk=2))
+    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2, local_delib_semantic_topk=2))
     idx = torch.randint(0, model.config.vocab_size, (2, 4))
 
     logits = model(idx)
 
     assert logits.shape == (2, 4, model.config.vocab_size)
+
+
+def test_local_delib_advanced_fields_are_wired_into_block(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=1,
+            local_delib_semantic_topk=3,
+            local_delib_semantic_lookback=7,
+            local_delib_use_phrase_consensus=True,
+        )
+    )
+
+    block = model.local_delib_blocks["0"]
+    assert block.semantic_topk == 3
+    assert block.semantic_lookback == 7
+    assert block.use_phrase_consensus is True
 
 
 def test_local_delib_module_creation_rules(monkeypatch):
@@ -151,7 +185,7 @@ def test_no_future_token_influence_in_local_delib_path(monkeypatch):
             local_delib=True,
             local_delib_steps=2,
             local_delib_phrase_chunk_size=1,
-            semantic_topk=2,
+            local_delib_semantic_topk=2,
         )
     )
 

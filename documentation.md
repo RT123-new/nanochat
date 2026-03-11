@@ -223,3 +223,15 @@
 - Known issues: None for this docs-only milestone extension.
 - Next step: Execute Milestone 10 as the first implementation slice with instrumentation-first adaptive halting and fixed-step fallback tests.
 
+
+
+#### 2026-03-11 02:30
+- Milestone: Local deliberation advanced-option first-class config plumbing (no behavior changes).
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `docs/architecture.md`, `nanochat/gpt.py`, `nanochat/local_deliberation.py`, `scripts/base_train.py`, `tests/test_gpt_local_deliberation.py`, `tests/test_engine_local_deliberation.py`, `tests/test_local_deliberation.py`.
+- Files changed: `nanochat/gpt.py`, `scripts/base_train.py`, `tests/test_gpt_local_deliberation.py`, `tests/test_engine_local_deliberation.py`, `docs/architecture.md`, `documentation.md`.
+- Summary: Promoted advanced local-deliberation options to first-class `GPTConfig` fields and `base_train` CLI/config wiring; replaced `getattr` fallback usage in GPT local-deliberation block construction with direct config fields; added parser validation for new numeric knobs; expanded train-time local-deliberation config printing; and added focused tests for default stability and block wiring.
+- Decisions made: Kept all new flags plumbing-only with defaults preserving existing behavior; did not implement adaptive-halt/branch/hierarchy/scratch runtime behavior in this patch.
+- Commands run: `python -m py_compile nanochat/gpt.py scripts/base_train.py tests/test_gpt_local_deliberation.py tests/test_engine_local_deliberation.py`; `python -m pytest -q tests/test_gpt_local_deliberation.py tests/test_engine_local_deliberation.py`.
+- Results: Syntax compilation passed; targeted pytest could not run in system Python due to missing torch (`ModuleNotFoundError: No module named 'torch'`).
+- Known issues: New branch/hierarchy/scratch/adaptive options are intentionally accepted and validated but not consumed by runtime local-deliberation logic yet.
+- Next step: Implement milestone-scoped runtime behavior for adaptive halt/branch/hierarchy/scratch in follow-on patches.
