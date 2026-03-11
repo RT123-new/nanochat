@@ -706,3 +706,57 @@ def test_scratch_path_is_strictly_causal_prefix_stable():
     y2, _ = block(x2)
 
     assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)
+
+
+def test_local_deliberation_surfaces_aux_losses_and_numeric_ranges():
+    torch.manual_seed(200)
+    block = LocalDeliberationBlock(
+        model_dim=12,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=2,
+        use_token_gate=True,
+        use_phrase_consensus=True,
+        branch_factor=2,
+        branch_every=1,
+        scratch_slots=3,
+        scratch_dim=5,
+    )
+    x = torch.randn(2, 6, 12)
+
+    _, _ = block(x)
+
+    aux = block.last_aux_losses
+    assert isinstance(aux, dict)
+    assert set(aux.keys()) == {
+        "local_delib_halt_sparsity_loss",
+        "local_delib_branch_diversity_loss",
+        "local_delib_branch_entropy_loss",
+        "local_delib_consensus_agreement_loss",
+        "local_delib_scratch_utilization_loss",
+    }
+    assert 0.0 <= aux["local_delib_halt_sparsity_loss"].item() <= 1.0
+    assert aux["local_delib_branch_diversity_loss"].item() >= 0.0
+    assert aux["local_delib_branch_entropy_loss"].item() >= 0.0
+    assert 0.0 <= aux["local_delib_consensus_agreement_loss"].item() <= 1.0
+    assert aux["local_delib_scratch_utilization_loss"].item() >= 0.0
+
+
+def test_aux_branch_losses_are_zero_when_branching_disabled():
+    torch.manual_seed(201)
+    block = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=2,
+        use_token_gate=False,
+        branch_factor=0,
+    )
+    x = torch.randn(1, 5, 10)
+
+    _, _ = block(x)
+
+    assert block.last_aux_losses["local_delib_branch_diversity_loss"].item() == 0.0
+    assert block.last_aux_losses["local_delib_branch_entropy_loss"].item() == 0.0

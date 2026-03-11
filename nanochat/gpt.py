@@ -58,6 +58,11 @@ class GPTConfig:
     local_delib_scratch_slots: int = 0
     local_delib_scratch_dim: int = 0
     local_delib_debug_branch_stats: bool = False
+    local_delib_halt_sparsity_weight: float = 0.0
+    local_delib_branch_diversity_weight: float = 0.0
+    local_delib_branch_entropy_weight: float = 0.0
+    local_delib_consensus_agreement_weight: float = 0.0
+    local_delib_scratch_utilization_weight: float = 0.0
 
 
 def norm(x):
@@ -214,6 +219,7 @@ class GPT(nn.Module):
             for layer_idx in self._get_local_delib_layer_indices(config)
         })
         self.last_deliberation_stats = None
+        self.last_aux_losses: dict[str, torch.Tensor] | None = None
         self.lm_head = Linear(config.n_embd, padded_vocab_size, bias=False)
         # Per-layer learnable scalars (inspired by modded-nanogpt)
         # resid_lambdas: scales the residual stream at each layer (init 1.0 = neutral)
@@ -522,6 +528,8 @@ class GPT(nn.Module):
         x = norm(x)
         x0 = x  # save initial normalized embedding for x0 residual
         debug_stats = [] if self.config.local_delib_debug_stats and kv_cache is None else None
+        aux_losses_accum: dict[str, torch.Tensor] = {}
+        aux_loss_count = 0
         for i, block in enumerate(self.transformer.h):
             x = self.resid_lambdas[i] * x + self.x0_lambdas[i] * x0
             ve = self.value_embeds[str(i)](idx).to(x.dtype) if str(i) in self.value_embeds else None
@@ -533,10 +541,22 @@ class GPT(nn.Module):
                 else:
                     cache = self._get_local_delib_cache(kv_cache, i, B, x.dtype, x.device)
                     x, layer_stats = self._run_local_delib_cached(block, x, cache)
+                layer_aux = getattr(block, "last_aux_losses", None)
+                if isinstance(layer_aux, dict) and len(layer_aux) > 0:
+                    aux_loss_count += 1
+                    for name, value in layer_aux.items():
+                        aux_losses_accum[name] = aux_losses_accum.get(name, 0.0) + value
                 if debug_stats is not None:
                     debug_stats.append({'layer_idx': i, **layer_stats})
         x = norm(x)
         self.last_deliberation_stats = debug_stats
+        if aux_loss_count > 0:
+            self.last_aux_losses = {
+                name: value / float(aux_loss_count)
+                for name, value in aux_losses_accum.items()
+            }
+        else:
+            self.last_aux_losses = None
 
         # Forward the lm_head (compute logits)
         softcap = 20 # smoothly cap the logits to the range [-softcap, softcap]

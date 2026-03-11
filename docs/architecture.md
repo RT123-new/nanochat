@@ -275,6 +275,19 @@ Candidate auxiliary objectives (all optional):
 - branch utility loss (reward branches that improve final token decisions)
 - scratchpad contribution loss (penalize unused/noisy slots)
 
+Current minimal implemented auxiliary path (all default disabled with weight `0.0`):
+- `local_delib_halt_sparsity_loss = mean(halt_gate)`
+- `local_delib_branch_diversity_loss = mean_step(mean_offdiag(cosine_similarity(branch_proposals)^2))`
+- `local_delib_branch_entropy_loss = mean_step(log(branch_factor) - entropy(softmax(branch_logits)))`
+- `local_delib_consensus_agreement_loss = mean_step((1 - mean_agreement_score) / 2)`
+- `local_delib_scratch_utilization_loss = 1 - mean_step((mean(uncertainty) + mean(salience * uncertainty)) / 2)`
+
+Training-side composition in `scripts/base_train.py`:
+- base objective stays cross-entropy;
+- when any configured auxiliary weight is non-zero and `model.last_aux_losses` is present, training adds
+  `sum(weight_i * aux_loss_i)`;
+- when all weights are zero (default), behavior is unchanged.
+
 Evaluation additions:
 - variable compute efficiency (quality per micro-step)
 - branch usefulness rate (spawned vs merged-helpful branches)

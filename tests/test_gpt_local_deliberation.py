@@ -56,6 +56,11 @@ def test_local_delib_advanced_config_defaults_are_stable():
     assert cfg.local_delib_scratch_slots == 0
     assert cfg.local_delib_scratch_dim == 0
     assert cfg.local_delib_debug_branch_stats is False
+    assert cfg.local_delib_halt_sparsity_weight == 0.0
+    assert cfg.local_delib_branch_diversity_weight == 0.0
+    assert cfg.local_delib_branch_entropy_weight == 0.0
+    assert cfg.local_delib_consensus_agreement_weight == 0.0
+    assert cfg.local_delib_scratch_utilization_weight == 0.0
 
 
 def test_forward_works_with_local_delib_disabled(monkeypatch):
@@ -433,3 +438,77 @@ def test_no_future_token_influence_in_scratch_path(monkeypatch):
     y2 = model(x2)
 
     assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)
+
+
+def test_gpt_surfaces_aux_loss_dict_when_local_delib_enabled(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_use_phrase_consensus=True,
+            local_delib_branch_factor=2,
+            local_delib_scratch_slots=2,
+            local_delib_scratch_dim=4,
+        )
+    )
+    idx = torch.randint(0, model.config.vocab_size, (2, 6))
+    targets = torch.randint(0, model.config.vocab_size, (2, 6))
+
+    _ = model(idx, targets=targets)
+
+    assert isinstance(model.last_aux_losses, dict)
+    assert "local_delib_halt_sparsity_loss" in model.last_aux_losses
+    assert "local_delib_branch_diversity_loss" in model.last_aux_losses
+    assert "local_delib_branch_entropy_loss" in model.last_aux_losses
+    assert "local_delib_consensus_agreement_loss" in model.last_aux_losses
+    assert "local_delib_scratch_utilization_loss" in model.last_aux_losses
+
+
+def test_zero_aux_weight_path_matches_base_loss(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(_tiny_config(local_delib=True, local_delib_steps=2))
+    idx = torch.randint(0, model.config.vocab_size, (2, 5))
+    targets = torch.randint(0, model.config.vocab_size, (2, 5))
+
+    base_loss = model(idx, targets=targets)
+    weighted_loss = base_loss
+    for aux_name in (
+        "local_delib_halt_sparsity_loss",
+        "local_delib_branch_diversity_loss",
+        "local_delib_branch_entropy_loss",
+        "local_delib_consensus_agreement_loss",
+        "local_delib_scratch_utilization_loss",
+    ):
+        weighted_loss = weighted_loss + (0.0 * model.last_aux_losses[aux_name])
+
+    assert torch.allclose(weighted_loss, base_loss)
+
+
+def test_nonzero_aux_weight_path_can_consume_model_aux_losses(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_use_phrase_consensus=True,
+            local_delib_branch_factor=2,
+            local_delib_scratch_slots=2,
+            local_delib_scratch_dim=4,
+        )
+    )
+    idx = torch.randint(0, model.config.vocab_size, (2, 5))
+    targets = torch.randint(0, model.config.vocab_size, (2, 5))
+
+    loss = model(idx, targets=targets)
+    weights = {
+        "local_delib_halt_sparsity_loss": 0.1,
+        "local_delib_branch_diversity_loss": 0.2,
+        "local_delib_branch_entropy_loss": 0.3,
+        "local_delib_consensus_agreement_loss": 0.4,
+        "local_delib_scratch_utilization_loss": 0.5,
+    }
+    for name, weight in weights.items():
+        loss = loss + weight * model.last_aux_losses[name]
+
+    assert torch.isfinite(loss)
