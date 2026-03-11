@@ -306,3 +306,23 @@ Debug stats include:
 - `hierarchy_levels_used`
 - `mean_hierarchy_feedback_norm`
 - `hierarchy_level_chunk_counts`
+
+## Local deliberation latent scratchpad slots (optional)
+
+`LocalDeliberationBlock` now supports an internal latent scratchpad configured by:
+- `GPTConfig.local_delib_scratch_slots`
+- `GPTConfig.local_delib_scratch_dim`
+
+Behavior:
+- when `local_delib_scratch_slots == 0`, scratchpad logic is fully disabled and existing paths are unchanged;
+- when enabled, per-token latent states read from and write to a tiny scratch slot bank using uncertainty/salience-gated attention;
+- scratch feedback is merged into the internal deliberation update input only (never decoded as text tokens);
+- scratch readout projection is zero-initialized so initialization remains near-identity.
+
+Debug stats include:
+- `scratch_slots_used`
+- `mean_scratch_read_weight`
+- `mean_scratch_write_weight`
+- `mean_scratch_norm`
+
+Decode-cache note: local deliberation cache support remains the existing safe strategy (re-deliberate over cached latent state + new token prefix). Scratch slots are recomputed from the cached latent token state each forward call and are not separately persisted as an external token stream.

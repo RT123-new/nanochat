@@ -208,6 +208,8 @@ class GPT(nn.Module):
                 branch_every=config.local_delib_branch_every,
                 branch_dim=config.local_delib_branch_dim,
                 hierarchy_chunk_sizes=self._parse_local_delib_hierarchy_chunk_sizes(config),
+                scratch_slots=config.local_delib_scratch_slots,
+                scratch_dim=config.local_delib_scratch_dim,
             )
             for layer_idx in self._get_local_delib_layer_indices(config)
         })
