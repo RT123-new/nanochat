@@ -246,3 +246,14 @@
 - Results: Syntax compilation passed; targeted pytest could not execute in this environment because `torch` is not installed in the active interpreter (`ModuleNotFoundError: No module named 'torch'` during collection).
 - Known issues: Runtime test execution remains blocked by missing `torch` in system Python.
 - Next step: Re-run the targeted local-deliberation pytest set in an environment with `torch` available.
+
+#### 2026-03-11 03:40
+- Milestone: Milestone 11 dynamic latent neighbor graph/flocking-style mixer (scoped local-deliberation patch).
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `docs/architecture.md`, `nanochat/local_deliberation.py`, `nanochat/gpt.py`, `tests/test_local_deliberation.py`, `tests/test_gpt_local_deliberation.py`.
+- Files changed: `nanochat/local_deliberation.py`, `nanochat/gpt.py`, `tests/test_local_deliberation.py`, `tests/test_gpt_local_deliberation.py`, `docs/architecture.md`, `documentation.md`.
+- Summary: Added an off-by-default `local_delib_use_neighbor_graph` path that builds a bounded causal neighbor graph per token (sequence predecessor + semantic top-k within lookback + optional phrase-node link), aggregates messages through a new helper class, and surfaces graph stats (`mean_neighbor_count`, sequence/semantic/phrase mean neighbor weights, `semantic_topk_used`) while preserving prior behavior when disabled.
+- Decisions made: Kept the legacy semantic summary path untouched for parity when graph mode is disabled; implemented phrase links causally using chunk-prefix means to avoid same-step future leakage; and kept decode-cache execution unchanged via existing `_run_local_delib_cached` block path.
+- Commands run: `python -m py_compile nanochat/local_deliberation.py nanochat/gpt.py tests/test_local_deliberation.py tests/test_gpt_local_deliberation.py`; `python -m pytest -q tests/test_local_deliberation.py tests/test_gpt_local_deliberation.py`.
+- Results: `py_compile` passed; pytest collection/execution is blocked in this interpreter because `torch` is unavailable (`ModuleNotFoundError: No module named 'torch'`).
+- Known issues: Runtime pytest validation remains environment-blocked without torch.
+- Next step: Re-run the targeted local deliberation pytest set in a torch-enabled environment.

@@ -52,7 +52,7 @@ This keeps the mechanism small and inspectable: it improves local latent coordin
 
 ### Local deliberation config surface (first-class plumbing)
 The local deliberation interface now exposes explicit model/train config keys for advanced options, even when behaviors are still reserved for later milestones:
-- `local_delib_semantic_topk`, `local_delib_semantic_lookback`, `local_delib_use_phrase_consensus`
+- `local_delib_semantic_topk`, `local_delib_semantic_lookback`, `local_delib_use_neighbor_graph`, `local_delib_use_phrase_consensus`
 - `local_delib_adaptive_halt`
 - `local_delib_branch_factor`, `local_delib_branch_every`, `local_delib_branch_dim`, `local_delib_debug_branch_stats`
 - `local_delib_hierarchy_chunk_sizes`

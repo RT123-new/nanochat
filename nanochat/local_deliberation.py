@@ -122,6 +122,134 @@ class PhraseConsensusHead(nn.Module):
         return phrase_consensus, feedback, mean_agreement_score, token_proposals
 
 
+class CausalNeighborGraphMixer(nn.Module):
+    """Builds a bounded causal token-neighbor graph and aggregates local messages."""
+
+    def __init__(
+        self,
+        state_dim: int,
+        phrase_chunk_size: int,
+        semantic_topk: int,
+        semantic_lookback: int,
+        use_phrase_nodes: bool,
+    ) -> None:
+        super().__init__()
+        self.semantic_topk = semantic_topk
+        self.semantic_lookback = semantic_lookback
+        self.use_phrase_nodes = use_phrase_nodes
+        self.phrase_chunk_size = phrase_chunk_size
+
+        self.q_proj = nn.Linear(state_dim, state_dim)
+        self.k_proj = nn.Linear(state_dim, state_dim)
+        self.v_proj = nn.Linear(state_dim, state_dim)
+        if use_phrase_nodes:
+            self.phrase_k_proj = nn.Linear(state_dim, state_dim)
+            self.phrase_v_proj = nn.Linear(state_dim, state_dim)
+
+    def _causal_phrase_states(self, h: torch.Tensor) -> torch.Tensor:
+        # For token t in a chunk, phrase state is mean(chunk_start:t), preserving causality.
+        bsz, seq_len, dim = h.shape
+        phrase_states = torch.zeros_like(h)
+        for start in range(0, seq_len, self.phrase_chunk_size):
+            end = min(seq_len, start + self.phrase_chunk_size)
+            chunk = h[:, start:end, :]
+            prefix = torch.cumsum(chunk, dim=1)
+            denom = torch.arange(1, chunk.shape[1] + 1, device=h.device, dtype=h.dtype).view(1, -1, 1)
+            phrase_states[:, start:end, :] = prefix / denom
+        return phrase_states
+
+    def summarize(self, h: torch.Tensor) -> tuple[torch.Tensor, dict[str, float | int]]:
+        bsz, seq_len, dim = h.shape
+        q = self.q_proj(h)
+        k = self.k_proj(h)
+        v = self.v_proj(h)
+        scale = 1.0 / math.sqrt(dim)
+
+        if self.use_phrase_nodes:
+            phrase_states = self._causal_phrase_states(h)
+            phrase_k = self.phrase_k_proj(phrase_states)
+            phrase_v = self.phrase_v_proj(phrase_states)
+        else:
+            phrase_k = None
+            phrase_v = None
+
+        summary = torch.zeros_like(h)
+        semantic_topk_used = 0
+        total_neighbor_count = 0.0
+        total_sequence_weight = 0.0
+        total_semantic_weight = 0.0
+        total_phrase_weight = 0.0
+
+        for token_idx in range(seq_len):
+            if token_idx == 0:
+                continue
+
+            token_q = q[:, token_idx, :]
+            score_chunks = []
+            value_chunks = []
+            type_chunks = []
+
+            # Immediate sequence predecessor.
+            seq_score = (token_q * k[:, token_idx - 1, :]).sum(dim=-1, keepdim=True) * scale
+            seq_value = v[:, token_idx - 1 : token_idx, :]
+            score_chunks.append(seq_score)
+            value_chunks.append(seq_value)
+            type_chunks.append("sequence")
+
+            # Causal semantic top-k from bounded lookback.
+            start = max(0, token_idx - self.semantic_lookback)
+            window_keys = k[:, start:token_idx, :]
+            if window_keys.shape[1] > 0 and self.semantic_topk > 0:
+                scores = (token_q.unsqueeze(1) * window_keys).sum(dim=-1) * scale
+                used_topk = min(self.semantic_topk, window_keys.shape[1])
+                semantic_topk_used = max(semantic_topk_used, used_topk)
+                topk_scores, local_indices = torch.topk(scores, k=used_topk, dim=-1)
+                semantic_values = torch.gather(
+                    v[:, start:token_idx, :],
+                    dim=1,
+                    index=local_indices.unsqueeze(-1).expand(-1, -1, dim),
+                )
+                score_chunks.append(topk_scores)
+                value_chunks.append(semantic_values)
+                type_chunks.extend(["semantic"] * used_topk)
+
+            # Optional phrase-node link (causal chunk-prefix summary).
+            if phrase_k is not None and phrase_v is not None:
+                phrase_score = (token_q * phrase_k[:, token_idx - 1, :]).sum(dim=-1, keepdim=True) * scale
+                phrase_value = phrase_v[:, token_idx - 1 : token_idx, :]
+                score_chunks.append(phrase_score)
+                value_chunks.append(phrase_value)
+                type_chunks.append("phrase")
+
+            all_scores = torch.cat(score_chunks, dim=-1)
+            all_values = torch.cat(value_chunks, dim=1)
+            all_weights = torch.softmax(all_scores, dim=-1)
+            summary[:, token_idx, :] = (all_weights.unsqueeze(-1) * all_values).sum(dim=1)
+
+            total_neighbor_count += float(len(type_chunks))
+            type_offset = 0
+            for t in type_chunks:
+                w = all_weights[:, type_offset]
+                mean_w = float(w.mean().item())
+                if t == "sequence":
+                    total_sequence_weight += mean_w
+                elif t == "semantic":
+                    total_semantic_weight += mean_w
+                else:
+                    total_phrase_weight += mean_w
+                type_offset += 1
+
+        denom = max(float(seq_len - 1), 1.0)
+        stats: dict[str, float | int] = {
+            "mean_neighbor_count": total_neighbor_count / denom,
+            "mean_sequence_neighbor_weight": total_sequence_weight / denom,
+            "mean_semantic_neighbor_weight": total_semantic_weight / denom,
+            "mean_phrase_neighbor_weight": total_phrase_weight / denom,
+            "semantic_topk_used": semantic_topk_used,
+        }
+        return summary, stats
+
+
 class LocalDeliberationBlock(nn.Module):
     """Token-local latent deliberation with causal mixing."""
 
@@ -135,6 +263,7 @@ class LocalDeliberationBlock(nn.Module):
         use_token_gate: bool,
         semantic_topk: int = 0,
         semantic_lookback: int = 64,
+        use_neighbor_graph: bool = False,
         use_phrase_consensus: bool = False,
         adaptive_halt: bool = False,
     ) -> None:
@@ -150,6 +279,7 @@ class LocalDeliberationBlock(nn.Module):
         self.use_token_gate = use_token_gate
         self.semantic_topk = semantic_topk
         self.semantic_lookback = semantic_lookback
+        self.use_neighbor_graph = use_neighbor_graph
         self.use_phrase_consensus = use_phrase_consensus
         self.adaptive_halt = adaptive_halt
 
@@ -168,6 +298,14 @@ class LocalDeliberationBlock(nn.Module):
             self.semantic_k = nn.Linear(state_dim, state_dim)
             self.semantic_v = nn.Linear(state_dim, state_dim)
             update_in_dim += state_dim
+        if self.use_neighbor_graph:
+            self.neighbor_graph_mixer = CausalNeighborGraphMixer(
+                state_dim=state_dim,
+                phrase_chunk_size=phrase_chunk_size,
+                semantic_topk=semantic_topk,
+                semantic_lookback=semantic_lookback,
+                use_phrase_nodes=use_phrase_consensus,
+            )
 
         self.update = nn.Sequential(
             nn.Linear(update_in_dim, state_dim),
@@ -222,7 +360,10 @@ class LocalDeliberationBlock(nn.Module):
         head_states: dict[str, torch.Tensor] = self.state_head(h)
 
         semantic_topk_used = 0
+        mean_neighbor_count = 0.0
+        mean_sequence_neighbor_weight = 0.0
         mean_semantic_neighbor_weight = 0.0
+        mean_phrase_neighbor_weight = 0.0
         mean_agreement_score = 0.0
         executed_steps_per_token = torch.zeros(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.float32)
         active_mask = torch.ones(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.bool)
@@ -236,11 +377,23 @@ class LocalDeliberationBlock(nn.Module):
                 mean_agreement_score += float(step_agreement_score.item())
             else:
                 consensus_feedback = torch.zeros_like(h)
-            if self.semantic_topk > 0:
+            if self.use_neighbor_graph:
+                semantic_summary, graph_stats = self.neighbor_graph_mixer.summarize(h)
+                semantic_topk_used = int(graph_stats["semantic_topk_used"])
+                mean_neighbor_count = float(graph_stats["mean_neighbor_count"])
+                mean_sequence_neighbor_weight = float(graph_stats["mean_sequence_neighbor_weight"])
+                mean_semantic_neighbor_weight = float(graph_stats["mean_semantic_neighbor_weight"])
+                mean_phrase_neighbor_weight = float(graph_stats["mean_phrase_neighbor_weight"])
+                if self.use_phrase_consensus:
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary, consensus_feedback], dim=-1)
+                else:
+                    update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary], dim=-1)
+            elif self.semantic_topk > 0:
                 semantic_summary, _, semantic_weights, semantic_topk_used = self._semantic_neighbor_summary(h)
                 used_weight_mask = (semantic_weights > 0).to(semantic_weights.dtype)
                 used_weight_count = used_weight_mask.sum().clamp_min(1.0)
                 mean_semantic_neighbor_weight = float((semantic_weights * used_weight_mask).sum().item() / used_weight_count.item())
+                mean_neighbor_count = float(semantic_topk_used)
                 if self.use_phrase_consensus:
                     update_inputs = torch.cat([h, mixed, phrase_broadcast, semantic_summary, consensus_feedback], dim=-1)
                 else:
@@ -285,7 +438,10 @@ class LocalDeliberationBlock(nn.Module):
             "mean_executed_steps_per_token": mean_executed_steps_per_token,
             "max_executed_steps_any_token": max_executed_steps_any_token,
             "fraction_halted_early": fraction_halted_early,
+            "mean_neighbor_count": mean_neighbor_count,
+            "mean_sequence_neighbor_weight": mean_sequence_neighbor_weight,
             "mean_semantic_neighbor_weight": mean_semantic_neighbor_weight,
+            "mean_phrase_neighbor_weight": mean_phrase_neighbor_weight,
             "semantic_topk_used": semantic_topk_used,
             "mean_agreement_score": mean_agreement_score,
         }
