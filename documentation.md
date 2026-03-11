@@ -211,3 +211,15 @@
 - Results: Syntax compilation passed; targeted cognition backend/agent tests passed (`7 passed`).
 - Known issues: None for this scoped patch.
 - Next step: If future milestones require richer diagnostics, extend side-channel keys in `last_generation_metadata` while preserving string-return generation APIs.
+
+#### 2026-03-11 02:05
+- Milestone: Post-M9 roadmap extension for full latent hierarchical graph-of-thought direction (docs-only planning pass).
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `docs/architecture.md`, `nanochat/local_deliberation.py`, `nanochat/gpt.py`, `nanochat/cognition/backend.py`, `nanochat/cognition/agent.py`, `nanochat/cognition/creative.py`.
+- Files changed: `plans.md`, `docs/architecture.md`, `documentation.md`.
+- Summary: Added a new milestone sequence after Milestone 9 covering adaptive per-token halting/variable compute, dynamic latent nearest-neighbor graph + flocking, latent branch spawn/merge, deeper multi-scale hierarchy beyond phrase chunks, latent creative scratchpad slots, and optional auxiliary losses/evals; expanded architecture docs with a repo-native staged target architecture for those mechanisms.
+- Decisions made: Kept this update docs-only (no runtime code changes), preserved existing wrapper cognition + model-core layering, and maintained the incremental/opt-in integration stance so current training/speedrun paths remain untouched by default.
+- Commands run: `sed -n '1,320p' README.md`; `sed -n '1,260p' pyproject.toml`; `sed -n '1,320p' AGENTS.md`; `sed -n '1,320p' plans.md`; `sed -n '1,300p' implement.md`; `sed -n '1,320p' documentation.md`; `sed -n '1,320p' docs/architecture.md`; `sed -n '1,260p' nanochat/local_deliberation.py`; `sed -n '1,260p' nanochat/gpt.py`; `sed -n '1,260p' nanochat/cognition/backend.py`; `sed -n '1,280p' nanochat/cognition/agent.py`; `sed -n '1,260p' nanochat/cognition/creative.py`; `rg -n "adaptive|halting|variable compute|nearest-neighbor|flocking|branch|merge|multi-scale|hierarchy|scratchpad|auxiliary|loss|eval" plans.md docs/architecture.md documentation.md`.
+- Results: Sanity checks confirm the new architecture concepts are consistently present across plan and architecture docs.
+- Known issues: None for this docs-only milestone extension.
+- Next step: Execute Milestone 10 as the first implementation slice with instrumentation-first adaptive halting and fixed-step fallback tests.
+
