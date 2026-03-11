@@ -279,3 +279,14 @@
 - Results: `py_compile` passed. `pytest` collection failed in this environment due to missing `torch`.
 - Known issues: Full targeted tests require a torch-enabled runtime.
 - Next step: Re-run local deliberation and GPT local deliberation tests in an environment with `torch` installed.
+
+#### 2026-03-11 06:20
+- Milestone: Milestone 14 latent creative scratchpad slots inside model-core local deliberation.
+- Repo files inspected: `README.md`, `pyproject.toml`, `AGENTS.md`, `plans.md`, `implement.md`, `documentation.md`, `docs/architecture.md`, `nanochat/local_deliberation.py`, `nanochat/gpt.py`, `nanochat/cognition/creative.py`, `tests/test_local_deliberation.py`, `tests/test_gpt_local_deliberation.py`.
+- Files changed: `nanochat/local_deliberation.py`, `nanochat/gpt.py`, `tests/test_local_deliberation.py`, `tests/test_gpt_local_deliberation.py`, `docs/architecture.md`, `documentation.md`.
+- Summary: Added an optional internal latent scratchpad in `LocalDeliberationBlock` with bounded config (`scratch_slots`, `scratch_dim`), gated token read/write behavior based on uncertainty/salience, scratch feedback integration into update inputs, and surfaced scratch stats (`scratch_slots_used`, `mean_scratch_read_weight`, `mean_scratch_write_weight`, `mean_scratch_norm`) while preserving default behavior when disabled.
+- Decisions made: Kept scratchpad model-side only (no tokenizer/chat interface changes and no emitted token length changes); zero-initialized scratch readout projection for near-identity startup; kept decode-cache behavior minimal/safe by reusing existing cached-deliberation recomputation rather than introducing separate scratch cache state.
+- Commands run: `python -m py_compile nanochat/local_deliberation.py nanochat/gpt.py tests/test_local_deliberation.py tests/test_gpt_local_deliberation.py`; `python -m pytest -q tests/test_local_deliberation.py tests/test_gpt_local_deliberation.py`.
+- Results: `py_compile` passed. Targeted pytest is blocked in this environment because `torch` is unavailable (`ModuleNotFoundError: No module named 'torch'` during test collection).
+- Known issues: Full runtime validation of scratch behavior tests requires a torch-enabled environment.
+- Next step: Re-run the targeted local deliberation/GPT tests in an environment with torch installed.

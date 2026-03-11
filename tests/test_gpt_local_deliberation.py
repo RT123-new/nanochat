@@ -348,3 +348,88 @@ def test_no_future_token_influence_in_branch_path(monkeypatch):
     y2 = model(x2)
 
     assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)
+
+
+def test_local_delib_scratch_fields_are_wired_into_block(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_scratch_slots=4,
+            local_delib_scratch_dim=6,
+        )
+    )
+
+    block = model.local_delib_blocks["0"]
+    assert block.scratch_slots == 4
+    assert block.scratch_dim == 6
+
+
+def test_gpt_local_delib_scratch_stats_and_sequence_shape(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_debug_stats=True,
+            local_delib_scratch_slots=3,
+            local_delib_scratch_dim=5,
+        )
+    )
+    idx = torch.randint(0, model.config.vocab_size, (2, 5))
+
+    logits = model(idx)
+
+    assert logits.shape == (2, 5, model.config.vocab_size)
+    layer_stats = model.last_deliberation_stats[0]
+    assert "scratch_slots_used" in layer_stats
+    assert "mean_scratch_read_weight" in layer_stats
+    assert "mean_scratch_write_weight" in layer_stats
+    assert "mean_scratch_norm" in layer_stats
+
+
+def test_scratch_enabled_changes_logits_when_projection_enabled(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    idx = torch.randint(0, 32, (1, 6))
+
+    torch.manual_seed(0)
+    base = GPT(_tiny_config(local_delib=True, local_delib_steps=2, local_delib_scratch_slots=0, local_delib_scratch_dim=0))
+    torch.manual_seed(0)
+    scratch = GPT(_tiny_config(local_delib=True, local_delib_steps=2, local_delib_scratch_slots=2, local_delib_scratch_dim=4))
+
+    for block in scratch.local_delib_blocks.values():
+        with torch.no_grad():
+            block.scratch_to_state.weight.fill_(0.1)
+            block.scratch_init.fill_(2.0)
+
+    logits_base = base(idx)
+    logits_scratch = scratch(idx)
+
+    assert not torch.allclose(logits_base, logits_scratch)
+
+
+def test_no_future_token_influence_in_scratch_path(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_phrase_chunk_size=1,
+            local_delib_scratch_slots=3,
+            local_delib_scratch_dim=6,
+        )
+    )
+
+    for block in model.local_delib_blocks.values():
+        with torch.no_grad():
+            block.scratch_to_state.weight.fill_(0.1)
+
+    x1 = torch.randint(0, model.config.vocab_size, (1, 8))
+    x2 = x1.clone()
+    x2[:, 5:] = torch.randint(0, model.config.vocab_size, (1, 3))
+
+    y1 = model(x1)
+    y2 = model(x2)
+
+    assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)

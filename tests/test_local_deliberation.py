@@ -599,3 +599,110 @@ def test_hierarchy_path_remains_strictly_causal():
     y2, _ = block(x2)
 
     assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)
+
+
+def test_scratch_disabled_parity_with_default_path():
+    torch.manual_seed(111)
+    x = torch.randn(2, 7, 10)
+
+    block_default = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=2,
+        use_token_gate=False,
+    )
+    y_default, stats_default = block_default(x)
+
+    torch.manual_seed(111)
+    block_disabled = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=6,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=2,
+        use_token_gate=False,
+        scratch_slots=0,
+        scratch_dim=4,
+    )
+    y_disabled, stats_disabled = block_disabled(x)
+
+    assert torch.allclose(y_default, y_disabled, atol=1e-8)
+    assert stats_default["scratch_slots_used"] == 0
+    assert stats_disabled["scratch_slots_used"] == 0
+
+
+def test_scratch_enabled_surfaces_stats_and_shape():
+    torch.manual_seed(112)
+    block = LocalDeliberationBlock(
+        model_dim=12,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=2,
+        use_token_gate=False,
+        scratch_slots=3,
+        scratch_dim=5,
+    )
+    x = torch.randn(1, 6, 12)
+
+    y, stats = block(x)
+
+    assert y.shape == x.shape
+    assert 0 <= stats["scratch_slots_used"] <= 3
+    assert stats["mean_scratch_read_weight"] >= 0.0
+    assert stats["mean_scratch_write_weight"] >= 0.0
+    assert stats["mean_scratch_norm"] >= 0.0
+
+
+def test_scratch_can_influence_internal_update_path_when_enabled():
+    torch.manual_seed(113)
+    x = torch.randn(1, 5, 8)
+
+    block = LocalDeliberationBlock(
+        model_dim=8,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=2,
+        use_token_gate=False,
+        scratch_slots=2,
+        scratch_dim=4,
+    )
+
+    with torch.no_grad():
+        block.scratch_to_state.weight.fill_(0.1)
+
+    baseline, _ = block(x)
+    with torch.no_grad():
+        block.scratch_init.fill_(2.0)
+    changed, _ = block(x)
+
+    assert not torch.allclose(baseline, changed)
+
+
+def test_scratch_path_is_strictly_causal_prefix_stable():
+    torch.manual_seed(114)
+    block = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=2,
+        use_token_gate=False,
+        scratch_slots=3,
+        scratch_dim=6,
+    )
+
+    with torch.no_grad():
+        block.scratch_to_state.weight.fill_(0.1)
+
+    x1 = torch.randn(1, 8, 10)
+    x2 = x1.clone()
+    x2[:, 5:, :] = torch.randn(1, 3, 10)
+
+    y1, _ = block(x1)
+    y2, _ = block(x2)
+
+    assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)

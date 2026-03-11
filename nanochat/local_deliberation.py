@@ -357,6 +357,8 @@ class LocalDeliberationBlock(nn.Module):
         branch_every: int = 1,
         branch_dim: int = 0,
         hierarchy_chunk_sizes: list[int] | None = None,
+        scratch_slots: int = 0,
+        scratch_dim: int = 0,
     ) -> None:
         super().__init__()
         if micro_steps < 1:
@@ -369,6 +371,12 @@ class LocalDeliberationBlock(nn.Module):
             raise ValueError("branch_factor must be >= 0")
         if branch_every < 1:
             raise ValueError("branch_every must be >= 1")
+        if scratch_slots < 0:
+            raise ValueError("scratch_slots must be >= 0")
+        if scratch_dim < 0:
+            raise ValueError("scratch_dim must be >= 0")
+        if scratch_slots > 0 and scratch_dim < 1:
+            raise ValueError("scratch_dim must be >= 1 when scratch_slots > 0")
 
         self.micro_steps = micro_steps
         self.use_token_gate = use_token_gate
@@ -381,6 +389,8 @@ class LocalDeliberationBlock(nn.Module):
         self.branch_every = branch_every
         self.branch_dim = branch_dim if branch_dim > 0 else state_dim
         self.hierarchy_chunk_sizes = tuple(hierarchy_chunk_sizes or [])
+        self.scratch_slots = scratch_slots
+        self.scratch_dim = scratch_dim if scratch_slots > 0 else 0
         for chunk_size in self.hierarchy_chunk_sizes:
             if chunk_size < 1:
                 raise ValueError("hierarchy chunk sizes must be >= 1")
@@ -413,6 +423,14 @@ class LocalDeliberationBlock(nn.Module):
                 semantic_lookback=semantic_lookback,
                 use_phrase_nodes=use_phrase_consensus,
             )
+        if self.scratch_slots > 0:
+            self.scratch_query = nn.Linear(state_dim, self.scratch_dim)
+            self.scratch_write_value = nn.Linear(state_dim, self.scratch_dim)
+            self.scratch_read_mix = nn.Linear(state_dim, self.scratch_dim)
+            self.scratch_to_state = nn.Linear(self.scratch_dim, state_dim)
+            self.scratch_init = nn.Parameter(torch.zeros(self.scratch_slots, self.scratch_dim))
+            self.scratch_read_temp = nn.Parameter(torch.tensor(1.0))
+            update_in_dim += state_dim
 
         self.update = nn.Sequential(
             nn.Linear(update_in_dim, state_dim),
@@ -432,6 +450,48 @@ class LocalDeliberationBlock(nn.Module):
 
         nn.init.zeros_(self.out_proj.weight)
         nn.init.zeros_(self.out_proj.bias)
+        if self.scratch_slots > 0:
+            nn.init.zeros_(self.scratch_to_state.weight)
+            nn.init.zeros_(self.scratch_to_state.bias)
+
+    def _compute_scratch_feedback(
+        self,
+        h: torch.Tensor,
+        head_states: dict[str, torch.Tensor],
+    ) -> tuple[torch.Tensor, float, float, int, float]:
+        bsz, seq_len, _ = h.shape
+        scratch = self.scratch_init.unsqueeze(0).expand(bsz, -1, -1).clone()
+        scratch_feedback = torch.zeros(bsz, seq_len, h.shape[-1], device=h.device, dtype=h.dtype)
+
+        read_weight_sum = 0.0
+        write_weight_sum = 0.0
+        slot_write_mass = torch.zeros(bsz, self.scratch_slots, device=h.device, dtype=h.dtype)
+
+        read_temp = torch.clamp(self.scratch_read_temp, min=0.1)
+        for token_idx in range(seq_len):
+            token_state = h[:, token_idx, :]
+            query = self.scratch_query(token_state)
+            slot_logits = torch.einsum("bd,bsd->bs", query, scratch) / math.sqrt(self.scratch_dim)
+            slot_attn = torch.softmax(slot_logits * read_temp, dim=-1)
+
+            read_gate = head_states["uncertainty"][:, token_idx, :]
+            read_summary = torch.einsum("bs,bsd->bd", slot_attn, scratch)
+            scratch_feedback[:, token_idx, :] = self.scratch_to_state(read_summary * read_gate)
+            read_weight_sum += float((slot_attn.mean(dim=-1) * read_gate.squeeze(-1)).mean().item())
+
+            write_gate = (head_states["salience"][:, token_idx, :] * head_states["uncertainty"][:, token_idx, :]).squeeze(-1)
+            write_value = self.scratch_write_value(token_state) + self.scratch_read_mix(read_summary)
+            write_weights = slot_attn * write_gate.unsqueeze(-1)
+            scratch = scratch + write_weights.unsqueeze(-1) * write_value.unsqueeze(1)
+            slot_write_mass += write_weights
+            write_weight_sum += float(write_weights.mean().item())
+
+        steps = float(max(seq_len, 1))
+        mean_read_weight = read_weight_sum / steps
+        mean_write_weight = write_weight_sum / steps
+        scratch_slots_used = int((slot_write_mass > 1e-4).any(dim=0).sum().item())
+        mean_scratch_norm = float(scratch.norm(dim=-1).mean().item())
+        return scratch_feedback, mean_read_weight, mean_write_weight, scratch_slots_used, mean_scratch_norm
 
     def _semantic_neighbor_summary(
         self, h: torch.Tensor
@@ -490,6 +550,10 @@ class LocalDeliberationBlock(nn.Module):
         hierarchy_feedback_norm_accum = 0.0
         hierarchy_feedback_steps = 0
         hierarchy_level_chunk_counts = [0 for _ in self.hierarchy_levels]
+        scratch_slots_used = 0
+        mean_scratch_read_weight = 0.0
+        mean_scratch_write_weight = 0.0
+        mean_scratch_norm = 0.0
         executed_steps_per_token = torch.zeros(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.float32)
         active_mask = torch.ones(h.shape[0], h.shape[1], 1, device=h.device, dtype=torch.bool)
         halt_threshold = torch.sigmoid(self.halt_threshold_logit)
@@ -545,6 +609,23 @@ class LocalDeliberationBlock(nn.Module):
                 else:
                     update_inputs = torch.cat([h, mixed, phrase_broadcast, hierarchy_feedback], dim=-1) if self.hierarchy_levels else torch.cat([h, mixed, phrase_broadcast], dim=-1)
 
+            if self.scratch_slots > 0 and not (self.use_token_gate or self.adaptive_halt):
+                head_states = self.state_head(h)
+
+            if self.scratch_slots > 0:
+                (
+                    scratch_feedback,
+                    step_scratch_read_weight,
+                    step_scratch_write_weight,
+                    step_scratch_slots_used,
+                    step_scratch_norm,
+                ) = self._compute_scratch_feedback(h, head_states)
+                update_inputs = torch.cat([update_inputs, scratch_feedback], dim=-1)
+                mean_scratch_read_weight += step_scratch_read_weight
+                mean_scratch_write_weight += step_scratch_write_weight
+                mean_scratch_norm += step_scratch_norm
+                scratch_slots_used = max(scratch_slots_used, step_scratch_slots_used)
+
             delta = self.update(update_inputs)
 
             if self.use_token_gate or self.adaptive_halt:
@@ -590,6 +671,9 @@ class LocalDeliberationBlock(nn.Module):
         mean_merge_weight = mean_merge_weight_accum / float(max(branch_steps, 1))
         fraction_tokens_branched = fraction_tokens_branched_accum / float(max(branch_steps, 1))
         mean_hierarchy_feedback_norm = hierarchy_feedback_norm_accum / float(max(hierarchy_feedback_steps, 1))
+        mean_scratch_read_weight = mean_scratch_read_weight / float(max(self.micro_steps, 1))
+        mean_scratch_write_weight = mean_scratch_write_weight / float(max(self.micro_steps, 1))
+        mean_scratch_norm = mean_scratch_norm / float(max(self.micro_steps, 1))
         stats: dict[str, torch.Tensor | float | int] = {
             "mean_salience": float(head_states["salience"].mean().item()),
             "mean_uncertainty": float(head_states["uncertainty"].mean().item()),
@@ -613,6 +697,10 @@ class LocalDeliberationBlock(nn.Module):
             "hierarchy_levels_used": len(self.hierarchy_levels),
             "mean_hierarchy_feedback_norm": mean_hierarchy_feedback_norm,
             "hierarchy_level_chunk_counts": hierarchy_level_chunk_counts,
+            "scratch_slots_used": scratch_slots_used,
+            "mean_scratch_read_weight": mean_scratch_read_weight,
+            "mean_scratch_write_weight": mean_scratch_write_weight,
+            "mean_scratch_norm": mean_scratch_norm,
         }
         return h, stats
 
