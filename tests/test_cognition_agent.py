@@ -29,7 +29,23 @@ class DelibMetadataBackend(CapturingBackend):
         self.last_generation_metadata = {
             "local_deliberation_stats": [{"layer_idx": 1, "agreement": 0.75, "mean_branch_score": 0.62, "branch_factor_used": 2}],
             "model_local_delib.branch": {"agreement": 0.75, "mean_branch_score": 0.62, "branch_factor_used": 2.0},
+            "model_local_delib.scratchpad_summaries": [{"layer_idx": 1, "summary": [0.1, 0.2, 0.3]}],
             "model_local_delib.adaptive_halt": {"halted_token_fraction": 0.4},
+            "model_local_delib.thought_summaries.branch_consensus": {
+                "layer_count": 1,
+                "branch_consensus_used": 1.0,
+                "mean_branch_consensus_weight": 0.7,
+            },
+            "model_local_delib.thought_summaries.scratch": {
+                "layer_count": 1,
+                "summary_dim": 3,
+                "mean_summary_norm": (0.1**2 + 0.2**2 + 0.3**2) ** 0.5,
+            },
+            "model_local_delib.thought_summaries.thought_graph": {
+                "layer_count": 1,
+                "thought_nodes_used": 4.0,
+                "thought_graph_steps_used": 2.0,
+            },
         }
         return "captured"
 
@@ -139,4 +155,8 @@ def test_agent_trace_includes_model_local_delib_metadata_when_available() -> Non
     assert result.response == "captured"
     assert result.trace.metadata["model_local_delib"] == [{"layer_idx": 1, "agreement": 0.75, "mean_branch_score": 0.62, "branch_factor_used": 2}]
     assert result.trace.metadata["model_local_delib.branch"]["branch_factor_used"] == 2.0
+    assert result.trace.metadata["model_local_delib.scratchpad_summaries"] == [{"layer_idx": 1, "summary": [0.1, 0.2, 0.3]}]
     assert result.trace.metadata["model_local_delib.adaptive_halt"]["halted_token_fraction"] == 0.4
+    assert result.trace.metadata["model_local_delib.thought_summaries.branch_consensus"]["branch_consensus_used"] == 1.0
+    assert result.trace.metadata["model_local_delib.thought_summaries.scratch"]["summary_dim"] == 3
+    assert result.trace.metadata["model_local_delib.thought_summaries.thought_graph"]["thought_nodes_used"] == 4.0

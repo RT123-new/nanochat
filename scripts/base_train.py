@@ -62,20 +62,64 @@ parser.add_argument("--local-delib-use-token-gate", action="store_true", help="e
 parser.add_argument("--local-delib-debug-stats", action="store_true", help="collect local deliberation debug stats")
 parser.add_argument("--local-delib-semantic-topk", type=int, default=0, help="top-k semantic neighbors for local deliberation (0 disables)")
 parser.add_argument("--local-delib-semantic-lookback", type=int, default=64, help="causal lookback window for semantic neighbors")
+parser.add_argument("--local-delib-use-neighbor-graph", action="store_true", help="enable causal neighbor graph aggregation in local deliberation")
 parser.add_argument("--local-delib-use-phrase-consensus", action="store_true", help="enable phrase consensus feedback in local deliberation")
+parser.add_argument("--local-delib-use-flocking", action="store_true", help="enable explicit flocking operators on top of the causal neighbor graph")
+parser.add_argument("--local-delib-flocking-alignment-weight", type=float, default=0.0, help="alignment contribution weight for flocking updates")
+parser.add_argument("--local-delib-flocking-cohesion-weight", type=float, default=0.0, help="cohesion contribution weight for flocking updates")
+parser.add_argument("--local-delib-flocking-separation-weight", type=float, default=0.0, help="separation contribution weight for flocking updates")
+parser.add_argument("--local-delib-flocking-separation-margin", type=float, default=1.0, help="distance margin below which separation activates")
+parser.add_argument("--local-delib-flocking-radius-cap", type=int, default=0, help="optional token-distance cap for flocking neighbors (0 disables)")
 parser.add_argument("--local-delib-adaptive-halt", action="store_true", help="reserved plumbing flag for adaptive local deliberation halting")
 parser.add_argument("--local-delib-branch-factor", type=int, default=0, help="reserved plumbing flag for latent branch spawn count")
 parser.add_argument("--local-delib-branch-every", type=int, default=1, help="reserved plumbing flag for branch insertion cadence")
 parser.add_argument("--local-delib-branch-dim", type=int, default=0, help="reserved plumbing flag for branch latent dimension")
+parser.add_argument("--local-delib-branch-consensus", action="store_true", help="enable latent branch-to-branch consensus before merge")
+parser.add_argument("--local-delib-branch-verifier", action="store_true", help="enable verifier-style rescoring of latent branches")
+parser.add_argument("--local-delib-branch-consensus-temp", type=float, default=1.0, help="temperature for branch consensus weighting")
+parser.add_argument("--local-delib-branch-max-active", type=int, default=0, help="optional cap on branches considered by consensus/verifier (0 uses branch_factor)")
+parser.add_argument("--local-delib-branch-disagreement-threshold", type=float, default=0.1, help="minimum disagreement required before consensus contributes to merge")
 parser.add_argument("--local-delib-hierarchy-chunk-sizes", type=str, default="", help="reserved plumbing flag for hierarchy chunk sizes, comma-separated")
+parser.add_argument("--local-delib-use-deep-hierarchy", action="store_true", help="enable an explicit causal token->phrase->span->sequence hierarchy path")
+parser.add_argument("--local-delib-span-chunk-size", type=int, default=0, help="token chunk size for the optional span/segment hierarchy level (0 disables)")
+parser.add_argument("--local-delib-sequence-summary", action="store_true", help="enable an explicit causal sequence-summary hierarchy level")
+parser.add_argument("--local-delib-hierarchy-bidirectional", action="store_true", help="allow downward sequence/span/phrase feedback in the deep hierarchy path")
+parser.add_argument("--local-delib-hierarchy-scale-gate", action="store_true", help="gate deep-hierarchy token feedback per scale")
 parser.add_argument("--local-delib-scratch-slots", type=int, default=0, help="reserved plumbing flag for latent scratch slots")
 parser.add_argument("--local-delib-scratch-dim", type=int, default=0, help="reserved plumbing flag for latent scratch dimension")
+parser.add_argument("--local-delib-scratch-refine-steps", type=int, default=0, help="bounded scratch refinement substeps per local-deliberation micro-step")
+parser.add_argument("--local-delib-scratch-use-branch-inputs", action=argparse.BooleanOptionalAction, default=False, help="let scratch writes ingest branch summaries when available")
+parser.add_argument("--local-delib-scratch-use-hierarchy-inputs", action=argparse.BooleanOptionalAction, default=False, help="let scratch writes ingest hierarchy summaries when available")
+parser.add_argument("--local-delib-scratch-export-summary", action=argparse.BooleanOptionalAction, default=False, help="export a compact scratch summary vector into debug metadata")
+parser.add_argument("--local-delib-scratch-summary-dim", type=int, default=0, help="exported scratch summary width (0 uses local deliberation state dim)")
+parser.add_argument("--local-delib-use-thought-graph", action="store_true", help="enable explicit latent thought nodes and bounded graph message passing")
+parser.add_argument("--local-delib-thought-node-budget", type=int, default=8, help="max explicit latent thought nodes per local deliberation block")
+parser.add_argument("--local-delib-thought-node-dim", type=int, default=0, help="explicit thought-node latent dimension (0 uses local deliberation state dim)")
+parser.add_argument("--local-delib-thought-graph-steps", type=int, default=1, help="number of bounded message-passing steps over explicit thought nodes")
+parser.add_argument("--local-delib-thought-topk-edges", type=int, default=2, help="top-k causal node edges used for thought-graph updates and token readout")
+parser.add_argument("--local-delib-thought-token-chunk-size", type=int, default=4, help="token chunk size used to seed explicit thought nodes")
+parser.add_argument("--local-delib-thought-use-branch-inputs", action=argparse.BooleanOptionalAction, default=True, help="let thought nodes ingest latent branch summaries when available")
+parser.add_argument("--local-delib-thought-use-hierarchy-inputs", action=argparse.BooleanOptionalAction, default=True, help="let thought nodes ingest hierarchy summaries when available")
+parser.add_argument("--local-delib-thought-use-scratch-inputs", action=argparse.BooleanOptionalAction, default=True, help="let thought nodes ingest scratch summaries when available")
+parser.add_argument("--local-delib-global-anchor-count", type=int, default=0, help="number of bounded global anchor states for local deliberation (0 disables)")
+parser.add_argument("--local-delib-global-anchor-dim", type=int, default=0, help="global anchor latent dimension (0 uses local deliberation state dim)")
+parser.add_argument("--local-delib-global-anchor-update", action=argparse.BooleanOptionalAction, default=False, help="allow tokens to update global anchor states from causal prefix summaries")
+parser.add_argument("--local-delib-global-anchor-temp", type=float, default=1.0, help="temperature for global anchor read/write attention")
+parser.add_argument("--local-delib-global-anchor-use-hierarchy", action=argparse.BooleanOptionalAction, default=False, help="let global anchors ingest hierarchy summaries when available")
+parser.add_argument("--local-delib-global-anchor-use-scratch", action=argparse.BooleanOptionalAction, default=False, help="let global anchors ingest scratch summaries when available")
+parser.add_argument("--local-delib-global-anchor-use-thought", action=argparse.BooleanOptionalAction, default=False, help="let global anchors ingest thought summaries when available")
 parser.add_argument("--local-delib-debug-branch-stats", action="store_true", help="reserved plumbing flag for branch debug statistics")
 parser.add_argument("--local-delib-halt-sparsity-weight", type=float, default=0.0, help="aux loss weight for halting sparsity")
 parser.add_argument("--local-delib-branch-diversity-weight", type=float, default=0.0, help="aux loss weight for branch diversity")
 parser.add_argument("--local-delib-branch-entropy-weight", type=float, default=0.0, help="aux loss weight for branch entropy")
 parser.add_argument("--local-delib-consensus-agreement-weight", type=float, default=0.0, help="aux loss weight for phrase consensus agreement")
 parser.add_argument("--local-delib-scratch-utilization-weight", type=float, default=0.0, help="aux loss weight for scratchpad utilization")
+parser.add_argument("--local-delib-flocking-stability-weight", type=float, default=0.0, help="aux loss weight for flocking stability")
+parser.add_argument("--local-delib-thought-edge-stability-weight", type=float, default=0.0, help="aux loss weight for thought-graph edge stability")
+parser.add_argument("--local-delib-thought-node-utilization-weight", type=float, default=0.0, help="aux loss weight for thought-node utilization")
+parser.add_argument("--local-delib-hierarchy-agreement-weight", type=float, default=0.0, help="aux loss weight for deep-hierarchy agreement")
+parser.add_argument("--local-delib-branch-usefulness-weight", type=float, default=0.0, help="aux loss weight for branch usefulness")
+parser.add_argument("--local-delib-anchor-usage-weight", type=float, default=0.0, help="aux loss weight for global anchor usage")
 # Training horizon (only one used, in order of precedence)
 parser.add_argument("--num-iterations", type=int, default=-1, help="explicit number of optimization steps (-1 = disable)")
 parser.add_argument("--target-flops", type=float, default=-1.0, help="calculate num_iterations to reach target_flops (-1 = disable)")
@@ -118,16 +162,74 @@ if args.local_delib_semantic_topk < 0:
     parser.error("--local-delib-semantic-topk must be >= 0")
 if args.local_delib_semantic_lookback < 1:
     parser.error("--local-delib-semantic-lookback must be >= 1")
+if args.local_delib_flocking_alignment_weight < 0.0:
+    parser.error("--local-delib-flocking-alignment-weight must be >= 0")
+if args.local_delib_flocking_cohesion_weight < 0.0:
+    parser.error("--local-delib-flocking-cohesion-weight must be >= 0")
+if args.local_delib_flocking_separation_weight < 0.0:
+    parser.error("--local-delib-flocking-separation-weight must be >= 0")
+if args.local_delib_flocking_separation_margin < 0.0:
+    parser.error("--local-delib-flocking-separation-margin must be >= 0")
+if args.local_delib_flocking_radius_cap < 0:
+    parser.error("--local-delib-flocking-radius-cap must be >= 0")
+if args.local_delib_use_flocking and not args.local_delib_use_neighbor_graph:
+    parser.error("--local-delib-use-flocking requires --local-delib-use-neighbor-graph")
 if args.local_delib_branch_factor < 0:
     parser.error("--local-delib-branch-factor must be >= 0")
 if args.local_delib_branch_every < 1:
     parser.error("--local-delib-branch-every must be >= 1")
 if args.local_delib_branch_dim < 0:
     parser.error("--local-delib-branch-dim must be >= 0")
+if args.local_delib_branch_consensus_temp <= 0.0:
+    parser.error("--local-delib-branch-consensus-temp must be > 0")
+if args.local_delib_branch_max_active < 0:
+    parser.error("--local-delib-branch-max-active must be >= 0")
+if args.local_delib_branch_disagreement_threshold < 0.0:
+    parser.error("--local-delib-branch-disagreement-threshold must be >= 0")
+if (args.local_delib_branch_consensus or args.local_delib_branch_verifier) and args.local_delib_branch_factor < 1:
+    parser.error("--local-delib-branch-consensus/--local-delib-branch-verifier require --local-delib-branch-factor > 0")
+if args.local_delib_span_chunk_size < 0:
+    parser.error("--local-delib-span-chunk-size must be >= 0")
+if args.local_delib_use_deep_hierarchy and 0 < args.local_delib_span_chunk_size < args.local_delib_phrase_chunk_size:
+    parser.error("--local-delib-span-chunk-size must be >= --local-delib-phrase-chunk-size when deep hierarchy is enabled")
 if args.local_delib_scratch_slots < 0:
     parser.error("--local-delib-scratch-slots must be >= 0")
 if args.local_delib_scratch_dim < 0:
     parser.error("--local-delib-scratch-dim must be >= 0")
+if args.local_delib_scratch_refine_steps < 0:
+    parser.error("--local-delib-scratch-refine-steps must be >= 0")
+if args.local_delib_scratch_summary_dim < 0:
+    parser.error("--local-delib-scratch-summary-dim must be >= 0")
+if args.local_delib_scratch_export_summary and args.local_delib_scratch_slots < 1:
+    parser.error("--local-delib-scratch-export-summary requires --local-delib-scratch-slots > 0")
+if args.local_delib_thought_node_budget < 0:
+    parser.error("--local-delib-thought-node-budget must be >= 0")
+if args.local_delib_thought_node_dim < 0:
+    parser.error("--local-delib-thought-node-dim must be >= 0")
+if args.local_delib_thought_graph_steps < 0:
+    parser.error("--local-delib-thought-graph-steps must be >= 0")
+if args.local_delib_thought_topk_edges < 1:
+    parser.error("--local-delib-thought-topk-edges must be >= 1")
+if args.local_delib_thought_token_chunk_size < 1:
+    parser.error("--local-delib-thought-token-chunk-size must be >= 1")
+if args.local_delib_use_thought_graph and args.local_delib_thought_node_budget < 1:
+    parser.error("--local-delib-use-thought-graph requires --local-delib-thought-node-budget >= 1")
+if args.local_delib_use_thought_graph and args.local_delib_thought_graph_steps < 1:
+    parser.error("--local-delib-use-thought-graph requires --local-delib-thought-graph-steps >= 1")
+if args.local_delib_global_anchor_count < 0:
+    parser.error("--local-delib-global-anchor-count must be >= 0")
+if args.local_delib_global_anchor_dim < 0:
+    parser.error("--local-delib-global-anchor-dim must be >= 0")
+if args.local_delib_global_anchor_temp <= 0.0:
+    parser.error("--local-delib-global-anchor-temp must be > 0")
+if args.local_delib_global_anchor_update and args.local_delib_global_anchor_count < 1:
+    parser.error("--local-delib-global-anchor-update requires --local-delib-global-anchor-count > 0")
+if (
+    args.local_delib_global_anchor_use_hierarchy
+    or args.local_delib_global_anchor_use_scratch
+    or args.local_delib_global_anchor_use_thought
+) and args.local_delib_global_anchor_count < 1:
+    parser.error("--local-delib-global-anchor-use-* flags require --local-delib-global-anchor-count > 0")
 # -----------------------------------------------------------------------------
 # Compute init and wandb logging
 
@@ -196,20 +298,64 @@ def build_model_meta(depth):
         local_delib_debug_stats=args.local_delib_debug_stats,
         local_delib_semantic_topk=args.local_delib_semantic_topk,
         local_delib_semantic_lookback=args.local_delib_semantic_lookback,
+        local_delib_use_neighbor_graph=args.local_delib_use_neighbor_graph,
         local_delib_use_phrase_consensus=args.local_delib_use_phrase_consensus,
+        local_delib_use_flocking=args.local_delib_use_flocking,
+        local_delib_flocking_alignment_weight=args.local_delib_flocking_alignment_weight,
+        local_delib_flocking_cohesion_weight=args.local_delib_flocking_cohesion_weight,
+        local_delib_flocking_separation_weight=args.local_delib_flocking_separation_weight,
+        local_delib_flocking_separation_margin=args.local_delib_flocking_separation_margin,
+        local_delib_flocking_radius_cap=args.local_delib_flocking_radius_cap,
         local_delib_adaptive_halt=args.local_delib_adaptive_halt,
         local_delib_branch_factor=args.local_delib_branch_factor,
         local_delib_branch_every=args.local_delib_branch_every,
         local_delib_branch_dim=args.local_delib_branch_dim,
+        local_delib_branch_consensus=args.local_delib_branch_consensus,
+        local_delib_branch_verifier=args.local_delib_branch_verifier,
+        local_delib_branch_consensus_temp=args.local_delib_branch_consensus_temp,
+        local_delib_branch_max_active=args.local_delib_branch_max_active,
+        local_delib_branch_disagreement_threshold=args.local_delib_branch_disagreement_threshold,
         local_delib_hierarchy_chunk_sizes=args.local_delib_hierarchy_chunk_sizes,
+        local_delib_use_deep_hierarchy=args.local_delib_use_deep_hierarchy,
+        local_delib_span_chunk_size=args.local_delib_span_chunk_size,
+        local_delib_sequence_summary=args.local_delib_sequence_summary,
+        local_delib_hierarchy_bidirectional=args.local_delib_hierarchy_bidirectional,
+        local_delib_hierarchy_scale_gate=args.local_delib_hierarchy_scale_gate,
         local_delib_scratch_slots=args.local_delib_scratch_slots,
         local_delib_scratch_dim=args.local_delib_scratch_dim,
+        local_delib_scratch_refine_steps=args.local_delib_scratch_refine_steps,
+        local_delib_scratch_use_branch_inputs=args.local_delib_scratch_use_branch_inputs,
+        local_delib_scratch_use_hierarchy_inputs=args.local_delib_scratch_use_hierarchy_inputs,
+        local_delib_scratch_export_summary=args.local_delib_scratch_export_summary,
+        local_delib_scratch_summary_dim=args.local_delib_scratch_summary_dim,
+        local_delib_use_thought_graph=args.local_delib_use_thought_graph,
+        local_delib_thought_node_budget=args.local_delib_thought_node_budget,
+        local_delib_thought_node_dim=args.local_delib_thought_node_dim,
+        local_delib_thought_graph_steps=args.local_delib_thought_graph_steps,
+        local_delib_thought_topk_edges=args.local_delib_thought_topk_edges,
+        local_delib_thought_token_chunk_size=args.local_delib_thought_token_chunk_size,
+        local_delib_thought_use_branch_inputs=args.local_delib_thought_use_branch_inputs,
+        local_delib_thought_use_hierarchy_inputs=args.local_delib_thought_use_hierarchy_inputs,
+        local_delib_thought_use_scratch_inputs=args.local_delib_thought_use_scratch_inputs,
+        local_delib_global_anchor_count=args.local_delib_global_anchor_count,
+        local_delib_global_anchor_dim=args.local_delib_global_anchor_dim,
+        local_delib_global_anchor_update=args.local_delib_global_anchor_update,
+        local_delib_global_anchor_temp=args.local_delib_global_anchor_temp,
+        local_delib_global_anchor_use_hierarchy=args.local_delib_global_anchor_use_hierarchy,
+        local_delib_global_anchor_use_scratch=args.local_delib_global_anchor_use_scratch,
+        local_delib_global_anchor_use_thought=args.local_delib_global_anchor_use_thought,
         local_delib_debug_branch_stats=args.local_delib_debug_branch_stats,
         local_delib_halt_sparsity_weight=args.local_delib_halt_sparsity_weight,
         local_delib_branch_diversity_weight=args.local_delib_branch_diversity_weight,
         local_delib_branch_entropy_weight=args.local_delib_branch_entropy_weight,
         local_delib_consensus_agreement_weight=args.local_delib_consensus_agreement_weight,
         local_delib_scratch_utilization_weight=args.local_delib_scratch_utilization_weight,
+        local_delib_flocking_stability_weight=args.local_delib_flocking_stability_weight,
+        local_delib_thought_edge_stability_weight=args.local_delib_thought_edge_stability_weight,
+        local_delib_thought_node_utilization_weight=args.local_delib_thought_node_utilization_weight,
+        local_delib_hierarchy_agreement_weight=args.local_delib_hierarchy_agreement_weight,
+        local_delib_branch_usefulness_weight=args.local_delib_branch_usefulness_weight,
+        local_delib_anchor_usage_weight=args.local_delib_anchor_usage_weight,
     )
     with torch.device("meta"):
         model_meta = GPT(config)
@@ -229,20 +375,64 @@ print0(
     "Local deliberation advanced: "
     f"semantic_topk={model_config.local_delib_semantic_topk}, "
     f"semantic_lookback={model_config.local_delib_semantic_lookback}, "
+    f"neighbor_graph={'on' if model_config.local_delib_use_neighbor_graph else 'off'}, "
     f"phrase_consensus={'on' if model_config.local_delib_use_phrase_consensus else 'off'}, "
+    f"flocking={'on' if model_config.local_delib_use_flocking else 'off'}, "
+    f"flocking_weights=(align={model_config.local_delib_flocking_alignment_weight}, "
+    f"cohere={model_config.local_delib_flocking_cohesion_weight}, "
+    f"separate={model_config.local_delib_flocking_separation_weight}), "
+    f"flocking_margin={model_config.local_delib_flocking_separation_margin}, "
+    f"flocking_radius_cap={model_config.local_delib_flocking_radius_cap}, "
     f"adaptive_halt={'on' if model_config.local_delib_adaptive_halt else 'off'}, "
     f"branch_factor={model_config.local_delib_branch_factor}, "
     f"branch_every={model_config.local_delib_branch_every}, "
     f"branch_dim={model_config.local_delib_branch_dim}, "
+    f"branch_consensus={'on' if model_config.local_delib_branch_consensus else 'off'}, "
+    f"branch_verifier={'on' if model_config.local_delib_branch_verifier else 'off'}, "
+    f"branch_consensus_temp={model_config.local_delib_branch_consensus_temp}, "
+    f"branch_max_active={model_config.local_delib_branch_max_active}, "
+    f"branch_disagreement_threshold={model_config.local_delib_branch_disagreement_threshold}, "
     f"hierarchy_chunk_sizes='{model_config.local_delib_hierarchy_chunk_sizes}', "
+    f"deep_hierarchy={'on' if model_config.local_delib_use_deep_hierarchy else 'off'}, "
+    f"span_chunk={model_config.local_delib_span_chunk_size}, "
+    f"sequence_summary={'on' if model_config.local_delib_sequence_summary else 'off'}, "
+    f"hierarchy_bidirectional={'on' if model_config.local_delib_hierarchy_bidirectional else 'off'}, "
+    f"hierarchy_scale_gate={'on' if model_config.local_delib_hierarchy_scale_gate else 'off'}, "
     f"scratch_slots={model_config.local_delib_scratch_slots}, "
     f"scratch_dim={model_config.local_delib_scratch_dim}, "
+    f"scratch_refine_steps={model_config.local_delib_scratch_refine_steps}, "
+    f"scratch_inputs=(branch={'on' if model_config.local_delib_scratch_use_branch_inputs else 'off'}, "
+    f"hier={'on' if model_config.local_delib_scratch_use_hierarchy_inputs else 'off'}), "
+    f"scratch_export_summary={'on' if model_config.local_delib_scratch_export_summary else 'off'}, "
+    f"scratch_summary_dim={model_config.local_delib_scratch_summary_dim}, "
+    f"thought_graph={'on' if model_config.local_delib_use_thought_graph else 'off'}, "
+    f"thought_budget={model_config.local_delib_thought_node_budget}, "
+    f"thought_dim={model_config.local_delib_thought_node_dim}, "
+    f"thought_steps={model_config.local_delib_thought_graph_steps}, "
+    f"thought_topk={model_config.local_delib_thought_topk_edges}, "
+    f"thought_chunk={model_config.local_delib_thought_token_chunk_size}, "
+    f"thought_inputs=(branch={'on' if model_config.local_delib_thought_use_branch_inputs else 'off'}, "
+    f"hier={'on' if model_config.local_delib_thought_use_hierarchy_inputs else 'off'}, "
+    f"scratch={'on' if model_config.local_delib_thought_use_scratch_inputs else 'off'}), "
+    f"global_anchors=(count={model_config.local_delib_global_anchor_count}, "
+    f"dim={model_config.local_delib_global_anchor_dim}, "
+    f"update={'on' if model_config.local_delib_global_anchor_update else 'off'}, "
+    f"temp={model_config.local_delib_global_anchor_temp}, "
+    f"inputs=(hier={'on' if model_config.local_delib_global_anchor_use_hierarchy else 'off'}, "
+    f"scratch={'on' if model_config.local_delib_global_anchor_use_scratch else 'off'}, "
+    f"thought={'on' if model_config.local_delib_global_anchor_use_thought else 'off'})), "
     f"debug_branch_stats={'on' if model_config.local_delib_debug_branch_stats else 'off'}, "
     f"aux_weights=(halt={model_config.local_delib_halt_sparsity_weight}, "
     f"branch_div={model_config.local_delib_branch_diversity_weight}, "
     f"branch_entropy={model_config.local_delib_branch_entropy_weight}, "
     f"consensus={model_config.local_delib_consensus_agreement_weight}, "
-    f"scratch={model_config.local_delib_scratch_utilization_weight})"
+    f"scratch={model_config.local_delib_scratch_utilization_weight}, "
+    f"flocking={model_config.local_delib_flocking_stability_weight}, "
+    f"thought_edge={model_config.local_delib_thought_edge_stability_weight}, "
+    f"thought_util={model_config.local_delib_thought_node_utilization_weight}, "
+    f"hier={model_config.local_delib_hierarchy_agreement_weight}, "
+    f"branch_use={model_config.local_delib_branch_usefulness_weight}, "
+    f"anchor={model_config.local_delib_anchor_usage_weight})"
 )
 
 aux_loss_weights = {
@@ -251,6 +441,12 @@ aux_loss_weights = {
     "local_delib_branch_entropy_loss": model_config.local_delib_branch_entropy_weight,
     "local_delib_consensus_agreement_loss": model_config.local_delib_consensus_agreement_weight,
     "local_delib_scratch_utilization_loss": model_config.local_delib_scratch_utilization_weight,
+    "local_delib_flocking_stability_loss": model_config.local_delib_flocking_stability_weight,
+    "local_delib_thought_edge_stability_loss": model_config.local_delib_thought_edge_stability_weight,
+    "local_delib_thought_node_utilization_loss": model_config.local_delib_thought_node_utilization_weight,
+    "local_delib_hierarchy_agreement_loss": model_config.local_delib_hierarchy_agreement_weight,
+    "local_delib_branch_usefulness_loss": model_config.local_delib_branch_usefulness_weight,
+    "local_delib_anchor_usage_loss": model_config.local_delib_anchor_usage_weight,
 }
 any_aux_weight_enabled = any(weight != 0.0 for weight in aux_loss_weights.values())
 model.to_empty(device=device) # 2) All tensors get storage on target device but with uninitialized (garbage) data

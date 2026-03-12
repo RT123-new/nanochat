@@ -122,6 +122,62 @@ def test_decode_cache_path_populates_deliberation_cache(monkeypatch):
     assert len(kv_cache.extra_caches["local_delib"]) == len(model.local_delib_blocks)
 
 
+def test_decode_cache_prefill_expands_local_delib_batch_state(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_phrase_chunk_size=2,
+            local_delib_use_deep_hierarchy=True,
+            local_delib_span_chunk_size=4,
+            local_delib_sequence_summary=True,
+            local_delib_scratch_slots=2,
+            local_delib_scratch_dim=4,
+            local_delib_scratch_refine_steps=1,
+            local_delib_use_thought_graph=True,
+            local_delib_thought_node_budget=3,
+            local_delib_thought_graph_steps=2,
+            local_delib_thought_topk_edges=2,
+            local_delib_thought_token_chunk_size=2,
+            local_delib_global_anchor_count=2,
+            local_delib_global_anchor_dim=4,
+            local_delib_global_anchor_update=True,
+        )
+    )
+
+    idx_prefill = torch.tensor([[1, 2, 3]], dtype=torch.long)
+    idx_decode = torch.tensor([[4], [5]], dtype=torch.long)
+    head_dim = model.config.n_embd // model.config.n_head
+    kv_prefill = KVCache(
+        batch_size=1,
+        num_heads=model.config.n_kv_head,
+        seq_len=model.config.sequence_len,
+        head_dim=head_dim,
+        num_layers=model.config.n_layer,
+        device=idx_prefill.device,
+        dtype=torch.float32,
+    )
+    kv_decode = KVCache(
+        batch_size=2,
+        num_heads=model.config.n_kv_head,
+        seq_len=model.config.sequence_len,
+        head_dim=head_dim,
+        num_layers=model.config.n_layer,
+        device=idx_prefill.device,
+        dtype=torch.float32,
+    )
+
+    _ = model(idx_prefill, kv_cache=kv_prefill)
+    kv_decode.prefill(kv_prefill)
+    logits = model(idx_decode, kv_cache=kv_decode)
+
+    assert logits.shape == (2, 1, model.config.vocab_size)
+    layer_cache = kv_decode.extra_caches["local_delib"]["0"]
+    assert layer_cache["stage_states"][0].shape[0] == 2
+    assert layer_cache["step_caches"][0]["anchors"]["anchors"].shape[0] == 2
+
+
 def test_decode_cache_path_works_with_adaptive_halt(monkeypatch):
     _patch_flash_attention(monkeypatch)
     model = GPT(_tiny_config(local_delib=True, local_delib_steps=3, local_delib_adaptive_halt=True, local_delib_semantic_topk=2))
@@ -155,6 +211,42 @@ def test_decode_cache_path_works_with_branching_enabled(monkeypatch):
             local_delib_semantic_topk=2,
             local_delib_branch_factor=2,
             local_delib_branch_every=1,
+        )
+    )
+
+    idx_prefill = torch.tensor([[1, 2, 3]], dtype=torch.long)
+    idx_decode = torch.tensor([[4]], dtype=torch.long)
+    head_dim = model.config.n_embd // model.config.n_head
+    kv_cache = KVCache(
+        batch_size=1,
+        num_heads=model.config.n_kv_head,
+        seq_len=model.config.sequence_len,
+        head_dim=head_dim,
+        num_layers=model.config.n_layer,
+        device=idx_prefill.device,
+        dtype=torch.float32,
+    )
+
+    _ = model(idx_prefill, kv_cache=kv_cache)
+    decode_logits = model(idx_decode, kv_cache=kv_cache)
+
+    assert decode_logits.shape == (1, 1, model.config.vocab_size)
+    assert kv_cache.get_pos() == 4
+
+
+def test_decode_cache_path_works_with_branch_consensus_enabled(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_semantic_topk=2,
+            local_delib_branch_factor=3,
+            local_delib_branch_every=1,
+            local_delib_branch_consensus=True,
+            local_delib_branch_verifier=True,
+            local_delib_branch_max_active=2,
+            local_delib_branch_disagreement_threshold=0.0,
         )
     )
 

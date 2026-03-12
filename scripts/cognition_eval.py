@@ -7,12 +7,15 @@ import argparse
 
 from nanochat.cognition.backend import EngineBackend
 from nanochat.cognition.eval import (
+    ADVANCED_LOCAL_DELIB_CASES,
     ContextAwareEvalBackend,
     DEFAULT_CASES,
     DEFAULT_LOCAL_DELIB_CASES,
     LocalDelibContextEvalBackend,
+    run_advanced_local_delib_ablation_eval,
     run_eval,
     run_local_delib_ablation_eval,
+    write_advanced_local_delib_eval_artifact,
     write_eval_artifact,
     write_local_delib_eval_artifact,
 )
@@ -22,7 +25,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run cognition and local-deliberation eval suites")
     parser.add_argument(
         "--suite",
-        choices=["cognition", "local-delib-ablation"],
+        choices=["cognition", "local-delib-ablation", "local-delib-ablation-advanced"],
         default="cognition",
         help="Eval suite to run",
     )
@@ -46,7 +49,7 @@ def main() -> None:
     parser.add_argument("-m", "--max-tokens", type=int, default=192, help="Max generation tokens for engine backend")
     args = parser.parse_args()
 
-    backend = LocalDelibContextEvalBackend() if args.suite == "local-delib-ablation" else ContextAwareEvalBackend()
+    backend = LocalDelibContextEvalBackend() if args.suite.startswith("local-delib-ablation") else ContextAwareEvalBackend()
     cleanup = None
     try:
         if args.backend == "engine":
@@ -83,12 +86,23 @@ def main() -> None:
             print(f"- delta: {summary.delta:.3f}")
             print(f"- route_counts: {summary.route_counts}")
             print(f"- artifact: {artifact_path}")
-        else:
+        elif args.suite == "local-delib-ablation":
             summary = run_local_delib_ablation_eval(DEFAULT_LOCAL_DELIB_CASES, backend=backend)
             artifact_path = write_local_delib_eval_artifact(summary, args.output)
             print("Local deliberation ablation eval summary")
             print(f"- backend: {args.backend}")
             print(f"- variant_mean_scores: {summary.variant_mean_scores}")
+            print(f"- rows: {len(summary.rows)}")
+            print(f"- artifact: {artifact_path}")
+        else:
+            summary = run_advanced_local_delib_ablation_eval(ADVANCED_LOCAL_DELIB_CASES, backend=backend)
+            artifact_path = write_advanced_local_delib_eval_artifact(summary, args.output)
+            print("Advanced local deliberation ablation eval summary")
+            print(f"- backend: {args.backend}")
+            print(f"- runtime_variant_overrides_applied: {summary.runtime_variant_overrides_applied}")
+            print(f"- variant_mean_scores: {summary.variant_mean_scores}")
+            print(f"- quality_per_compute: {summary.quality_per_compute}")
+            print(f"- mean_steps_taken: {summary.mean_steps_taken}")
             print(f"- rows: {len(summary.rows)}")
             print(f"- artifact: {artifact_path}")
     finally:
