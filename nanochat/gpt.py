@@ -50,19 +50,62 @@ class GPTConfig:
     local_delib_semantic_lookback: int = 64
     local_delib_use_neighbor_graph: bool = False
     local_delib_use_phrase_consensus: bool = False
+    local_delib_use_flocking: bool = False
+    local_delib_flocking_alignment_weight: float = 0.0
+    local_delib_flocking_cohesion_weight: float = 0.0
+    local_delib_flocking_separation_weight: float = 0.0
+    local_delib_flocking_separation_margin: float = 1.0
+    local_delib_flocking_radius_cap: int = 0
     local_delib_adaptive_halt: bool = False
     local_delib_branch_factor: int = 0
     local_delib_branch_every: int = 1
     local_delib_branch_dim: int = 0
+    local_delib_branch_consensus: bool = False
+    local_delib_branch_verifier: bool = False
+    local_delib_branch_consensus_temp: float = 1.0
+    local_delib_branch_max_active: int = 0
+    local_delib_branch_disagreement_threshold: float = 0.1
     local_delib_hierarchy_chunk_sizes: str = ""
+    local_delib_use_deep_hierarchy: bool = False
+    local_delib_span_chunk_size: int = 0
+    local_delib_sequence_summary: bool = False
+    local_delib_hierarchy_bidirectional: bool = False
+    local_delib_hierarchy_scale_gate: bool = False
     local_delib_scratch_slots: int = 0
     local_delib_scratch_dim: int = 0
+    local_delib_scratch_refine_steps: int = 0
+    local_delib_scratch_use_branch_inputs: bool = False
+    local_delib_scratch_use_hierarchy_inputs: bool = False
+    local_delib_scratch_export_summary: bool = False
+    local_delib_scratch_summary_dim: int = 0
+    local_delib_use_thought_graph: bool = False
+    local_delib_thought_node_budget: int = 8
+    local_delib_thought_node_dim: int = 0
+    local_delib_thought_graph_steps: int = 1
+    local_delib_thought_topk_edges: int = 2
+    local_delib_thought_token_chunk_size: int = 4
+    local_delib_thought_use_branch_inputs: bool = True
+    local_delib_thought_use_hierarchy_inputs: bool = True
+    local_delib_thought_use_scratch_inputs: bool = True
+    local_delib_global_anchor_count: int = 0
+    local_delib_global_anchor_dim: int = 0
+    local_delib_global_anchor_update: bool = False
+    local_delib_global_anchor_temp: float = 1.0
+    local_delib_global_anchor_use_hierarchy: bool = False
+    local_delib_global_anchor_use_scratch: bool = False
+    local_delib_global_anchor_use_thought: bool = False
     local_delib_debug_branch_stats: bool = False
     local_delib_halt_sparsity_weight: float = 0.0
     local_delib_branch_diversity_weight: float = 0.0
     local_delib_branch_entropy_weight: float = 0.0
     local_delib_consensus_agreement_weight: float = 0.0
     local_delib_scratch_utilization_weight: float = 0.0
+    local_delib_flocking_stability_weight: float = 0.0
+    local_delib_thought_edge_stability_weight: float = 0.0
+    local_delib_thought_node_utilization_weight: float = 0.0
+    local_delib_hierarchy_agreement_weight: float = 0.0
+    local_delib_branch_usefulness_weight: float = 0.0
+    local_delib_anchor_usage_weight: float = 0.0
 
 
 def norm(x):
@@ -102,7 +145,7 @@ class CausalSelfAttention(nn.Module):
         self.c_k = Linear(self.n_embd, self.n_kv_head * self.head_dim, bias=False)
         self.c_v = Linear(self.n_embd, self.n_kv_head * self.head_dim, bias=False)
         self.c_proj = Linear(self.n_embd, self.n_embd, bias=False)
-        self.ve_gate_channels = 32
+        self.ve_gate_channels = min(32, self.n_embd)
         self.ve_gate = Linear(self.ve_gate_channels, self.n_kv_head, bias=False) if has_ve(layer_idx, config.n_layer) else None
 
     def forward(self, x, ve, cos_sin, window_size, kv_cache):
@@ -208,13 +251,50 @@ class GPT(nn.Module):
                 semantic_lookback=config.local_delib_semantic_lookback,
                 use_neighbor_graph=config.local_delib_use_neighbor_graph,
                 use_phrase_consensus=config.local_delib_use_phrase_consensus,
+                use_flocking=config.local_delib_use_flocking,
+                flocking_alignment_weight=config.local_delib_flocking_alignment_weight,
+                flocking_cohesion_weight=config.local_delib_flocking_cohesion_weight,
+                flocking_separation_weight=config.local_delib_flocking_separation_weight,
+                flocking_separation_margin=config.local_delib_flocking_separation_margin,
+                flocking_radius_cap=config.local_delib_flocking_radius_cap,
                 adaptive_halt=config.local_delib_adaptive_halt,
                 branch_factor=config.local_delib_branch_factor,
                 branch_every=config.local_delib_branch_every,
                 branch_dim=config.local_delib_branch_dim,
+                branch_consensus=config.local_delib_branch_consensus,
+                branch_verifier=config.local_delib_branch_verifier,
+                branch_consensus_temp=config.local_delib_branch_consensus_temp,
+                branch_max_active=config.local_delib_branch_max_active,
+                branch_disagreement_threshold=config.local_delib_branch_disagreement_threshold,
                 hierarchy_chunk_sizes=self._parse_local_delib_hierarchy_chunk_sizes(config),
+                use_deep_hierarchy=config.local_delib_use_deep_hierarchy,
+                span_chunk_size=config.local_delib_span_chunk_size,
+                sequence_summary=config.local_delib_sequence_summary,
+                hierarchy_bidirectional=config.local_delib_hierarchy_bidirectional,
+                hierarchy_scale_gate=config.local_delib_hierarchy_scale_gate,
                 scratch_slots=config.local_delib_scratch_slots,
                 scratch_dim=config.local_delib_scratch_dim,
+                scratch_refine_steps=config.local_delib_scratch_refine_steps,
+                scratch_use_branch_inputs=config.local_delib_scratch_use_branch_inputs,
+                scratch_use_hierarchy_inputs=config.local_delib_scratch_use_hierarchy_inputs,
+                scratch_export_summary=config.local_delib_scratch_export_summary,
+                scratch_summary_dim=config.local_delib_scratch_summary_dim,
+                use_thought_graph=config.local_delib_use_thought_graph,
+                thought_node_budget=config.local_delib_thought_node_budget,
+                thought_node_dim=config.local_delib_thought_node_dim,
+                thought_graph_steps=config.local_delib_thought_graph_steps,
+                thought_topk_edges=config.local_delib_thought_topk_edges,
+                thought_token_chunk_size=config.local_delib_thought_token_chunk_size,
+                thought_use_branch_inputs=config.local_delib_thought_use_branch_inputs,
+                thought_use_hierarchy_inputs=config.local_delib_thought_use_hierarchy_inputs,
+                thought_use_scratch_inputs=config.local_delib_thought_use_scratch_inputs,
+                global_anchor_count=config.local_delib_global_anchor_count,
+                global_anchor_dim=config.local_delib_global_anchor_dim,
+                global_anchor_update=config.local_delib_global_anchor_update,
+                global_anchor_temp=config.local_delib_global_anchor_temp,
+                global_anchor_use_hierarchy=config.local_delib_global_anchor_use_hierarchy,
+                global_anchor_use_scratch=config.local_delib_global_anchor_use_scratch,
+                global_anchor_use_thought=config.local_delib_global_anchor_use_thought,
             )
             for layer_idx in self._get_local_delib_layer_indices(config)
         })
@@ -481,34 +561,49 @@ class GPT(nn.Module):
             group["initial_lr"] = group["lr"]
         return optimizer
 
+    def _expand_local_delib_cache_batch(self, value, bsz):
+        if isinstance(value, torch.Tensor):
+            if value.ndim >= 2 and value.shape[0] == 1 and bsz > 1:
+                expand_shape = (bsz, *value.shape[1:])
+                return value.expand(expand_shape).clone()
+            return value
+        if isinstance(value, list):
+            return [self._expand_local_delib_cache_batch(item, bsz) for item in value]
+        if isinstance(value, dict):
+            return {key: self._expand_local_delib_cache_batch(item, bsz) for key, item in value.items()}
+        return value
+
     def _get_local_delib_cache(self, kv_cache, layer_idx, bsz, dtype, device):
         if kv_cache is None:
             return None
+        if not hasattr(kv_cache, "extra_caches"):
+            kv_cache.extra_caches = {}
         layer_key = str(layer_idx)
         root = kv_cache.extra_caches.setdefault("local_delib", {})
         cache = root.get(layer_key)
         if cache is None:
-            block = self.local_delib_blocks[layer_key]
             cache = {
-                "state": torch.zeros(bsz, 0, block.in_proj.out_features, dtype=dtype, device=device),
+                "stage_states": [],
+                "step_caches": [],
                 "token_count": 0,
             }
             root[layer_key] = cache
+        elif isinstance(cache, dict):
+            stage_states = cache.get("stage_states")
+            if isinstance(stage_states, list) and len(stage_states) > 0:
+                first_state = stage_states[0]
+                if isinstance(first_state, torch.Tensor) and first_state.shape[0] != bsz:
+                    expanded = self._expand_local_delib_cache_batch(cache, bsz)
+                    cache.clear()
+                    cache.update(expanded)
         return cache
 
     def _run_local_delib_cached(self, block, x, cache):
-        # x: (B, T, C), supports T>=1 for prefill and T==1 decode continuation.
         h_new = block.in_proj(x)
-        h = torch.cat([cache["state"], h_new], dim=1)
-        seq_len = h.size(1)
-        tail_start = seq_len - h_new.size(1)
-
-        h, stats = block.deliberate_state(h)
-
-        cache["state"] = h.detach()
-        cache["token_count"] = seq_len
-
-        output = x + block.out_proj(h[:, tail_start:, :])
+        h_cached, stats, new_cache = block.deliberate_state_cached(h_new, cache)
+        cache.clear()
+        cache.update(new_cache)
+        output = x + block.out_proj(h_cached)
         return output, stats
 
     def forward(self, idx, targets=None, kv_cache=None, loss_reduction='mean'):
