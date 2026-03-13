@@ -1,5 +1,7 @@
 import copy
+import math
 
+import pytest
 import torch
 
 from nanochat.local_deliberation import (
@@ -165,6 +167,43 @@ def _configure_global_anchor_modules(block: LocalDeliberationBlock) -> None:
             block.global_anchor_thought_gate.bias.zero_()
 
 
+def _override_state_head_with_halt_pattern(
+    block: LocalDeliberationBlock,
+    halt_values: list[float],
+) -> None:
+    pattern = torch.tensor(halt_values, dtype=torch.float32).view(1, -1, 1)
+
+    def fake_state_head(h):
+        assert pattern.shape[1] == h.shape[1]
+        halt = pattern.to(device=h.device, dtype=h.dtype).expand(h.shape[0], -1, -1)
+        return {"salience": halt, "uncertainty": 1.0 - halt, "halt_gate": halt}
+
+    block.state_head.forward = fake_state_head
+
+
+def _configure_phrase_consensus_identity(block: LocalDeliberationBlock) -> None:
+    state_dim = block.in_proj.out_features
+    eye = torch.eye(state_dim)
+
+    with torch.no_grad():
+        block.in_proj.weight.copy_(eye)
+        block.in_proj.bias.zero_()
+        block.phrase_consensus.proposal_proj.weight.copy_(eye)
+        block.phrase_consensus.proposal_proj.bias.zero_()
+        block.phrase_consensus.consensus_proj.weight.copy_(eye)
+        block.phrase_consensus.consensus_proj.bias.zero_()
+        block.phrase_consensus.agreement_gate.weight.zero_()
+        block.phrase_consensus.agreement_gate.bias.fill_(2.0)
+
+
+def _assert_finite_stats(stats: dict[str, object]) -> None:
+    for key, value in stats.items():
+        if isinstance(value, float):
+            assert math.isfinite(value), key
+        elif isinstance(value, torch.Tensor):
+            assert torch.isfinite(value).all(), key
+
+
 def test_local_deliberation_block_shapes():
     block = LocalDeliberationBlock(
         model_dim=16,
@@ -232,6 +271,57 @@ def test_local_deliberation_block_shapes():
     assert stats["executed_steps"] == 2
     assert stats["semantic_topk_used"] == 0
     assert stats["mean_agreement_score"] == 0.0
+
+
+@pytest.mark.parametrize(
+    ("factory", "message"),
+    [
+        (
+            lambda: CausalDepthwiseMixer(model_dim=4, kernel_size=0),
+            "kernel_size must be odd and >= 1",
+        ),
+        (
+            lambda: CausalDepthwiseMixer(model_dim=4, kernel_size=2),
+            "kernel_size must be odd and >= 1",
+        ),
+        (
+            lambda: PhrasePool(model_dim=4, chunk_size=0),
+            "chunk_size must be >= 1",
+        ),
+        (
+            lambda: PhraseConsensusHead(model_dim=4, chunk_size=0),
+            "chunk_size must be >= 1",
+        ),
+        (
+            lambda: LocalDeliberationBlock(
+                model_dim=8,
+                state_dim=8,
+                kernel_size=3,
+                phrase_chunk_size=2,
+                micro_steps=1,
+                use_token_gate=False,
+                hierarchy_chunk_sizes=[0],
+            ),
+            "hierarchy chunk sizes must be >= 1",
+        ),
+        (
+            lambda: LocalDeliberationBlock(
+                model_dim=8,
+                state_dim=8,
+                kernel_size=3,
+                phrase_chunk_size=4,
+                micro_steps=1,
+                use_token_gate=False,
+                use_deep_hierarchy=True,
+                span_chunk_size=2,
+            ),
+            "span_chunk_size must be >= phrase_chunk_size when deep hierarchy is enabled",
+        ),
+    ],
+)
+def test_causal_constructor_guards_invalid_kernel_and_chunk_sizes(factory, message):
+    with pytest.raises(ValueError, match=message):
+        factory()
 
 
 def test_causal_depthwise_mixer_no_lookahead():
@@ -375,6 +465,52 @@ def test_adaptive_halt_can_execute_different_depths_per_token():
     assert 0.0 < stats["fraction_halted_early"] < 1.0
 
 
+def test_adaptive_halt_supports_all_halt_no_halt_and_mixed_patterns():
+    torch.manual_seed(203)
+    x = torch.randn(1, 4, 8)
+
+    stats_by_pattern = {}
+    for label, halt_values in {
+        "all_halt": [0.9, 0.9, 0.9, 0.9],
+        "mixed": [0.9, 0.1, 0.9, 0.9],
+        "no_halt": [0.1, 0.1, 0.1, 0.1],
+    }.items():
+        block = LocalDeliberationBlock(
+            model_dim=8,
+            state_dim=8,
+            kernel_size=3,
+            phrase_chunk_size=2,
+            micro_steps=4,
+            use_token_gate=False,
+            adaptive_halt=True,
+        )
+        block.halt_threshold_logit.data.fill_(0.0)
+        _override_state_head_with_halt_pattern(block, halt_values)
+        _, stats_by_pattern[label] = block(x)
+
+    all_halt = stats_by_pattern["all_halt"]
+    mixed = stats_by_pattern["mixed"]
+    no_halt = stats_by_pattern["no_halt"]
+
+    assert all_halt["mean_executed_steps_per_token"] == 1.0
+    assert all_halt["max_executed_steps_any_token"] == 1
+    assert all_halt["fraction_halted_early"] == 1.0
+
+    assert no_halt["mean_executed_steps_per_token"] == 4.0
+    assert no_halt["max_executed_steps_any_token"] == 4
+    assert no_halt["fraction_halted_early"] == 0.0
+
+    assert all_halt["mean_executed_steps_per_token"] < mixed["mean_executed_steps_per_token"] < no_halt["mean_executed_steps_per_token"]
+    assert all_halt["max_executed_steps_any_token"] < mixed["max_executed_steps_any_token"] == no_halt["max_executed_steps_any_token"]
+    assert no_halt["fraction_halted_early"] < mixed["fraction_halted_early"] < all_halt["fraction_halted_early"]
+
+    for stats in stats_by_pattern.values():
+        assert 1.0 <= stats["mean_executed_steps_per_token"] <= 4.0
+        assert 0.0 <= stats["fraction_halted_early"] <= 1.0
+        assert 0.0 <= stats["mean_final_halt"] <= 1.0
+        _assert_finite_stats(stats)
+
+
 def test_semantic_topk_enabled_shapes_and_stats():
     torch.manual_seed(0)
     block = LocalDeliberationBlock(
@@ -395,6 +531,45 @@ def test_semantic_topk_enabled_shapes_and_stats():
     assert stats["semantic_topk_used"] == 3
     assert 0.0 <= stats["mean_semantic_neighbor_weight"] <= 1.0
     assert stats["mean_agreement_score"] == 0.0
+
+
+def test_semantic_topk_stats_prove_real_activation():
+    torch.manual_seed(2)
+    x = torch.randn(1, 7, 10)
+
+    torch.manual_seed(2)
+    block_off = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=1,
+        use_token_gate=False,
+        semantic_topk=0,
+        semantic_lookback=4,
+    )
+    _, stats_off = block_off(x)
+
+    torch.manual_seed(2)
+    block_on = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=1,
+        use_token_gate=False,
+        semantic_topk=2,
+        semantic_lookback=4,
+    )
+    _, stats_on = block_on(x)
+
+    assert stats_off["semantic_topk_used"] == 0
+    assert stats_off["mean_neighbor_count"] == 0.0
+    assert stats_off["mean_semantic_neighbor_weight"] == 0.0
+
+    assert stats_on["semantic_topk_used"] == 2
+    assert stats_on["mean_neighbor_count"] == 2.0
+    assert 0.0 < stats_on["mean_semantic_neighbor_weight"] <= 1.0
 
 
 def test_semantic_neighbors_strictly_causal():
@@ -497,6 +672,80 @@ def test_local_deliberation_reports_mean_agreement_score_when_enabled():
 
     assert isinstance(stats["mean_agreement_score"], float)
     assert -1.0 <= stats["mean_agreement_score"] <= 1.0
+
+
+def test_phrase_consensus_agreement_stat_tracks_token_alignment():
+    block = LocalDeliberationBlock(
+        model_dim=4,
+        state_dim=4,
+        kernel_size=3,
+        phrase_chunk_size=3,
+        micro_steps=1,
+        use_token_gate=False,
+        use_phrase_consensus=True,
+    )
+    _configure_phrase_consensus_identity(block)
+
+    aligned = torch.tensor(
+        [
+            [
+                [1.0, 0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+            ]
+        ]
+    )
+    mixed = torch.tensor(
+        [
+            [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [1.0, 0.0, 0.0, 0.0],
+            ]
+        ]
+    )
+
+    _, aligned_stats = block(aligned)
+    _, mixed_stats = block(mixed)
+
+    assert aligned_stats["mean_agreement_score"] > mixed_stats["mean_agreement_score"]
+    assert aligned_stats["mean_agreement_score"] > 0.95
+    assert mixed_stats["mean_agreement_score"] < 0.8
+
+
+def test_semantic_consensus_halt_stats_stay_finite_and_bounded():
+    torch.manual_seed(21)
+    block = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=3,
+        use_token_gate=False,
+        semantic_topk=2,
+        semantic_lookback=4,
+        use_phrase_consensus=True,
+        adaptive_halt=True,
+    )
+    block.halt_threshold_logit.data.fill_(0.0)
+    _override_state_head_with_halt_pattern(block, [0.1, 0.9, 0.1, 0.9, 0.1, 0.9])
+    x = torch.randn(1, 6, 10)
+
+    y, stats = block(x)
+
+    assert y.shape == x.shape
+    assert 0 < stats["semantic_topk_used"] <= 2
+    assert 0.0 < stats["mean_semantic_neighbor_weight"] <= 1.0
+    assert -1.0 <= stats["mean_agreement_score"] <= 1.0
+    assert 1.0 <= stats["mean_executed_steps_per_token"] <= 3.0
+    assert 0.0 <= stats["fraction_halted_early"] <= 1.0
+    _assert_finite_stats(stats)
 
 
 def test_neighbor_graph_disabled_matches_semantic_path():
@@ -1524,6 +1773,135 @@ def test_thought_graph_node_budget_is_bounded():
     _, stats = block(x)
 
     assert stats["thought_nodes_used"] == 2
+
+
+def test_incremental_thought_feedback_matches_full_feedback_for_new_token():
+    torch.manual_seed(1233)
+    block = LocalDeliberationBlock(
+        model_dim=8,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=1,
+        use_token_gate=False,
+        use_thought_graph=True,
+        thought_node_budget=3,
+        thought_graph_steps=2,
+        thought_topk_edges=2,
+        thought_token_chunk_size=2,
+    )
+    _configure_thought_graph_modules(block)
+
+    x_prefill = torch.randn(1, 3, 8)
+    x_decode = torch.randn(1, 1, 8)
+    h_prefill = block.in_proj(x_prefill)
+    h_decode = block.in_proj(x_decode)
+    h_full = torch.cat([h_prefill, h_decode], dim=1)
+
+    full_feedback, _, _ = block._compute_thought_feedback(h_full)
+    step_cache = block._build_thought_step_cache(h_prefill)
+    incremental_feedback = block._incremental_thought_feedback(h_decode, step_cache, prefix_len=3)
+
+    assert torch.allclose(incremental_feedback, full_feedback[:, -1:, :], atol=1e-6, rtol=1e-6)
+
+
+def test_thought_graph_decode_cache_matches_full_stack_across_multiple_decode_steps():
+    torch.manual_seed(1234)
+    block = LocalDeliberationBlock(
+        model_dim=10,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=2,
+        use_token_gate=False,
+        branch_factor=3,
+        branch_every=1,
+        branch_consensus=True,
+        branch_verifier=True,
+        branch_max_active=2,
+        branch_disagreement_threshold=0.0,
+        hierarchy_chunk_sizes=[2],
+        use_deep_hierarchy=True,
+        span_chunk_size=2,
+        sequence_summary=True,
+        hierarchy_bidirectional=True,
+        hierarchy_scale_gate=True,
+        scratch_slots=2,
+        scratch_dim=4,
+        scratch_refine_steps=1,
+        scratch_use_branch_inputs=True,
+        scratch_use_hierarchy_inputs=True,
+        use_thought_graph=True,
+        thought_node_budget=3,
+        thought_graph_steps=2,
+        thought_topk_edges=2,
+        thought_token_chunk_size=2,
+        global_anchor_count=2,
+        global_anchor_dim=4,
+        global_anchor_update=True,
+        global_anchor_use_hierarchy=True,
+        global_anchor_use_scratch=True,
+        global_anchor_use_thought=True,
+    )
+    _configure_branch_modules(block, use_consensus=True)
+    _configure_deep_hierarchy_modules(block)
+    _configure_scratch_workspace_modules(block)
+    _configure_thought_graph_modules(block)
+    _configure_global_anchor_modules(block)
+
+    x_prefill = torch.randn(1, 3, 10)
+    x_decode_1 = torch.randn(1, 1, 10)
+    x_decode_2 = torch.randn(1, 1, 10)
+    x_full = torch.cat([x_prefill, x_decode_1, x_decode_2], dim=1)
+
+    h_full, _ = block.deliberate_state(block.in_proj(x_full))
+
+    _, _, cache = block.deliberate_state_cached(block.in_proj(x_prefill), None)
+    h_decode_1, _, cache = block.deliberate_state_cached(block.in_proj(x_decode_1), cache)
+    h_decode_2, _, cache = block.deliberate_state_cached(block.in_proj(x_decode_2), cache)
+
+    assert torch.allclose(h_decode_1, h_full[:, 3:4, :], atol=1e-3, rtol=1e-3)
+    assert torch.allclose(h_decode_2, h_full[:, 4:5, :], atol=1e-3, rtol=1e-3)
+
+    thought_cache = cache["step_caches"][0]["thought"]
+    assert thought_cache is not None
+    assert len(thought_cache["prev_nodes_by_step"]) == block.thought_graph_steps + 1
+    assert thought_cache["prev_nodes_by_step"][-1].shape[1] <= block.thought_node_budget
+    assert int(thought_cache["current_count"]) <= block.thought_token_chunk_size
+    assert cache["token_count"] == x_full.shape[1]
+
+
+def test_thought_graph_decode_cache_falls_back_only_when_node_budget_window_would_slide():
+    torch.manual_seed(1235)
+    block = LocalDeliberationBlock(
+        model_dim=8,
+        state_dim=8,
+        kernel_size=3,
+        phrase_chunk_size=2,
+        micro_steps=1,
+        use_token_gate=False,
+        use_thought_graph=True,
+        thought_node_budget=2,
+        thought_graph_steps=2,
+        thought_topk_edges=2,
+        thought_token_chunk_size=2,
+    )
+    _configure_thought_graph_modules(block)
+
+    x_prefill = torch.randn(1, 4, 8)
+    x_decode = torch.randn(1, 1, 8)
+    x_full = torch.cat([x_prefill, x_decode], dim=1)
+
+    _, _, cache = block.deliberate_state_cached(block.in_proj(x_prefill), None)
+    thought_cache = cache["step_caches"][0]["thought"]
+    assert thought_cache is not None
+    assert thought_cache["will_slide_budget"] is True
+
+    h_decode, _, new_cache = block.deliberate_state_cached(block.in_proj(x_decode), cache)
+    h_full, _ = block.deliberate_state(block.in_proj(x_full))
+
+    assert torch.allclose(h_decode, h_full[:, -1:, :], atol=1e-6, rtol=1e-6)
+    assert new_cache["token_count"] == x_full.shape[1]
 
 
 def test_global_anchors_disabled_parity_with_default_path():

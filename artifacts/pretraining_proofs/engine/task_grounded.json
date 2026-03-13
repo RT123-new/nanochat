@@ -1,0 +1,83 @@
+{
+  "backend_kind": "engine",
+  "baseline_mean": 0.0,
+  "checkpoint_identity": {
+    "device_type": "cpu",
+    "model_tag": "d1",
+    "source": "sft",
+    "step": 1
+  },
+  "cognition_mean": 0.0,
+  "delta": 0.0,
+  "metric_tier": "task_grounded",
+  "per_task": {
+    "SmokeTinyTask": {
+      "baseline_pass_rate": 0.0,
+      "cognition_pass_rate": 0.0,
+      "count": 2.0,
+      "delta": 0.0,
+      "proof_baseline_pass_rate": 0.0,
+      "proof_cognition_pass_rate": 0.0,
+      "proof_count": 2.0,
+      "proof_delta": 0.0
+    }
+  },
+  "proof_baseline_mean": 0.0,
+  "proof_cognition_mean": 0.0,
+  "proof_delta": 0.0,
+  "rows": [
+    {
+      "baseline_passed": false,
+      "baseline_response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "baseline_runtime_override_application_method": "none",
+      "baseline_runtime_override_reason": null,
+      "baseline_runtime_override_status": "not_requested",
+      "baseline_score": 0.0,
+      "benchmark_eligible": true,
+      "cognition_decision": "direct_answer",
+      "cognition_passed": false,
+      "cognition_response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "cognition_runtime_override_application_method": "none",
+      "cognition_runtime_override_reason": null,
+      "cognition_runtime_override_status": "not_requested",
+      "cognition_score": 0.0,
+      "cognition_trace_metadata": {
+        "confidence": 0.6,
+        "retrieved_episode_ids": [],
+        "retrieved_semantic_ids": [],
+        "reused_skill_ids": []
+      },
+      "example_index": 0,
+      "prompt": "solve arithmetic task",
+      "task_name": "SmokeTinyTask"
+    },
+    {
+      "baseline_passed": false,
+      "baseline_response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "baseline_runtime_override_application_method": "none",
+      "baseline_runtime_override_reason": null,
+      "baseline_runtime_override_status": "not_requested",
+      "baseline_score": 0.0,
+      "benchmark_eligible": true,
+      "cognition_decision": "direct_answer",
+      "cognition_passed": false,
+      "cognition_response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "cognition_runtime_override_application_method": "none",
+      "cognition_runtime_override_reason": null,
+      "cognition_runtime_override_status": "not_requested",
+      "cognition_score": 0.0,
+      "cognition_trace_metadata": {
+        "confidence": 0.6,
+        "retrieved_episode_ids": [],
+        "retrieved_semantic_ids": [],
+        "reused_skill_ids": []
+      },
+      "example_index": 1,
+      "prompt": "write a small function",
+      "task_name": "SmokeTinyTask"
+    }
+  ],
+  "task_names": [
+    "SmokeTinyTask"
+  ]
+}

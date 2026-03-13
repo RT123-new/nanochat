@@ -1,0 +1,1050 @@
+{
+  "rows": [
+    {
+      "case_id": "planning_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.0,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 0.0
+      },
+      "model_local_delib_graph_artifact": {},
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 0.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.0,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.0,
+        "mean_scratch_write_weight": 0.0,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 0.0
+      },
+      "response": "direct response without extra latent support",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.0,
+      "variant_id": "local_delib_off"
+    },
+    {
+      "case_id": "planning_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.0,
+        "mean_steps_taken": 2.0
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.7,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 0.0
+      },
+      "model_local_delib_graph_artifact": {
+        "compute": {
+          "layers": [
+            {
+              "executed_steps": 6.0,
+              "fraction_halted_early": 0.0,
+              "halted_token_fraction": 0.0,
+              "layer_idx": 0,
+              "max_executed_steps_any_token": 2.0,
+              "mean_executed_steps_per_token": 2.0,
+              "mean_final_halt": 0.0,
+              "mean_halt": 0.0,
+              "mean_steps_taken": 2.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "adaptive_halt_active_layers": 0,
+            "executed_steps": 6.0,
+            "fraction_halted_early": 0.0,
+            "halted_token_fraction": 0.0,
+            "layer_count": 1,
+            "max_executed_steps_any_token": 2.0,
+            "mean_executed_steps_per_token": 2.0,
+            "mean_final_halt": 0.0,
+            "mean_halt": 0.0,
+            "mean_steps_taken": 2.0
+          }
+        },
+        "overview": {
+          "active_layer_count": 1,
+          "active_layers": [
+            0
+          ],
+          "active_sections": [
+            "compute"
+          ],
+          "layer_count": 1,
+          "section_layer_counts": {
+            "compute": 1
+          },
+          "trace_version": 1
+        }
+      },
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 0.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.0,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.0,
+        "mean_scratch_write_weight": 0.0,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 0.0
+      },
+      "response": "plan steps",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.3333333333333333,
+      "variant_id": "local_delib_basic"
+    },
+    {
+      "case_id": "planning_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.5,
+        "mean_steps_taken": 1.5
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.7,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 0.0
+      },
+      "model_local_delib_graph_artifact": {
+        "compute": {
+          "layers": [
+            {
+              "executed_steps": 5.0,
+              "fraction_halted_early": 0.5,
+              "halted_token_fraction": 0.5,
+              "layer_idx": 0,
+              "max_executed_steps_any_token": 3.0,
+              "mean_executed_steps_per_token": 1.5,
+              "mean_final_halt": 0.79,
+              "mean_halt": 0.46,
+              "mean_steps_taken": 1.5
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "adaptive_halt_active_layers": 1,
+            "executed_steps": 5.0,
+            "fraction_halted_early": 0.5,
+            "halted_token_fraction": 0.5,
+            "layer_count": 1,
+            "max_executed_steps_any_token": 3.0,
+            "mean_executed_steps_per_token": 1.5,
+            "mean_final_halt": 0.79,
+            "mean_halt": 0.46,
+            "mean_steps_taken": 1.5
+          }
+        },
+        "overview": {
+          "active_layer_count": 1,
+          "active_layers": [
+            0
+          ],
+          "active_sections": [
+            "compute"
+          ],
+          "layer_count": 1,
+          "section_layer_counts": {
+            "compute": 1
+          },
+          "trace_version": 1
+        }
+      },
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 0.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.0,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.0,
+        "mean_scratch_write_weight": 0.0,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 0.0
+      },
+      "response": "plan steps verify",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.6666666666666666,
+      "variant_id": "local_delib_adaptive_halt"
+    },
+    {
+      "case_id": "planning_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.0,
+        "mean_steps_taken": 2.0
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.7,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 2.0
+      },
+      "model_local_delib_graph_artifact": {
+        "branch": {
+          "layers": [
+            {
+              "agreement": 0.7,
+              "branch_consensus_used": 0.0,
+              "branch_factor_used": 2.0,
+              "layer_idx": 0,
+              "mean_branch_consensus_weight": 0.0,
+              "mean_branch_disagreement": 0.0,
+              "mean_branch_score": 0.6,
+              "mean_branch_verifier_score": 0.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "agreement": 0.7,
+            "branch_consensus_used": 0.0,
+            "branch_factor_used": 2.0,
+            "consensus_active_layers": 0,
+            "layer_count": 1,
+            "mean_branch_consensus_weight": 0.0,
+            "mean_branch_disagreement": 0.0,
+            "mean_branch_score": 0.6,
+            "mean_branch_verifier_score": 0.0,
+            "verifier_active_layers": 0
+          }
+        },
+        "compute": {
+          "layers": [
+            {
+              "executed_steps": 6.0,
+              "fraction_halted_early": 0.0,
+              "halted_token_fraction": 0.0,
+              "layer_idx": 0,
+              "max_executed_steps_any_token": 2.0,
+              "mean_executed_steps_per_token": 2.0,
+              "mean_final_halt": 0.0,
+              "mean_halt": 0.0,
+              "mean_steps_taken": 2.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "adaptive_halt_active_layers": 0,
+            "executed_steps": 6.0,
+            "fraction_halted_early": 0.0,
+            "halted_token_fraction": 0.0,
+            "layer_count": 1,
+            "max_executed_steps_any_token": 2.0,
+            "mean_executed_steps_per_token": 2.0,
+            "mean_final_halt": 0.0,
+            "mean_halt": 0.0,
+            "mean_steps_taken": 2.0
+          }
+        },
+        "overview": {
+          "active_layer_count": 1,
+          "active_layers": [
+            0
+          ],
+          "active_sections": [
+            "branch",
+            "compute"
+          ],
+          "layer_count": 1,
+          "section_layer_counts": {
+            "branch": 1,
+            "compute": 1
+          },
+          "trace_version": 1
+        }
+      },
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 0.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.0,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.0,
+        "mean_scratch_write_weight": 0.0,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 0.0
+      },
+      "response": "plan steps",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.3333333333333333,
+      "variant_id": "local_delib_branch"
+    },
+    {
+      "case_id": "planning_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.0,
+        "mean_steps_taken": 2.0
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.7,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 0.0
+      },
+      "model_local_delib_graph_artifact": {
+        "compute": {
+          "layers": [
+            {
+              "executed_steps": 6.0,
+              "fraction_halted_early": 0.0,
+              "halted_token_fraction": 0.0,
+              "layer_idx": 0,
+              "max_executed_steps_any_token": 2.0,
+              "mean_executed_steps_per_token": 2.0,
+              "mean_final_halt": 0.0,
+              "mean_halt": 0.0,
+              "mean_steps_taken": 2.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "adaptive_halt_active_layers": 0,
+            "executed_steps": 6.0,
+            "fraction_halted_early": 0.0,
+            "halted_token_fraction": 0.0,
+            "layer_count": 1,
+            "max_executed_steps_any_token": 2.0,
+            "mean_executed_steps_per_token": 2.0,
+            "mean_final_halt": 0.0,
+            "mean_halt": 0.0,
+            "mean_steps_taken": 2.0
+          }
+        },
+        "hierarchy": {
+          "layers": [
+            {
+              "hierarchy_depth_used": 0.0,
+              "hierarchy_levels_used": 2.0,
+              "layer_idx": 0,
+              "mean_downward_message_norm": 0.0,
+              "mean_hierarchy_feedback_norm": 0.4,
+              "mean_scale_gate": 0.0,
+              "mean_upward_message_norm": 0.0,
+              "phrase_nodes_used": 0.0,
+              "sequence_summary_used": 0.0,
+              "span_nodes_used": 0.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "hierarchy_depth_used": 0.0,
+            "hierarchy_levels_used": 2.0,
+            "layer_count": 1,
+            "mean_downward_message_norm": 0.0,
+            "mean_hierarchy_feedback_norm": 0.4,
+            "mean_scale_gate": 0.0,
+            "mean_upward_message_norm": 0.0,
+            "phrase_nodes_used": 0.0,
+            "scale_layers": {
+              "phrase": 0,
+              "sequence": 0,
+              "span": 0
+            },
+            "sequence_summary_used": 0.0,
+            "span_nodes_used": 0.0
+          }
+        },
+        "overview": {
+          "active_layer_count": 1,
+          "active_layers": [
+            0
+          ],
+          "active_sections": [
+            "hierarchy",
+            "compute"
+          ],
+          "layer_count": 1,
+          "section_layer_counts": {
+            "compute": 1,
+            "hierarchy": 1
+          },
+          "trace_version": 1
+        }
+      },
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 2.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.0,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.0,
+        "mean_scratch_write_weight": 0.0,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 0.0
+      },
+      "response": "plan steps",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.3333333333333333,
+      "variant_id": "local_delib_hierarchy"
+    },
+    {
+      "case_id": "planning_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.0,
+        "mean_steps_taken": 2.0
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.7,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 0.0
+      },
+      "model_local_delib_graph_artifact": {
+        "compute": {
+          "layers": [
+            {
+              "executed_steps": 6.0,
+              "fraction_halted_early": 0.0,
+              "halted_token_fraction": 0.0,
+              "layer_idx": 0,
+              "max_executed_steps_any_token": 2.0,
+              "mean_executed_steps_per_token": 2.0,
+              "mean_final_halt": 0.0,
+              "mean_halt": 0.0,
+              "mean_steps_taken": 2.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "adaptive_halt_active_layers": 0,
+            "executed_steps": 6.0,
+            "fraction_halted_early": 0.0,
+            "halted_token_fraction": 0.0,
+            "layer_count": 1,
+            "max_executed_steps_any_token": 2.0,
+            "mean_executed_steps_per_token": 2.0,
+            "mean_final_halt": 0.0,
+            "mean_halt": 0.0,
+            "mean_steps_taken": 2.0
+          }
+        },
+        "overview": {
+          "active_layer_count": 1,
+          "active_layers": [
+            0
+          ],
+          "active_sections": [
+            "scratch",
+            "compute"
+          ],
+          "layer_count": 1,
+          "section_layer_counts": {
+            "compute": 1,
+            "scratch": 1
+          },
+          "trace_version": 1
+        },
+        "scratch": {
+          "layers": [
+            {
+              "layer_idx": 0,
+              "mean_scratch_read_weight": 0.35,
+              "mean_scratch_refine_norm": 0.0,
+              "mean_scratch_summary_norm": 0.25,
+              "mean_scratch_write_weight": 0.28,
+              "scratch_reset_ok": 1.0,
+              "scratch_slots_used": 2.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "layer_count": 1,
+            "mean_scratch_read_weight": 0.35,
+            "mean_scratch_refine_norm": 0.0,
+            "mean_scratch_summary_norm": 0.25,
+            "mean_scratch_write_weight": 0.28,
+            "scratch_reset_ok": 1.0,
+            "scratch_slots_used": 2.0
+          }
+        }
+      },
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 0.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.35,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.25,
+        "mean_scratch_write_weight": 0.28,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 2.0
+      },
+      "response": "plan steps",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.3333333333333333,
+      "variant_id": "local_delib_scratchpad"
+    },
+    {
+      "case_id": "creative_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.0,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 0.0
+      },
+      "model_local_delib_graph_artifact": {},
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 0.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.0,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.0,
+        "mean_scratch_write_weight": 0.0,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 0.0
+      },
+      "response": "direct response without extra latent support",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.0,
+      "variant_id": "local_delib_off"
+    },
+    {
+      "case_id": "creative_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.0,
+        "mean_steps_taken": 2.0
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.7,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 0.0
+      },
+      "model_local_delib_graph_artifact": {
+        "compute": {
+          "layers": [
+            {
+              "executed_steps": 6.0,
+              "fraction_halted_early": 0.0,
+              "halted_token_fraction": 0.0,
+              "layer_idx": 0,
+              "max_executed_steps_any_token": 2.0,
+              "mean_executed_steps_per_token": 2.0,
+              "mean_final_halt": 0.0,
+              "mean_halt": 0.0,
+              "mean_steps_taken": 2.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "adaptive_halt_active_layers": 0,
+            "executed_steps": 6.0,
+            "fraction_halted_early": 0.0,
+            "halted_token_fraction": 0.0,
+            "layer_count": 1,
+            "max_executed_steps_any_token": 2.0,
+            "mean_executed_steps_per_token": 2.0,
+            "mean_final_halt": 0.0,
+            "mean_halt": 0.0,
+            "mean_steps_taken": 2.0
+          }
+        },
+        "overview": {
+          "active_layer_count": 1,
+          "active_layers": [
+            0
+          ],
+          "active_sections": [
+            "compute"
+          ],
+          "layer_count": 1,
+          "section_layer_counts": {
+            "compute": 1
+          },
+          "trace_version": 1
+        }
+      },
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 0.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.0,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.0,
+        "mean_scratch_write_weight": 0.0,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 0.0
+      },
+      "response": "plan steps",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.0,
+      "variant_id": "local_delib_basic"
+    },
+    {
+      "case_id": "creative_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.5,
+        "mean_steps_taken": 1.5
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.7,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 0.0
+      },
+      "model_local_delib_graph_artifact": {
+        "compute": {
+          "layers": [
+            {
+              "executed_steps": 5.0,
+              "fraction_halted_early": 0.5,
+              "halted_token_fraction": 0.5,
+              "layer_idx": 0,
+              "max_executed_steps_any_token": 3.0,
+              "mean_executed_steps_per_token": 1.5,
+              "mean_final_halt": 0.79,
+              "mean_halt": 0.46,
+              "mean_steps_taken": 1.5
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "adaptive_halt_active_layers": 1,
+            "executed_steps": 5.0,
+            "fraction_halted_early": 0.5,
+            "halted_token_fraction": 0.5,
+            "layer_count": 1,
+            "max_executed_steps_any_token": 3.0,
+            "mean_executed_steps_per_token": 1.5,
+            "mean_final_halt": 0.79,
+            "mean_halt": 0.46,
+            "mean_steps_taken": 1.5
+          }
+        },
+        "overview": {
+          "active_layer_count": 1,
+          "active_layers": [
+            0
+          ],
+          "active_sections": [
+            "compute"
+          ],
+          "layer_count": 1,
+          "section_layer_counts": {
+            "compute": 1
+          },
+          "trace_version": 1
+        }
+      },
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 0.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.0,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.0,
+        "mean_scratch_write_weight": 0.0,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 0.0
+      },
+      "response": "plan steps verify",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.0,
+      "variant_id": "local_delib_adaptive_halt"
+    },
+    {
+      "case_id": "creative_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.0,
+        "mean_steps_taken": 2.0
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.7,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 2.0
+      },
+      "model_local_delib_graph_artifact": {
+        "branch": {
+          "layers": [
+            {
+              "agreement": 0.7,
+              "branch_consensus_used": 0.0,
+              "branch_factor_used": 2.0,
+              "layer_idx": 0,
+              "mean_branch_consensus_weight": 0.0,
+              "mean_branch_disagreement": 0.0,
+              "mean_branch_score": 0.6,
+              "mean_branch_verifier_score": 0.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "agreement": 0.7,
+            "branch_consensus_used": 0.0,
+            "branch_factor_used": 2.0,
+            "consensus_active_layers": 0,
+            "layer_count": 1,
+            "mean_branch_consensus_weight": 0.0,
+            "mean_branch_disagreement": 0.0,
+            "mean_branch_score": 0.6,
+            "mean_branch_verifier_score": 0.0,
+            "verifier_active_layers": 0
+          }
+        },
+        "compute": {
+          "layers": [
+            {
+              "executed_steps": 6.0,
+              "fraction_halted_early": 0.0,
+              "halted_token_fraction": 0.0,
+              "layer_idx": 0,
+              "max_executed_steps_any_token": 2.0,
+              "mean_executed_steps_per_token": 2.0,
+              "mean_final_halt": 0.0,
+              "mean_halt": 0.0,
+              "mean_steps_taken": 2.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "adaptive_halt_active_layers": 0,
+            "executed_steps": 6.0,
+            "fraction_halted_early": 0.0,
+            "halted_token_fraction": 0.0,
+            "layer_count": 1,
+            "max_executed_steps_any_token": 2.0,
+            "mean_executed_steps_per_token": 2.0,
+            "mean_final_halt": 0.0,
+            "mean_halt": 0.0,
+            "mean_steps_taken": 2.0
+          }
+        },
+        "overview": {
+          "active_layer_count": 1,
+          "active_layers": [
+            0
+          ],
+          "active_sections": [
+            "branch",
+            "compute"
+          ],
+          "layer_count": 1,
+          "section_layer_counts": {
+            "branch": 1,
+            "compute": 1
+          },
+          "trace_version": 1
+        }
+      },
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 0.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.0,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.0,
+        "mean_scratch_write_weight": 0.0,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 0.0
+      },
+      "response": "plan steps",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.0,
+      "variant_id": "local_delib_branch"
+    },
+    {
+      "case_id": "creative_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.0,
+        "mean_steps_taken": 2.0
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.7,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 0.0
+      },
+      "model_local_delib_graph_artifact": {
+        "compute": {
+          "layers": [
+            {
+              "executed_steps": 6.0,
+              "fraction_halted_early": 0.0,
+              "halted_token_fraction": 0.0,
+              "layer_idx": 0,
+              "max_executed_steps_any_token": 2.0,
+              "mean_executed_steps_per_token": 2.0,
+              "mean_final_halt": 0.0,
+              "mean_halt": 0.0,
+              "mean_steps_taken": 2.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "adaptive_halt_active_layers": 0,
+            "executed_steps": 6.0,
+            "fraction_halted_early": 0.0,
+            "halted_token_fraction": 0.0,
+            "layer_count": 1,
+            "max_executed_steps_any_token": 2.0,
+            "mean_executed_steps_per_token": 2.0,
+            "mean_final_halt": 0.0,
+            "mean_halt": 0.0,
+            "mean_steps_taken": 2.0
+          }
+        },
+        "hierarchy": {
+          "layers": [
+            {
+              "hierarchy_depth_used": 0.0,
+              "hierarchy_levels_used": 2.0,
+              "layer_idx": 0,
+              "mean_downward_message_norm": 0.0,
+              "mean_hierarchy_feedback_norm": 0.4,
+              "mean_scale_gate": 0.0,
+              "mean_upward_message_norm": 0.0,
+              "phrase_nodes_used": 0.0,
+              "sequence_summary_used": 0.0,
+              "span_nodes_used": 0.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "hierarchy_depth_used": 0.0,
+            "hierarchy_levels_used": 2.0,
+            "layer_count": 1,
+            "mean_downward_message_norm": 0.0,
+            "mean_hierarchy_feedback_norm": 0.4,
+            "mean_scale_gate": 0.0,
+            "mean_upward_message_norm": 0.0,
+            "phrase_nodes_used": 0.0,
+            "scale_layers": {
+              "phrase": 0,
+              "sequence": 0,
+              "span": 0
+            },
+            "sequence_summary_used": 0.0,
+            "span_nodes_used": 0.0
+          }
+        },
+        "overview": {
+          "active_layer_count": 1,
+          "active_layers": [
+            0
+          ],
+          "active_sections": [
+            "hierarchy",
+            "compute"
+          ],
+          "layer_count": 1,
+          "section_layer_counts": {
+            "compute": 1,
+            "hierarchy": 1
+          },
+          "trace_version": 1
+        }
+      },
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 2.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.0,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.0,
+        "mean_scratch_write_weight": 0.0,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 0.0
+      },
+      "response": "plan steps",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.0,
+      "variant_id": "local_delib_hierarchy"
+    },
+    {
+      "case_id": "creative_prompt",
+      "model_local_delib_adaptive_halt": {
+        "halted_token_fraction": 0.0,
+        "mean_steps_taken": 2.0
+      },
+      "model_local_delib_branch": {
+        "agreement": 0.7,
+        "branch_consensus_used": 0.0,
+        "branch_factor_used": 0.0
+      },
+      "model_local_delib_graph_artifact": {
+        "compute": {
+          "layers": [
+            {
+              "executed_steps": 6.0,
+              "fraction_halted_early": 0.0,
+              "halted_token_fraction": 0.0,
+              "layer_idx": 0,
+              "max_executed_steps_any_token": 2.0,
+              "mean_executed_steps_per_token": 2.0,
+              "mean_final_halt": 0.0,
+              "mean_halt": 0.0,
+              "mean_steps_taken": 2.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "adaptive_halt_active_layers": 0,
+            "executed_steps": 6.0,
+            "fraction_halted_early": 0.0,
+            "halted_token_fraction": 0.0,
+            "layer_count": 1,
+            "max_executed_steps_any_token": 2.0,
+            "mean_executed_steps_per_token": 2.0,
+            "mean_final_halt": 0.0,
+            "mean_halt": 0.0,
+            "mean_steps_taken": 2.0
+          }
+        },
+        "overview": {
+          "active_layer_count": 1,
+          "active_layers": [
+            0
+          ],
+          "active_sections": [
+            "scratch",
+            "compute"
+          ],
+          "layer_count": 1,
+          "section_layer_counts": {
+            "compute": 1,
+            "scratch": 1
+          },
+          "trace_version": 1
+        },
+        "scratch": {
+          "layers": [
+            {
+              "layer_idx": 0,
+              "mean_scratch_read_weight": 0.35,
+              "mean_scratch_refine_norm": 0.0,
+              "mean_scratch_summary_norm": 0.25,
+              "mean_scratch_write_weight": 0.28,
+              "scratch_reset_ok": 1.0,
+              "scratch_slots_used": 2.0
+            }
+          ],
+          "summary": {
+            "active_layers": [
+              0
+            ],
+            "layer_count": 1,
+            "mean_scratch_read_weight": 0.35,
+            "mean_scratch_refine_norm": 0.0,
+            "mean_scratch_summary_norm": 0.25,
+            "mean_scratch_write_weight": 0.28,
+            "scratch_reset_ok": 1.0,
+            "scratch_slots_used": 2.0
+          }
+        }
+      },
+      "model_local_delib_hierarchy": {
+        "hierarchy_depth_used": 0.0,
+        "hierarchy_levels_used": 0.0
+      },
+      "model_local_delib_scratchpad": {
+        "mean_scratch_read_weight": 0.35,
+        "mean_scratch_refine_norm": 0.0,
+        "mean_scratch_summary_norm": 0.25,
+        "mean_scratch_write_weight": 0.28,
+        "scratch_reset_ok": 1.0,
+        "scratch_slots_used": 2.0
+      },
+      "response": "plan steps",
+      "runtime_override_application_method": "demo_backend",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "score": 0.0,
+      "variant_id": "local_delib_scratchpad"
+    }
+  ],
+  "runtime_variant_override_counts": {
+    "exact": 12
+  },
+  "runtime_variant_override_statuses": {
+    "local_delib_adaptive_halt": "exact",
+    "local_delib_basic": "exact",
+    "local_delib_branch": "exact",
+    "local_delib_hierarchy": "exact",
+    "local_delib_off": "exact",
+    "local_delib_scratchpad": "exact"
+  },
+  "runtime_variant_overrides_applied": true,
+  "variant_mean_scores": {
+    "local_delib_adaptive_halt": 0.3333333333333333,
+    "local_delib_basic": 0.16666666666666666,
+    "local_delib_branch": 0.16666666666666666,
+    "local_delib_hierarchy": 0.16666666666666666,
+    "local_delib_off": 0.0,
+    "local_delib_scratchpad": 0.16666666666666666
+  }
+}

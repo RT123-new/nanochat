@@ -1,0 +1,4625 @@
+{
+  "activation_coverage": {
+    "local_delib_adaptive_halt": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib",
+        "adaptive_halt"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_basic": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_branch_consensus_verifier": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib",
+        "branching",
+        "branch_consensus"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_combo_full_stack": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus",
+        "hierarchy",
+        "scratch",
+        "thought_graph",
+        "anchors"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_combo_reasoner": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_deep_hierarchy": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib",
+        "hierarchy"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_flocking": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib",
+        "neighbor_graph",
+        "flocking"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_global_anchors": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib",
+        "anchors"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_neighbor_graph": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib",
+        "neighbor_graph"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_off": {
+      "activation_ok_rate": 1.0,
+      "expected_mechanisms": [],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_scratch_refine": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib",
+        "scratch"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    },
+    "local_delib_thought_graph": {
+      "activation_ok_rate": 0.0,
+      "expected_mechanisms": [
+        "local_delib",
+        "thought_graph"
+      ],
+      "metrics_interpretable_rate": 0.0,
+      "response_format_rate": 0.0
+    }
+  },
+  "backend_kind": "engine",
+  "baseline_variant_id": "local_delib_off",
+  "case_deltas_vs_baseline": {
+    "anchor_long_context": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "branch_consensus": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "deep_hierarchy": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "exact_recall": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "scratch_refine": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "thought_graph": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    }
+  },
+  "case_scores": {
+    "anchor_long_context": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "branch_consensus": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "deep_hierarchy": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "exact_recall": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "scratch_refine": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "thought_graph": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    }
+  },
+  "compute_accounting": {
+    "local_delib_adaptive_halt": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_basic": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_branch_consensus_verifier": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_combo_full_stack": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_combo_reasoner": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_deep_hierarchy": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_flocking": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_global_anchors": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_neighbor_graph": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_off": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_scratch_refine": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    },
+    "local_delib_thought_graph": {
+      "active_mechanism_count": 0.0,
+      "estimated_compute_cost": 1.0,
+      "executed_steps": 0.0,
+      "fraction_halted_early": 0.0,
+      "halted_token_fraction": 0.0,
+      "max_executed_steps_any_token": 0.0,
+      "mean_executed_steps_per_token": 0.0,
+      "mean_steps_taken": 0.0
+    }
+  },
+  "delta_vs_baseline": {
+    "local_delib_adaptive_halt": 0.0,
+    "local_delib_basic": 0.0,
+    "local_delib_branch_consensus_verifier": 0.0,
+    "local_delib_combo_full_stack": 0.0,
+    "local_delib_combo_reasoner": 0.0,
+    "local_delib_deep_hierarchy": 0.0,
+    "local_delib_flocking": 0.0,
+    "local_delib_global_anchors": 0.0,
+    "local_delib_neighbor_graph": 0.0,
+    "local_delib_off": 0.0,
+    "local_delib_scratch_refine": 0.0,
+    "local_delib_thought_graph": 0.0
+  },
+  "metric_tier": "structured_prompt_proxy",
+  "quality_per_compute": {
+    "local_delib_adaptive_halt": 0.0,
+    "local_delib_basic": 0.0,
+    "local_delib_branch_consensus_verifier": 0.0,
+    "local_delib_combo_full_stack": 0.0,
+    "local_delib_combo_reasoner": 0.0,
+    "local_delib_deep_hierarchy": 0.0,
+    "local_delib_flocking": 0.0,
+    "local_delib_global_anchors": 0.0,
+    "local_delib_neighbor_graph": 0.0,
+    "local_delib_off": 0.0,
+    "local_delib_scratch_refine": 0.0,
+    "local_delib_thought_graph": 0.0
+  },
+  "rows": [
+    {
+      "activation_checks": {},
+      "activation_ok": true,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "loaded_checkpoint",
+      "runtime_override_applied": true,
+      "runtime_override_reason": "requested overrides already match the loaded checkpoint config",
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_off"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_basic"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_adaptive_halt"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_neighbor_graph"
+    },
+    {
+      "activation_checks": {
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph",
+        "flocking"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_flocking"
+    },
+    {
+      "activation_checks": {
+        "branch_consensus": false,
+        "branching": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_branch_consensus_verifier"
+    },
+    {
+      "activation_checks": {
+        "hierarchy": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "hierarchy"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_deep_hierarchy"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "scratch": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "scratch"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_scratch_refine"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "thought_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_thought_graph"
+    },
+    {
+      "activation_checks": {
+        "anchors": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_global_anchors"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_reasoner"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "anchors": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "hierarchy": false,
+        "local_delib": false,
+        "neighbor_graph": false,
+        "scratch": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "exact_recall",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus",
+        "hierarchy",
+        "scratch",
+        "thought_graph",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "exact_recall",
+        "long_range_context"
+      ],
+      "task_family": "exact_recall",
+      "task_metrics": {
+        "checksum_exact": 0.0,
+        "needle_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_full_stack"
+    },
+    {
+      "activation_checks": {},
+      "activation_ok": true,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "loaded_checkpoint",
+      "runtime_override_applied": true,
+      "runtime_override_reason": "requested overrides already match the loaded checkpoint config",
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_off"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_basic"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_adaptive_halt"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_neighbor_graph"
+    },
+    {
+      "activation_checks": {
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph",
+        "flocking"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_flocking"
+    },
+    {
+      "activation_checks": {
+        "branch_consensus": false,
+        "branching": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_branch_consensus_verifier"
+    },
+    {
+      "activation_checks": {
+        "hierarchy": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "hierarchy"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_deep_hierarchy"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "scratch": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "scratch"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_scratch_refine"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "thought_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_thought_graph"
+    },
+    {
+      "activation_checks": {
+        "anchors": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_global_anchors"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_reasoner"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "anchors": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "hierarchy": false,
+        "local_delib": false,
+        "neighbor_graph": false,
+        "scratch": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "branch_consensus",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus",
+        "hierarchy",
+        "scratch",
+        "thought_graph",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "branch_consensus",
+        "verifier_merge"
+      ],
+      "task_family": "branch_utility",
+      "task_metrics": {
+        "merged_support": 0.0,
+        "winner_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_full_stack"
+    },
+    {
+      "activation_checks": {},
+      "activation_ok": true,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "loaded_checkpoint",
+      "runtime_override_applied": true,
+      "runtime_override_reason": "requested overrides already match the loaded checkpoint config",
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_off"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_basic"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_adaptive_halt"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_neighbor_graph"
+    },
+    {
+      "activation_checks": {
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph",
+        "flocking"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_flocking"
+    },
+    {
+      "activation_checks": {
+        "branch_consensus": false,
+        "branching": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_branch_consensus_verifier"
+    },
+    {
+      "activation_checks": {
+        "hierarchy": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "hierarchy"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_deep_hierarchy"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "scratch": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "scratch"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_scratch_refine"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "thought_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_thought_graph"
+    },
+    {
+      "activation_checks": {
+        "anchors": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_global_anchors"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_reasoner"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "anchors": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "hierarchy": false,
+        "local_delib": false,
+        "neighbor_graph": false,
+        "scratch": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "deep_hierarchy",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus",
+        "hierarchy",
+        "scratch",
+        "thought_graph",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "deep_hierarchy"
+      ],
+      "task_family": "hierarchy_utility",
+      "task_metrics": {
+        "phrase_exact": 0.0,
+        "sequence_exact": 0.0,
+        "span_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_full_stack"
+    },
+    {
+      "activation_checks": {},
+      "activation_ok": true,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "loaded_checkpoint",
+      "runtime_override_applied": true,
+      "runtime_override_reason": "requested overrides already match the loaded checkpoint config",
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_off"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_basic"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_adaptive_halt"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_neighbor_graph"
+    },
+    {
+      "activation_checks": {
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph",
+        "flocking"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_flocking"
+    },
+    {
+      "activation_checks": {
+        "branch_consensus": false,
+        "branching": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_branch_consensus_verifier"
+    },
+    {
+      "activation_checks": {
+        "hierarchy": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "hierarchy"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_deep_hierarchy"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "scratch": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "scratch"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_scratch_refine"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "thought_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_thought_graph"
+    },
+    {
+      "activation_checks": {
+        "anchors": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_global_anchors"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_reasoner"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "anchors": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "hierarchy": false,
+        "local_delib": false,
+        "neighbor_graph": false,
+        "scratch": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "scratch_refine",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus",
+        "hierarchy",
+        "scratch",
+        "thought_graph",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "scratch_refinement",
+        "creative_divergence"
+      ],
+      "task_family": "scratch_utility",
+      "task_metrics": {
+        "idea_1_exact": 0.0,
+        "idea_2_exact": 0.0,
+        "ideas_distinct": 0.0,
+        "revision_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_full_stack"
+    },
+    {
+      "activation_checks": {},
+      "activation_ok": true,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "loaded_checkpoint",
+      "runtime_override_applied": true,
+      "runtime_override_reason": "requested overrides already match the loaded checkpoint config",
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_off"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_basic"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_adaptive_halt"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_neighbor_graph"
+    },
+    {
+      "activation_checks": {
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph",
+        "flocking"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_flocking"
+    },
+    {
+      "activation_checks": {
+        "branch_consensus": false,
+        "branching": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_branch_consensus_verifier"
+    },
+    {
+      "activation_checks": {
+        "hierarchy": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "hierarchy"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_deep_hierarchy"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "scratch": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "scratch"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_scratch_refine"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "thought_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_thought_graph"
+    },
+    {
+      "activation_checks": {
+        "anchors": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_global_anchors"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_reasoner"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "anchors": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "hierarchy": false,
+        "local_delib": false,
+        "neighbor_graph": false,
+        "scratch": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "anchor_long_context",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus",
+        "hierarchy",
+        "scratch",
+        "thought_graph",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "global_anchors",
+        "long_context_summary"
+      ],
+      "task_family": "anchor_utility",
+      "task_metrics": {
+        "anchor_exact": 0.0,
+        "summary_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_full_stack"
+    },
+    {
+      "activation_checks": {},
+      "activation_ok": true,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "loaded_checkpoint",
+      "runtime_override_applied": true,
+      "runtime_override_reason": "requested overrides already match the loaded checkpoint config",
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_off"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_basic"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_adaptive_halt"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_neighbor_graph"
+    },
+    {
+      "activation_checks": {
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "neighbor_graph",
+        "flocking"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_flocking"
+    },
+    {
+      "activation_checks": {
+        "branch_consensus": false,
+        "branching": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_branch_consensus_verifier"
+    },
+    {
+      "activation_checks": {
+        "hierarchy": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "hierarchy"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_deep_hierarchy"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "scratch": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "scratch"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_scratch_refine"
+    },
+    {
+      "activation_checks": {
+        "local_delib": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "thought_graph"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_thought_graph"
+    },
+    {
+      "activation_checks": {
+        "anchors": false,
+        "local_delib": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_global_anchors"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "local_delib": false,
+        "neighbor_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_reasoner"
+    },
+    {
+      "activation_checks": {
+        "adaptive_halt": false,
+        "anchors": false,
+        "branch_consensus": false,
+        "branching": false,
+        "flocking": false,
+        "hierarchy": false,
+        "local_delib": false,
+        "neighbor_graph": false,
+        "scratch": false,
+        "thought_graph": false
+      },
+      "activation_ok": false,
+      "active_mechanisms": [],
+      "anchor_stats": {},
+      "backend_kind": "engine",
+      "branch_stats": {},
+      "case_id": "thought_graph",
+      "compute_accounting": {
+        "active_mechanism_count": 0.0,
+        "estimated_compute_cost": 1.0,
+        "executed_steps": 0.0,
+        "fraction_halted_early": 0.0,
+        "halted_token_fraction": 0.0,
+        "max_executed_steps_any_token": 0.0,
+        "mean_executed_steps_per_token": 0.0,
+        "mean_steps_taken": 0.0
+      },
+      "expected_activations": [
+        "local_delib",
+        "adaptive_halt",
+        "neighbor_graph",
+        "flocking",
+        "branching",
+        "branch_consensus",
+        "hierarchy",
+        "scratch",
+        "thought_graph",
+        "anchors"
+      ],
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "metric_score": 0.0,
+      "metric_tier": "structured_prompt_proxy",
+      "metrics_interpretable": false,
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "pass_threshold": 1.0,
+      "passed": false,
+      "quality_per_compute": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "response_format_ok": false,
+      "runtime_override_application_method": "reinstantiated_model",
+      "runtime_override_applied": true,
+      "runtime_override_reason": null,
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "targeted_mechanisms": [
+        "thought_graph",
+        "multi_step_reasoning"
+      ],
+      "task_family": "thought_graph_utility",
+      "task_metrics": {
+        "answer_exact": 0.0,
+        "step_1_exact": 0.0,
+        "step_2_exact": 0.0
+      },
+      "thought_graph_stats": {},
+      "variant_id": "local_delib_combo_full_stack"
+    }
+  ],
+  "runtime_variant_override_counts": {
+    "exact": 72
+  },
+  "runtime_variant_override_statuses": {
+    "local_delib_adaptive_halt": "exact",
+    "local_delib_basic": "exact",
+    "local_delib_branch_consensus_verifier": "exact",
+    "local_delib_combo_full_stack": "exact",
+    "local_delib_combo_reasoner": "exact",
+    "local_delib_deep_hierarchy": "exact",
+    "local_delib_flocking": "exact",
+    "local_delib_global_anchors": "exact",
+    "local_delib_neighbor_graph": "exact",
+    "local_delib_off": "exact",
+    "local_delib_scratch_refine": "exact",
+    "local_delib_thought_graph": "exact"
+  },
+  "runtime_variant_overrides_applied": true,
+  "task_family_scores": {
+    "anchor_utility": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "branch_utility": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "exact_recall": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "hierarchy_utility": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "scratch_utility": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    },
+    "thought_graph_utility": {
+      "local_delib_adaptive_halt": 0.0,
+      "local_delib_basic": 0.0,
+      "local_delib_branch_consensus_verifier": 0.0,
+      "local_delib_combo_full_stack": 0.0,
+      "local_delib_combo_reasoner": 0.0,
+      "local_delib_deep_hierarchy": 0.0,
+      "local_delib_flocking": 0.0,
+      "local_delib_global_anchors": 0.0,
+      "local_delib_neighbor_graph": 0.0,
+      "local_delib_off": 0.0,
+      "local_delib_scratch_refine": 0.0,
+      "local_delib_thought_graph": 0.0
+    }
+  },
+  "variant_mean_scores": {
+    "local_delib_adaptive_halt": 0.0,
+    "local_delib_basic": 0.0,
+    "local_delib_branch_consensus_verifier": 0.0,
+    "local_delib_combo_full_stack": 0.0,
+    "local_delib_combo_reasoner": 0.0,
+    "local_delib_deep_hierarchy": 0.0,
+    "local_delib_flocking": 0.0,
+    "local_delib_global_anchors": 0.0,
+    "local_delib_neighbor_graph": 0.0,
+    "local_delib_off": 0.0,
+    "local_delib_scratch_refine": 0.0,
+    "local_delib_thought_graph": 0.0
+  },
+  "variant_pass_rates": {
+    "local_delib_adaptive_halt": 0.0,
+    "local_delib_basic": 0.0,
+    "local_delib_branch_consensus_verifier": 0.0,
+    "local_delib_combo_full_stack": 0.0,
+    "local_delib_combo_reasoner": 0.0,
+    "local_delib_deep_hierarchy": 0.0,
+    "local_delib_flocking": 0.0,
+    "local_delib_global_anchors": 0.0,
+    "local_delib_neighbor_graph": 0.0,
+    "local_delib_off": 0.0,
+    "local_delib_scratch_refine": 0.0,
+    "local_delib_thought_graph": 0.0
+  }
+}

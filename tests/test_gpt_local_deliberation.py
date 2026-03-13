@@ -1,7 +1,10 @@
-from types import SimpleNamespace
+import ast
+from pathlib import Path
+from types import MethodType, SimpleNamespace
 
 import torch
 
+from nanochat.engine import KVCache
 from nanochat.gpt import GPT, GPTConfig
 
 
@@ -230,6 +233,52 @@ def test_local_delib_advanced_config_defaults_are_stable():
     assert cfg.local_delib_anchor_usage_weight == 0.0
 
 
+def test_base_train_local_delib_config_surface_matches_gptconfig() -> None:
+    base_train_path = Path(__file__).resolve().parents[1] / "scripts" / "base_train.py"
+    tree = ast.parse(base_train_path.read_text(encoding="utf-8"))
+    config_fields = {
+        name
+        for name in GPTConfig.__dataclass_fields__
+        if name.startswith("local_delib")
+    }
+
+    parser_dests: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if not isinstance(node.func, ast.Attribute) or node.func.attr != "add_argument":
+            continue
+        for arg in node.args:
+            if isinstance(arg, ast.Constant) and isinstance(arg.value, str) and arg.value.startswith("--local-delib"):
+                parser_dests.add(arg.value[2:].replace("-", "_"))
+
+    build_model_meta = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "build_model_meta"
+    )
+    wired_kwargs: set[str] = set()
+    for node in ast.walk(build_model_meta):
+        if not isinstance(node, ast.Call):
+            continue
+        if not isinstance(node.func, ast.Name) or node.func.id != "GPTConfig":
+            continue
+        wired_kwargs.update(
+            keyword.arg
+            for keyword in node.keywords
+            if keyword.arg is not None and keyword.arg.startswith("local_delib")
+        )
+
+    assert parser_dests == config_fields, (
+        f"parser drift: missing={sorted(config_fields - parser_dests)}, "
+        f"extra={sorted(parser_dests - config_fields)}"
+    )
+    assert wired_kwargs == config_fields, (
+        f"build_model_meta drift: missing={sorted(config_fields - wired_kwargs)}, "
+        f"extra={sorted(wired_kwargs - config_fields)}"
+    )
+
+
 def test_forward_works_with_local_delib_disabled(monkeypatch):
     _patch_flash_attention(monkeypatch)
     model = GPT(_tiny_config(local_delib=False, local_delib_steps=2))
@@ -426,6 +475,56 @@ def test_local_delib_module_creation_rules(monkeypatch):
     enabled = GPT(_tiny_config(local_delib=True, local_delib_steps=2, local_delib_every=2, n_layer=5))
     # layers: 0, 2, 4
     assert sorted(enabled.local_delib_blocks.keys()) == ["0", "2", "4"]
+
+
+def test_local_delib_optional_modules_only_exist_when_enabled(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+
+    basic = GPT(_tiny_config(local_delib=True, local_delib_steps=2))
+    basic_block = basic.local_delib_blocks["0"]
+    assert not hasattr(basic_block, "branch_proposal")
+    assert not hasattr(basic_block, "neighbor_graph_mixer")
+    assert not hasattr(basic_block, "scratch_query")
+    assert not hasattr(basic_block, "thought_graph")
+    assert not hasattr(basic_block, "global_anchor_query")
+    assert len(basic_block.hierarchy_levels) == 0
+    assert basic_block.deep_phrase_scale is None
+    assert basic_block.deep_span_scale is None
+    assert basic_block.deep_sequence_scale is None
+
+    advanced = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_phrase_chunk_size=2,
+            local_delib_semantic_topk=2,
+            local_delib_use_neighbor_graph=True,
+            local_delib_branch_factor=2,
+            local_delib_branch_consensus=True,
+            local_delib_branch_verifier=True,
+            local_delib_hierarchy_chunk_sizes="2,4",
+            local_delib_use_deep_hierarchy=True,
+            local_delib_span_chunk_size=4,
+            local_delib_sequence_summary=True,
+            local_delib_scratch_slots=2,
+            local_delib_scratch_dim=4,
+            local_delib_use_thought_graph=True,
+            local_delib_thought_node_budget=2,
+            local_delib_thought_graph_steps=1,
+            local_delib_global_anchor_count=2,
+            local_delib_global_anchor_update=True,
+        )
+    )
+    advanced_block = advanced.local_delib_blocks["0"]
+    assert hasattr(advanced_block, "branch_proposal")
+    assert hasattr(advanced_block, "neighbor_graph_mixer")
+    assert hasattr(advanced_block, "scratch_query")
+    assert hasattr(advanced_block, "thought_graph")
+    assert hasattr(advanced_block, "global_anchor_query")
+    assert len(advanced_block.hierarchy_levels) == 2
+    assert advanced_block.deep_phrase_scale is not None
+    assert advanced_block.deep_span_scale is not None
+    assert advanced_block.deep_sequence_scale is not None
 
 
 
@@ -1104,6 +1203,62 @@ def test_no_future_token_influence_in_global_anchor_path(monkeypatch):
     assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)
 
 
+def test_no_future_token_influence_in_full_advanced_combo_path(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_phrase_chunk_size=1,
+            local_delib_semantic_topk=2,
+            local_delib_use_neighbor_graph=True,
+            local_delib_use_phrase_consensus=True,
+            local_delib_branch_factor=3,
+            local_delib_branch_consensus=True,
+            local_delib_branch_verifier=True,
+            local_delib_branch_max_active=2,
+            local_delib_branch_disagreement_threshold=0.0,
+            local_delib_use_deep_hierarchy=True,
+            local_delib_span_chunk_size=2,
+            local_delib_sequence_summary=True,
+            local_delib_hierarchy_bidirectional=True,
+            local_delib_hierarchy_scale_gate=True,
+            local_delib_scratch_slots=2,
+            local_delib_scratch_dim=4,
+            local_delib_scratch_refine_steps=1,
+            local_delib_scratch_use_branch_inputs=True,
+            local_delib_scratch_use_hierarchy_inputs=True,
+            local_delib_use_thought_graph=True,
+            local_delib_thought_node_budget=2,
+            local_delib_thought_graph_steps=2,
+            local_delib_thought_topk_edges=2,
+            local_delib_thought_token_chunk_size=2,
+            local_delib_global_anchor_count=2,
+            local_delib_global_anchor_dim=4,
+            local_delib_global_anchor_update=True,
+            local_delib_global_anchor_use_hierarchy=True,
+            local_delib_global_anchor_use_scratch=True,
+            local_delib_global_anchor_use_thought=True,
+        )
+    )
+    for block in model.local_delib_blocks.values():
+        _configure_deep_hierarchy_modules(block)
+        _configure_scratch_modules(block)
+        _configure_thought_modules(block)
+        _configure_global_anchor_modules(block)
+        with torch.no_grad():
+            block.out_proj.weight.fill_(0.1)
+
+    x1 = torch.randint(0, model.config.vocab_size, (1, 8))
+    x2 = x1.clone()
+    x2[:, 5:] = torch.randint(0, model.config.vocab_size, (1, 3))
+
+    y1 = model(x1)
+    y2 = model(x2)
+
+    assert torch.allclose(y1[:, :5, :], y2[:, :5, :], atol=1e-6, rtol=1e-6)
+
+
 def test_kv_cache_works_with_thought_graph_enabled(monkeypatch):
     _patch_flash_attention(monkeypatch)
     model = GPT(
@@ -1260,6 +1415,246 @@ def test_decode_cache_matches_full_forward_for_advanced_local_delib(monkeypatch)
     assert layer_cache["step_caches"][0]["scratch"]["slots"].shape[1] == 2
     assert layer_cache["step_caches"][0]["anchors"]["anchors"].shape[1] == 2
     assert layer_cache["step_caches"][0]["thought"] is None
+
+
+def test_thought_graph_cached_decode_recomputes_only_when_budget_window_slides(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+
+    def _instrument_recompute_calls(model: GPT) -> dict[str, int]:
+        block = model.local_delib_blocks["0"]
+        calls = {"count": 0}
+        original = block.deliberate_state
+
+        def wrapped(self, h, capture_stage_states=False):
+            calls["count"] += 1
+            return original(h, capture_stage_states=capture_stage_states)
+
+        monkeypatch.setattr(block, "deliberate_state", MethodType(wrapped, block))
+        return calls
+
+    valid = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_use_thought_graph=True,
+            local_delib_thought_node_budget=2,
+            local_delib_thought_graph_steps=2,
+            local_delib_thought_topk_edges=2,
+            local_delib_thought_token_chunk_size=2,
+        )
+    )
+    valid_calls = _instrument_recompute_calls(valid)
+    valid_prefill = torch.tensor([[1, 2, 3]], dtype=torch.long)
+    valid_decode = torch.tensor([[4]], dtype=torch.long)
+    head_dim = valid.config.n_embd // valid.config.n_head
+    valid_cache = KVCache(
+        batch_size=1,
+        num_heads=valid.config.n_kv_head,
+        seq_len=valid.config.sequence_len,
+        head_dim=head_dim,
+        num_layers=valid.config.n_layer,
+        device=valid_prefill.device,
+        dtype=torch.float32,
+    )
+
+    _ = valid(valid_prefill, kv_cache=valid_cache)
+    assert valid_calls["count"] == 1
+    assert valid_cache.extra_caches["local_delib"]["0"]["step_caches"][0]["thought"]["will_slide_budget"] is False
+    _ = valid(valid_decode, kv_cache=valid_cache)
+    assert valid_calls["count"] == 1
+    assert valid_cache.extra_caches["local_delib"]["0"]["step_caches"][0]["thought"]["will_slide_budget"] is True
+
+    sliding = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_use_thought_graph=True,
+            local_delib_thought_node_budget=2,
+            local_delib_thought_graph_steps=2,
+            local_delib_thought_topk_edges=2,
+            local_delib_thought_token_chunk_size=2,
+        )
+    )
+    for block in sliding.local_delib_blocks.values():
+        with torch.no_grad():
+            block.out_proj.weight.fill_(0.1)
+    sliding_calls = _instrument_recompute_calls(sliding)
+    sliding_prefill = torch.tensor([[1, 2, 3, 4]], dtype=torch.long)
+    sliding_decode = torch.tensor([[5]], dtype=torch.long)
+    sliding_full = torch.tensor([[1, 2, 3, 4, 5]], dtype=torch.long)
+    sliding_cache = KVCache(
+        batch_size=1,
+        num_heads=sliding.config.n_kv_head,
+        seq_len=sliding.config.sequence_len,
+        head_dim=head_dim,
+        num_layers=sliding.config.n_layer,
+        device=sliding_prefill.device,
+        dtype=torch.float32,
+    )
+
+    _ = sliding(sliding_prefill, kv_cache=sliding_cache)
+    assert sliding_calls["count"] == 1
+    decode_logits = sliding(sliding_decode, kv_cache=sliding_cache)
+    assert sliding_calls["count"] == 2
+    full_logits = sliding(sliding_full)
+
+    assert sliding_calls["count"] == 3
+    assert torch.allclose(decode_logits[:, -1, :], full_logits[:, -1, :], atol=1e-2, rtol=1e-2)
+    assert sliding_cache.extra_caches["local_delib"]["0"]["step_caches"][0]["thought"]["will_slide_budget"] is False
+
+
+def test_decode_cache_matches_full_forward_with_thought_graph_full_stack(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_phrase_chunk_size=2,
+            local_delib_use_deep_hierarchy=True,
+            local_delib_span_chunk_size=2,
+            local_delib_sequence_summary=True,
+            local_delib_hierarchy_bidirectional=True,
+            local_delib_hierarchy_scale_gate=True,
+            local_delib_scratch_slots=2,
+            local_delib_scratch_dim=4,
+            local_delib_scratch_refine_steps=1,
+            local_delib_scratch_use_hierarchy_inputs=True,
+            local_delib_use_thought_graph=True,
+            local_delib_thought_node_budget=3,
+            local_delib_thought_graph_steps=2,
+            local_delib_thought_topk_edges=2,
+            local_delib_thought_token_chunk_size=2,
+            local_delib_global_anchor_count=2,
+            local_delib_global_anchor_dim=4,
+            local_delib_global_anchor_update=True,
+            local_delib_global_anchor_use_hierarchy=True,
+            local_delib_global_anchor_use_scratch=True,
+            local_delib_global_anchor_use_thought=True,
+        )
+    )
+    for block in model.local_delib_blocks.values():
+        _configure_deep_hierarchy_modules(block)
+        _configure_scratch_modules(block)
+        _configure_thought_modules(block)
+        _configure_global_anchor_modules(block)
+        with torch.no_grad():
+            block.out_proj.weight.fill_(0.1)
+
+    class DummyKVCache:
+        def __init__(self, n_layers, batch_size, seq_len, n_heads, head_dim):
+            self.n_layers = n_layers
+            self.cache_seqlens = torch.zeros(batch_size, dtype=torch.int32)
+            self.k_cache = torch.zeros(n_layers, batch_size, seq_len, n_heads, head_dim)
+            self.v_cache = torch.zeros(n_layers, batch_size, seq_len, n_heads, head_dim)
+            self.extra_caches = {}
+
+        def get_pos(self):
+            return int(self.cache_seqlens[0].item())
+
+        def get_layer_cache(self, layer_idx):
+            return self.k_cache[layer_idx], self.v_cache[layer_idx]
+
+        def advance(self, num_tokens):
+            self.cache_seqlens += num_tokens
+
+    idx_prefill = torch.tensor([[1, 2, 3]], dtype=torch.long)
+    idx_decode_1 = torch.tensor([[4]], dtype=torch.long)
+    idx_decode_2 = torch.tensor([[5]], dtype=torch.long)
+    idx_full_1 = torch.cat([idx_prefill, idx_decode_1], dim=1)
+    idx_full_2 = torch.cat([idx_full_1, idx_decode_2], dim=1)
+    head_dim = model.config.n_embd // model.config.n_head
+    kv_cache = DummyKVCache(
+        n_layers=model.config.n_layer,
+        batch_size=1,
+        seq_len=model.config.sequence_len,
+        n_heads=model.config.n_kv_head,
+        head_dim=head_dim,
+    )
+
+    _ = model(idx_prefill, kv_cache=kv_cache)
+    decode_logits_1 = model(idx_decode_1, kv_cache=kv_cache)
+    decode_logits_2 = model(idx_decode_2, kv_cache=kv_cache)
+    full_logits_1 = model(idx_full_1)
+    full_logits_2 = model(idx_full_2)
+
+    assert torch.allclose(decode_logits_1[:, -1, :], full_logits_1[:, -1, :], atol=1e-2, rtol=1e-2)
+    assert torch.allclose(decode_logits_2[:, -1, :], full_logits_2[:, -1, :], atol=1e-2, rtol=1e-2)
+
+    layer_cache = kv_cache.extra_caches["local_delib"]["0"]
+    thought_cache = layer_cache["step_caches"][0]["thought"]
+    assert thought_cache is not None
+    assert len(thought_cache["prev_nodes_by_step"]) == model.local_delib_blocks["0"].thought_graph_steps + 1
+    assert thought_cache["prev_nodes_by_step"][-1].shape[1] <= model.local_delib_blocks["0"].thought_node_budget
+    assert kv_cache.get_pos() == idx_full_2.shape[1]
+
+
+def test_decode_cache_sections_stay_bounded_by_configured_budgets(monkeypatch):
+    _patch_flash_attention(monkeypatch)
+    model = GPT(
+        _tiny_config(
+            local_delib=True,
+            local_delib_steps=2,
+            local_delib_hierarchy_chunk_sizes="2,4",
+            local_delib_use_deep_hierarchy=True,
+            local_delib_phrase_chunk_size=2,
+            local_delib_span_chunk_size=4,
+            local_delib_sequence_summary=True,
+            local_delib_scratch_slots=2,
+            local_delib_scratch_dim=4,
+            local_delib_scratch_refine_steps=1,
+            local_delib_use_thought_graph=True,
+            local_delib_thought_node_budget=2,
+            local_delib_thought_graph_steps=2,
+            local_delib_thought_topk_edges=2,
+            local_delib_thought_token_chunk_size=2,
+            local_delib_global_anchor_count=2,
+            local_delib_global_anchor_dim=4,
+            local_delib_global_anchor_update=True,
+        )
+    )
+
+    idx_prefill = torch.tensor([[1, 2, 3]], dtype=torch.long)
+    decode_tokens = [torch.tensor([[4]], dtype=torch.long), torch.tensor([[5]], dtype=torch.long)]
+    head_dim = model.config.n_embd // model.config.n_head
+    kv_cache = KVCache(
+        batch_size=1,
+        num_heads=model.config.n_kv_head,
+        seq_len=model.config.sequence_len,
+        head_dim=head_dim,
+        num_layers=model.config.n_layer,
+        device=idx_prefill.device,
+        dtype=torch.float32,
+    )
+
+    _ = model(idx_prefill, kv_cache=kv_cache)
+    for token in decode_tokens:
+        _ = model(token, kv_cache=kv_cache)
+
+    layer_cache = kv_cache.extra_caches["local_delib"]["0"]
+    assert layer_cache["token_count"] == 5
+    assert len(layer_cache["stage_states"]) == model.local_delib_blocks["0"].micro_steps + 1
+    assert all(stage_state.shape[1] == 5 for stage_state in layer_cache["stage_states"])
+
+    step_cache = layer_cache["step_caches"][0]
+    legacy_cache = step_cache["legacy_hierarchy"]
+    assert len(legacy_cache) == 2
+    assert legacy_cache[0]["current_chunk_count"] <= 2
+    assert legacy_cache[1]["current_chunk_count"] <= 4
+
+    deep_cache = step_cache["deep_hierarchy"]
+    assert deep_cache is not None
+    assert deep_cache["phrase"]["count"] <= 2
+    assert deep_cache["span"]["count"] <= 4
+    assert deep_cache["sequence"]["count"] <= layer_cache["token_count"]
+
+    assert step_cache["scratch"]["slots"].shape[1] == 2
+    assert step_cache["anchors"]["anchors"].shape[1] == 2
+
+    thought_cache = step_cache["thought"]
+    assert thought_cache is not None
+    assert thought_cache["current_count"] <= 2
+    assert thought_cache["prev_nodes_by_step"][-1].shape[1] <= 2
+    assert thought_cache["prev_node_limits"].numel() <= 2
 
 
 def test_gpt_surfaces_aux_loss_dict_when_local_delib_enabled(monkeypatch):

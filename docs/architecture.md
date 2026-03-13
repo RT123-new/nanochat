@@ -133,6 +133,17 @@ Outputs may include:
 - alternate framings
 - candidate responses
 
+Current implementation note:
+- Prompt 3 upgrades `CreativeWorkspace` from suffix-based draft generation into a small multi-stage orchestrator with explicit strategies:
+  - `conservative_answer`
+  - `divergent_ideas`
+  - `memory_grounded`
+  - `branch_resolution`
+  - `recombination`
+- strategy selection is still lightweight and wrapper-side: it depends on route, retrieved support context, and compact `model_local_delib.*` summaries when available;
+- the first candidate stays conservative, then later candidates can shift toward divergence, memory grounding, branch resolution, or recombination once wrapper-visible model summaries appear;
+- traces now record explored strategies, selected/rejected candidates, verifier rankings, and sandbox outcomes so the wrapper creativity path stays inspectable.
+
 ### 6. Verifier workspace
 Purpose:
 - critique, rank, and optionally repair candidate outputs
@@ -145,6 +156,10 @@ Outputs may include:
 - confidence estimates
 - chosen candidate
 
+Current implementation note:
+- the verifier now scores candidates across relevance, usefulness, diversity, repairability, and route-specific strategy fit rather than raw query-term overlap alone;
+- verify-path traces include whether repair is required and why, even when the current implementation decides not to launch a separate repair generation pass.
+
 ### 7. Lightweight sandbox
 Purpose:
 - allow branch-and-score experimentation without requiring a full world model
@@ -154,6 +169,10 @@ Capabilities:
 - score outcomes using simple heuristics or small task-specific scorers
 - record failures and successes
 - feed evidence back into episodic memory
+
+Current implementation note:
+- sandbox runs now consume a verifier-informed shortlist instead of blindly scoring every draft;
+- the shortlist prefers the best grounded candidate plus the most diverse remaining candidate so divergence is preserved before final collapse.
 
 ### 8. Consolidator
 Purpose:
@@ -199,6 +218,7 @@ Design constraints:
 - summaries are compact numeric/statistical payloads only, not raw latent tensors;
 - summary keys only appear when the underlying mechanism actually surfaces non-zero or exported summary data;
 - the older aggregate keys such as `model_local_delib.branch`, `model_local_delib.hierarchy`, `model_local_delib.scratchpad`, `model_local_delib.adaptive_halt`, and `model_local_delib.scratchpad_summaries` remain available for backward compatibility.
+- when a backend reports runtime override handling, wrapper traces now also preserve `local_delib_runtime_override` so engine-backed/debug traces show whether the requested variant was exact, approximated, or unsupported.
 
 ## Prompt 12 hardening snapshot
 Implemented and stable enough for targeted experiments:
@@ -213,10 +233,66 @@ Implemented and stable enough for targeted experiments:
 - Prompt 10 ablation harness and Prompt 11 wrapper-level compact summary surfacing
 
 Still experimental:
-- engine-backed variant hot-swapping in evals depends on backend support
-- explicit thought-graph decode continuation still falls back to full local-deliberation recompute for correctness
-- Prompt 10 quality and quality-per-compute numbers remain heuristic rather than benchmark-grade metrics
-- broader non-Prompt-12 legacy local-deliberation pytest debt may still exist outside the targeted hardening slice
+- engine-backed variant hot-swapping is now implemented for compatible backends/checkpoints, but exactness still depends on strict runtime compatibility
+- exact incremental thought-graph decode continuation is now supported for cached single-token decode while the bounded node window stays stable; the only remaining fallback is the clearly defined budget-window slide case where a new chunk would force the oldest thought node out of the cache
+- the lightweight Prompt 10 quality and quality-per-compute numbers remain heuristic ranking aids even though the repo now also has stronger task-grounded and natural-language opt-in benchmark suites
+- broader targeted local/GPT/engine regression slices are green, but large live-checkpoint engine smoke coverage remains more limited than the focused tiny-model/runtime tests
+
+## Prompt Pack v4 gap map
+Closed Prompt Pack v4 milestones:
+- Prompt 1: cached single-token decode now continues through the bounded explicit thought-graph path without full-prefix recompute while the thought-node window remains stable
+- Prompt 2: wrapper metadata, traces, and eval artifacts now surface compact `model_local_delib.graph_artifact` payloads and compact `model_local_delib.thought_summaries.*` summaries
+- Prompt 3: wrapper creativity is now a structured generate -> verify -> sandbox orchestration layer that can adapt to compact model-core summaries
+- Prompt 4: the repo now has a separate structured `local-delib-research` suite with task-level pass/fail metrics, activation sanity checks, backend-kind labels, baseline deltas, and compute accounting
+- Prompt 5: engine-backed evals now report runtime variant application truthfully with `exact`, `approximated`, or `unsupported` statuses and strict-failure support
+
+Remaining limits after the Prompt 6 hardening pass:
+- the repo now has stronger opt-in task-grounded and natural-language benchmark suites, but the older advanced/research evals remain repo-native proxy tasks rather than external benchmark claims
+- exact thought-graph cached decode still keeps one narrow recompute fallback for the documented bounded budget-window slide case
+- engine-backed runtime overrides remain limited by strict checkpoint/state-dict compatibility; incompatible variants are surfaced explicitly rather than silently approximated
+
+### Prompt 3 wrapper creativity integration
+Wrapper creativity is now a first-class, inspectable orchestration layer rather than a naive multi-draft helper.
+
+Prompt 3 behavior:
+- route + support context decide the initial strategy mix;
+- wrapper-visible `model_local_delib.graph_artifact` / `model_local_delib.thought_summaries.*` metadata is condensed into a small creative-policy summary when present;
+- that summary can promote `branch_resolution` and `recombination` strategies after the first generation call exposes branch/scratch/thought/hierarchy/anchor activity;
+- verifier and sandbox stages now preserve candidate ids, strategy ids, ranking reasons, repair hints, shortlist choice, and branch outcomes in trace metadata.
+
+Wrapper versus model-core split:
+- model-core local deliberation remains latent and internal; it exposes only compact summaries and graph artifacts;
+- wrapper creativity remains prompt-level and inspectable; it uses those summaries as policy hints, not as raw latent state or hidden control flow.
+
+### Prompt 2 graph artifact surface
+Wrapper-visible local-deliberation metadata now includes a compact `model_local_delib.graph_artifact` object when model-core local-deliberation stats are present.
+
+Design constraints:
+- no raw latent tensors are exposed
+- existing aggregate keys such as `model_local_delib.branch`, `model_local_delib.hierarchy`, `model_local_delib.scratchpad`, `model_local_delib.adaptive_halt`, and `model_local_delib.thought_summaries.*` remain intact
+- sections only appear when the underlying mechanism is active enough to produce useful debug signal
+
+Artifact shape:
+- `overview`: trace version, active sections, active layers, and per-section layer counts
+- `branch`: compact branch activity / consensus / verifier-merge summary plus active per-layer rows
+- `thought_graph`: thought-node counts, degree/interaction summary, and per-layer rows
+- `hierarchy`: hierarchy depth/scale usage plus per-layer rows; legacy chunk counts are surfaced when present
+- `scratch`: scratch usage plus exported summary metadata when scratch summaries are enabled
+- `anchors`: global-anchor usage/read/write summary plus per-layer rows
+- `compute`: executed-step / halting summary plus per-layer rows
+- `flocking`: local-neighbor and flocking telemetry plus per-layer rows
+
+Intentional omissions:
+- no token-by-token adjacency lists
+- no raw hidden-state vectors
+- no decode-cache internals beyond the already documented bounded cache behavior
+
+### Thought-graph decode cache behavior
+When `local_delib_use_thought_graph=True` and cached decode is running one token at a time:
+- cached decode now reuses structured bounded thought-node state instead of forcing a full-prefix local-deliberation recompute
+- the cache stores prior thought nodes by graph step, prior node limits, current partial-chunk pooled state, and current partial-chunk write state
+- batch-1 prefill caches can still be expanded into larger decode batches through the existing GPT-side cache expansion path
+- fallback remains explicit and narrow: if the token would start a new chunk exactly when the bounded thought-node budget is already full, cached continuation raises the bounded fallback and recomputes the prefix once so semantics stay correct
 
 Enable major model-core features through `GPTConfig` or `scripts/base_train.py` flags:
 - base local deliberation: `local_delib`, `local_delib_steps`
@@ -330,7 +406,7 @@ Current implementation note:
 - when `local_delib_use_thought_graph=True`, `LocalDeliberationBlock` now builds explicit thought nodes from causal token chunks and optional branch/hierarchy/scratch summaries;
 - each thought node receives a token-write summary from its assigned chunk, then runs a bounded number of causal top-k message-passing steps;
 - tokens can only read thought nodes whose anchor chunk has already completed, so token-prefix causality is preserved;
-- Prompt 8 now stores bounded per-step decode-cache metadata for thought-node windows during prefill, but decode continuation still falls back to full local-deliberation recompute when the thought graph is enabled so graph-step semantics stay exact.
+- Prompt Pack v4 Prompt 1 now continues cached single-token decode through that bounded thought-node state directly; the only remaining recompute path is the explicitly documented budget-window slide case where a new chunk would evict the oldest thought node from the bounded cache.
 
 Prompt 4 debug stats now include:
 - `thought_nodes_used`
@@ -525,7 +601,7 @@ Decode-cache note: Prompt 8 now stores structured per-step local-deliberation ca
 - bounded step caches for hierarchy summaries, scratch slots, and global anchors
 - optional thought-node window metadata captured during prefill
 
-Decode continuation uses those caches for the bounded scratch/anchor-oriented path and batch-expands them safely when a batch-1 prefill cache is cloned into a larger decode batch. Thought-graph decode still takes the correctness-first fallback to full local-deliberation recompute.
+Decode continuation uses those caches for the bounded scratch/anchor-oriented path and for exact incremental thought-graph continuation while the bounded node window remains stable. Batch-1 prefill caches still expand safely into larger decode batches. The only remaining recompute path is the documented thought-node budget-window slide fallback at a chunk boundary.
 
 ## Local deliberation explicit latent thought graph (optional)
 
@@ -545,7 +621,7 @@ Behavior:
 - when enabled, the block builds a bounded set of explicit thought nodes from causal token chunks, optionally folding in branch, hierarchy, and scratch summaries that already exist inside the same micro-step;
 - tokens write into their assigned chunk node, thought nodes run a small causal top-k message-passing loop, and tokens only read back nodes whose anchor chunk is already complete;
 - this is more explicit than the earlier local approximation because the runtime now has named node state, node-to-node edges, token-to-node writes, and node-to-token reads rather than only implicit token mixing paths;
-- Prompt 8 captures bounded thought-node decode metadata during prefill, but still preserves correctness-first decode continuation by falling back to full recompute whenever the explicit thought graph is active.
+- Prompt Pack v4 Prompt 1 captures bounded thought-node decode metadata during prefill and reuses it for exact cached single-token continuation; the only remaining recompute is the explicit bounded fallback when a new decode token would force the cached thought-node window to slide.
 
 Debug stats include:
 - `thought_nodes_used`

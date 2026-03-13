@@ -1,0 +1,239 @@
+{
+  "artifacts": [
+    {
+      "label": "cognition",
+      "path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/cognition_eval.json",
+      "row_count": 4,
+      "runtime_override_counts": {},
+      "runtime_override_statuses": []
+    },
+    {
+      "label": "local-delib-ablation-advanced",
+      "path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/local_delib_ablation_advanced.json",
+      "row_count": 72,
+      "runtime_override_counts": {
+        "exact": 72
+      },
+      "runtime_override_statuses": [
+        "exact"
+      ]
+    },
+    {
+      "label": "local-delib-research",
+      "path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/local_delib_research.json",
+      "row_count": 72,
+      "runtime_override_counts": {
+        "exact": 72
+      },
+      "runtime_override_statuses": [
+        "exact"
+      ]
+    },
+    {
+      "label": "task-grounded",
+      "path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/task_grounded.json",
+      "row_count": 2,
+      "runtime_override_counts": {},
+      "runtime_override_statuses": []
+    },
+    {
+      "label": "local-delib-natural",
+      "path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/local_delib_natural.json",
+      "row_count": 24,
+      "runtime_override_counts": {
+        "exact": 24
+      },
+      "runtime_override_statuses": [
+        "exact"
+      ]
+    },
+    {
+      "label": "runtime-override-audit",
+      "path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/runtime_override_audit.json",
+      "row_count": 2,
+      "runtime_override_counts": {
+        "exact": 1,
+        "unsupported": 1
+      },
+      "runtime_override_statuses": [
+        "exact",
+        "unsupported"
+      ]
+    }
+  ],
+  "checkpoint_identity": {
+    "base_dir": "/tmp/nanochat-smoke-root",
+    "device_type": "cpu",
+    "model_tag": "d1",
+    "source": "sft",
+    "step": 1
+  },
+  "commands": [
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "-m",
+        "scripts.cognition_eval",
+        "--backend",
+        "engine",
+        "--source",
+        "sft",
+        "--model-tag",
+        "d1",
+        "--step",
+        "1",
+        "--device-type",
+        "cpu",
+        "--temperature",
+        "0.0",
+        "--top-k",
+        "1",
+        "--max-tokens",
+        "64",
+        "--no-enforce-improvement",
+        "--output",
+        "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/cognition_eval.json"
+      ],
+      "artifact_path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/cognition_eval.json",
+      "exit_code": 0,
+      "label": "cognition"
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "-m",
+        "scripts.cognition_eval",
+        "--suite",
+        "local-delib-ablation-advanced",
+        "--backend",
+        "engine",
+        "--source",
+        "sft",
+        "--model-tag",
+        "d1",
+        "--step",
+        "1",
+        "--device-type",
+        "cpu",
+        "--temperature",
+        "0.0",
+        "--top-k",
+        "1",
+        "--max-tokens",
+        "64",
+        "--output",
+        "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/local_delib_ablation_advanced.json"
+      ],
+      "artifact_path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/local_delib_ablation_advanced.json",
+      "exit_code": 0,
+      "label": "local-delib-ablation-advanced"
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "-m",
+        "scripts.cognition_eval",
+        "--suite",
+        "local-delib-research",
+        "--backend",
+        "engine",
+        "--source",
+        "sft",
+        "--model-tag",
+        "d1",
+        "--step",
+        "1",
+        "--device-type",
+        "cpu",
+        "--temperature",
+        "0.0",
+        "--top-k",
+        "1",
+        "--max-tokens",
+        "64",
+        "--output",
+        "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/local_delib_research.json"
+      ],
+      "artifact_path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/local_delib_research.json",
+      "exit_code": 0,
+      "label": "local-delib-research"
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "-m",
+        "scripts.cognition_eval",
+        "--suite",
+        "task-grounded",
+        "--backend",
+        "engine",
+        "--source",
+        "sft",
+        "--model-tag",
+        "d1",
+        "--step",
+        "1",
+        "--device-type",
+        "cpu",
+        "--temperature",
+        "0.0",
+        "--top-k",
+        "1",
+        "--max-tokens",
+        "64",
+        "--tasks",
+        "SmokeTinyTask",
+        "--max-problems",
+        "2",
+        "--seed",
+        "42",
+        "--output",
+        "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/task_grounded.json"
+      ],
+      "artifact_path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/task_grounded.json",
+      "exit_code": 0,
+      "label": "task-grounded"
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "-m",
+        "scripts.cognition_eval",
+        "--suite",
+        "local-delib-natural",
+        "--backend",
+        "engine",
+        "--source",
+        "sft",
+        "--model-tag",
+        "d1",
+        "--step",
+        "1",
+        "--device-type",
+        "cpu",
+        "--temperature",
+        "0.0",
+        "--top-k",
+        "1",
+        "--max-tokens",
+        "64",
+        "--max-problems",
+        "2",
+        "--seed",
+        "42",
+        "--output",
+        "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/local_delib_natural.json"
+      ],
+      "artifact_path": "/Users/RT1/Downloads/nanochat-master/artifacts/pretraining_proofs/engine/local_delib_natural.json",
+      "exit_code": 0,
+      "label": "local-delib-natural"
+    }
+  ],
+  "observed_runtime_override_statuses": [
+    "exact",
+    "unsupported"
+  ],
+  "reason": null,
+  "status": "passed",
+  "strict_audit": true
+}

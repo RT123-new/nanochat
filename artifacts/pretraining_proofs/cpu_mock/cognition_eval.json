@@ -1,0 +1,63 @@
+{
+  "baseline_mean": 0.0,
+  "cognition_mean": 1.0,
+  "delta": 1.0,
+  "route_counts": {
+    "direct_answer": 3,
+    "retrieve_memory": 1
+  },
+  "rows": [
+    {
+      "baseline_response": "I can answer directly, but I do not have any prior guidance to reuse yet.",
+      "baseline_score": 0.0,
+      "case_id": "memory_recall",
+      "cognition_decision": "retrieve_memory",
+      "cognition_response": "Based on prior guidance: Use terse bullet summaries with citations.",
+      "cognition_score": 1.0,
+      "creative_candidate_count": 0,
+      "creative_handoff": null,
+      "creative_model_summary_used": false,
+      "creative_selected_strategy": null,
+      "creative_strategy_ids": []
+    },
+    {
+      "baseline_response": "I can answer directly, but I do not have any prior guidance to reuse yet.",
+      "baseline_score": 0.0,
+      "case_id": "memory_reuse_paraphrase",
+      "cognition_decision": "direct_answer",
+      "cognition_response": "Based on prior guidance: Use terse bullet summaries with citations.",
+      "cognition_score": 1.0,
+      "creative_candidate_count": 0,
+      "creative_handoff": null,
+      "creative_model_summary_used": false,
+      "creative_selected_strategy": null,
+      "creative_strategy_ids": []
+    },
+    {
+      "baseline_response": "I can answer directly, but I do not have any prior guidance to reuse yet.",
+      "baseline_score": 0.0,
+      "case_id": "semantic_house_style",
+      "cognition_decision": "direct_answer",
+      "cognition_response": "Follow this stored guidance: House style: brief neutral numbered answers.",
+      "cognition_score": 1.0,
+      "creative_candidate_count": 0,
+      "creative_handoff": null,
+      "creative_model_summary_used": false,
+      "creative_selected_strategy": null,
+      "creative_strategy_ids": []
+    },
+    {
+      "baseline_response": "I can answer directly, but I do not have any prior guidance to reuse yet.",
+      "baseline_score": 0.0,
+      "case_id": "skill_reuse_paraphrase",
+      "cognition_decision": "direct_answer",
+      "cognition_response": "Apply this skill: extract bullets; condense the bullets",
+      "cognition_score": 1.0,
+      "creative_candidate_count": 0,
+      "creative_handoff": null,
+      "creative_model_summary_used": false,
+      "creative_selected_strategy": null,
+      "creative_strategy_ids": []
+    }
+  ]
+}

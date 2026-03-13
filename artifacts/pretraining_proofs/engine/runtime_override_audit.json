@@ -1,0 +1,113 @@
+{
+  "anchor_stats": {
+    "checkpoint_config_exact": {},
+    "shape_incompatible_override": {}
+  },
+  "branch_stats": {
+    "checkpoint_config_exact": {},
+    "shape_incompatible_override": {}
+  },
+  "compute_proxy_metrics": {
+    "checkpoint_config_exact": {
+      "estimated_compute_cost": 1.0
+    },
+    "shape_incompatible_override": {
+      "estimated_compute_cost": 1.0
+    }
+  },
+  "flocking_stats": {
+    "checkpoint_config_exact": {},
+    "shape_incompatible_override": {}
+  },
+  "hierarchy_stats": {
+    "checkpoint_config_exact": {},
+    "shape_incompatible_override": {}
+  },
+  "mean_steps_taken": {
+    "checkpoint_config_exact": 0.0,
+    "shape_incompatible_override": 0.0
+  },
+  "neighbor_graph_stats": {
+    "checkpoint_config_exact": {},
+    "shape_incompatible_override": {}
+  },
+  "quality_per_compute": {
+    "checkpoint_config_exact": 0.0,
+    "shape_incompatible_override": 0.0
+  },
+  "quality_proxy_scores": {
+    "checkpoint_config_exact": {
+      "basic_planning": 0.0
+    },
+    "shape_incompatible_override": {
+      "basic_planning": 0.0
+    }
+  },
+  "rows": [
+    {
+      "anchor_stats": {},
+      "branch_stats": {},
+      "case_id": "basic_planning",
+      "compute_proxy_metrics": {
+        "estimated_compute_cost": 1.0
+      },
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "quality_per_compute": 0.0,
+      "quality_proxy_score": 0.0,
+      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd",
+      "runtime_override_application_method": "loaded_checkpoint",
+      "runtime_override_applied": true,
+      "runtime_override_reason": "requested overrides already match the loaded checkpoint config",
+      "runtime_override_status": "exact",
+      "scratch_stats": {},
+      "thought_graph_stats": {},
+      "variant_id": "checkpoint_config_exact"
+    },
+    {
+      "anchor_stats": {},
+      "branch_stats": {},
+      "case_id": "basic_planning",
+      "compute_proxy_metrics": {
+        "estimated_compute_cost": 1.0
+      },
+      "flocking_stats": {},
+      "hierarchy_stats": {},
+      "model_local_delib_graph_artifact": {},
+      "neighbor_graph_stats": {},
+      "quality_per_compute": 0.0,
+      "quality_proxy_score": 0.0,
+      "response": "",
+      "runtime_override_application_method": "unsupported",
+      "runtime_override_applied": false,
+      "runtime_override_reason": "runtime override requires a model shape/module layout that is not strictly state-dict compatible with the loaded checkpoint: Error(s) in loading state_dict for GPT:\n\tMissing key(s) in state_dict: \"local_delib_blocks.0.halt_threshold_logit\", \"local_delib_blocks.0.scratch_init\", \"local_delib_blocks.0.scratch_read_temp\", \"local_delib_blocks.0.in_proj.weight\", \"local_delib_blocks.0.in_proj.bias\", \"local_delib_blocks.0.mixer.conv.weight\", \"local_delib_blocks.0.mixer.conv.bias\", \"local_delib_blocks.0.phrase_pool.proj.weight\", \"local_delib_blocks.0.phrase_pool.proj.bias\", \"local_delib_blocks.0.phrase_consensus.proposal_proj.weight\", \"local_delib_blocks.0.phrase_consensus.proposal_proj.bias\", \"local_delib_blocks.0.phrase_consensus.consensus_proj.weight\", \"local_delib_blocks.0.phrase_consensus.consensus_proj.bias\", \"local_delib_blocks.0.phrase_consensus.agreement_gate.weight\", \"local_delib_blocks.0.phrase_consensus.agreement_gate.bias\", \"local_delib_blocks.0.state_head.proj.weight\", \"local_delib_blocks.0.state_head.proj.bias\", \"local_delib_blocks.0.scratch_query.weight\", \"local_delib_blocks.0.scratch_query.bias\", \"local_delib_blocks.0.scratch_write_value.weight\", \"local_delib_blocks.0.scratch_write_value.bias\", \"local_delib_blocks.0.scratch_read_mix.weight\", \"local_delib_blocks.0.scratch_read_mix.bias\", \"local_delib_blocks.0.scratch_to_state.weight\", \"local_delib_blocks.0.scratch_to_state.bias\", \"local_delib_blocks.0.scratch_persist_gate.weight\", \"local_delib_blocks.0.scratch_persist_gate.bias\", \"local_delib_blocks.0.update.0.weight\", \"local_delib_blocks.0.update.0.bias\", \"local_delib_blocks.0.update.2.weight\", \"local_delib_blocks.0.update.2.bias\", \"local_delib_blocks.0.out_proj.weight\", \"local_delib_blocks.0.out_proj.bias\", \"local_delib_blocks.1.halt_threshold_logit\", \"local_delib_blocks.1.scratch_init\", \"local_delib_blocks.1.scratch_read_temp\", \"local_delib_blocks.1.in_proj.weight\", \"local_delib_blocks.1.in_proj.bias\", \"local_delib_blocks.1.mixer.conv.weight\", \"local_delib_blocks.1.mixer.conv.bias\", \"local_delib_blocks.1.phrase_pool.proj.weight\", \"local_delib_blocks.1.phrase_pool.proj.bias\", \"local_delib_blocks.1.phrase_consensus.proposal_proj.weight\", \"local_delib_blocks.1.phrase_consensus.proposal_proj.bias\", \"local_delib_blocks.1.phrase_consensus.consensus_proj.weight\", \"local_delib_blocks.1.phrase_consensus.consensus_proj.bias\", \"local_delib_blocks.1.phrase_consensus.agreement_gate.weight\", \"local_delib_blocks.1.phrase_consensus.agreement_gate.bias\", \"local_delib_blocks.1.state_head.proj.weight\", \"local_delib_blocks.1.state_head.proj.bias\", \"local_delib_blocks.1.scratch_query.weight\", \"local_delib_blocks.1.scratch_query.bias\", \"local_delib_blocks.1.scratch_write_value.weight\", \"local_delib_blocks.1.scratch_write_value.bias\", \"local_delib_blocks.1.scratch_read_mix.weight\", \"local_delib_blocks.1.scratch_read_mix.bias\", \"local_delib_blocks.1.scratch_to_state.weight\", \"local_delib_blocks.1.scratch_to_state.bias\", \"local_delib_blocks.1.scratch_persist_gate.weight\", \"local_delib_blocks.1.scratch_persist_gate.bias\", \"local_delib_blocks.1.update.0.weight\", \"local_delib_blocks.1.update.0.bias\", \"local_delib_blocks.1.update.2.weight\", \"local_delib_blocks.1.update.2.bias\", \"local_delib_blocks.1.out_proj.weight\", \"local_delib_blocks.1.out_proj.bias\". ",
+      "runtime_override_status": "unsupported",
+      "scratch_stats": {},
+      "thought_graph_stats": {},
+      "variant_id": "shape_incompatible_override"
+    }
+  ],
+  "runtime_variant_override_counts": {
+    "exact": 1,
+    "unsupported": 1
+  },
+  "runtime_variant_override_statuses": {
+    "checkpoint_config_exact": "exact",
+    "shape_incompatible_override": "unsupported"
+  },
+  "runtime_variant_overrides_applied": false,
+  "scratch_stats": {
+    "checkpoint_config_exact": {},
+    "shape_incompatible_override": {}
+  },
+  "thought_graph_stats": {
+    "checkpoint_config_exact": {},
+    "shape_incompatible_override": {}
+  },
+  "variant_mean_scores": {
+    "checkpoint_config_exact": 0.0,
+    "shape_incompatible_override": 0.0
+  }
+}
