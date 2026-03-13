@@ -34,7 +34,7 @@ class SkillRegistry:
             if score <= 0:
                 continue
             matches.append(SkillMatch(skill=skill, score=score))
-        matches.sort(key=lambda match: match.score, reverse=True)
+        matches.sort(key=lambda match: (-match.score, match.skill.skill_id))
         return matches[:limit]
 
     def best_for(self, query: str) -> SkillArtifact | None:

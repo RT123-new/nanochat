@@ -218,3 +218,31 @@ tests/
 - each auxiliary loss has a disable-by-default switch and clear weighting config
 - `docs/evals.md` includes lightweight metrics for variable compute efficiency and quality tradeoffs
 - documentation records ablation expectations and rollback criteria for each auxiliary path
+
+## Milestone 16 - Pre-training proof prompt pack
+### Goals
+- Add a docs-only master prompt pack for generating comprehensive tests for the added cognition and local-deliberation systems
+- Add a repo-native runbook that explains how to execute the resulting proof suite before a training run
+- Keep the default proof path CPU/mock-first, with optional checkpoint-backed smoke isolated from the required gate
+
+### Acceptance criteria
+- every added cognition/local-delib feature is mapped to at least one correctness prompt and one usefulness/evidence prompt
+- commands are CPU/mock-first, with optional checkpoint-backed smoke clearly separated
+- run order, artifact paths, and pass/fail evidence are explicit
+- `codex_test_prompt_pack.md` is decision-complete for Prompts 0-9
+- `docs/pretraining_validation_runbook.md` maps features to tests, prompts, artifacts, and execution stages
+- `docs/evals.md` links the new pack/runbook and aligns output paths with `scripts/cognition_eval.py`
+- no changes to `runs/`, `scripts/base_train.py`, or the default training flow are required
+
+## Milestone 17 - Optional engine smoke hardening and stronger non-proxy evaluation
+### Goals
+- Add a stricter optional engine-smoke manifest around the existing local checkpoint path without changing the default CPU/mock proof gate
+- Add stronger opt-in non-proxy evaluation through task-native benchmark grading and natural-language local-deliberation cases
+
+### Acceptance criteria
+- `tests/test_cognition_engine_smoke.py` writes or updates an engine smoke manifest with checkpoint identity, commands, artifacts, runtime-override coverage, and skip/fail reason
+- `scripts/cognition_eval.py` supports `--suite task-grounded` and `--suite local-delib-natural`
+- task-grounded eval reuses existing repo task graders for `GSM8K`, `SpellingBee`, and `HumanEval`
+- natural local-delib eval uses rule-based exact graders without relying on `KEY=VALUE` response formatting
+- engine-backed benchmark claims are documented as exact-row-only, while non-exact rows remain available for debugging
+- docs and `documentation.md` record commands, artifact paths, interpretation rules, and remaining limits

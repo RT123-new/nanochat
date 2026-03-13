@@ -794,6 +794,8 @@ class TokenToThoughtReadWrite(nn.Module):
         h: torch.Tensor,
         nodes: torch.Tensor,
         node_limits: torch.Tensor,
+        *,
+        start_position: int = 0,
     ) -> tuple[torch.Tensor, torch.Tensor, float, torch.Tensor]:
         bsz, seq_len, _ = h.shape
         node_dim = nodes.shape[-1]
@@ -812,7 +814,7 @@ class TokenToThoughtReadWrite(nn.Module):
         weight_tensor_accum = h.new_zeros(())
         active_tokens = 0
         for token_idx in range(seq_len):
-            accessible = node_limits <= token_idx
+            accessible = node_limits <= (token_idx + start_position)
             accessible_count = int(accessible.sum().item())
             if accessible_count == 0:
                 continue
@@ -2217,6 +2219,7 @@ class LocalDeliberationBlock(nn.Module):
             token_h,
             nodes=final_nodes,
             node_limits=node_limits,
+            start_position=prefix_len,
         )
         return self.thought_consensus_reducer(read_summary, consensus_summary)
 
@@ -2292,7 +2295,7 @@ class LocalDeliberationBlock(nn.Module):
             return h_full, stats, self.build_decode_cache(stage_states)
 
         stage_states: list[torch.Tensor] = cache["stage_states"]  # type: ignore[assignment]
-        if h_new.shape[1] != 1 or self.use_thought_graph:
+        if h_new.shape[1] != 1:
             h_full = torch.cat([stage_states[0], h_new], dim=1)
             h_full, stats, new_stage_states = self.deliberate_state(h_full, capture_stage_states=True)
             return h_full[:, -h_new.shape[1]:, :], stats, self.build_decode_cache(new_stage_states)

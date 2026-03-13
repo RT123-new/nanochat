@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .backend import BackendAdapter
+from .backend import BackendAdapter, summarize_local_delib_for_creative_policy
 from .consolidation import Consolidator
-from .creative import CreativeWorkspace
+from .creative import CreativeCandidate, CreativeWorkspace
 from .memory import EpisodicMemory, RankedEpisode, RankedMemory, SemanticMemory
 from .normalize import term_set
 from .router import ExplicitRouter
@@ -14,7 +14,7 @@ from .sandbox import LightweightSandbox
 from .schemas import Episode, SkillArtifact, Trace
 from .skills import SkillRegistry
 from .traces import TraceRecorder
-from .verifier import VerifierWorkspace
+from .verifier import RankedCandidate, VerifierWorkspace
 
 
 @dataclass(slots=True)
@@ -55,6 +55,10 @@ class CognitionAgent:
         semantic_hits = self.semantic.retrieve(query, limit=self.SEMANTIC_SUPPORT_LIMIT)
         reused_skill = self.registry.best_for(query)
         response = ""
+        selected_strategy_id: str | None = None
+        creative_metadata: dict[str, object] | None = None
+        verifier_metadata: dict[str, object] | None = None
+        sandbox_metadata: dict[str, object] | None = None
         episodic_hits = self._select_episodic_support(
             query=query,
             decision=decision.action,
@@ -62,32 +66,103 @@ class CognitionAgent:
             reused_skill=reused_skill,
         )
         selected_episodes = [match.episode for match in episodic_hits]
+        prompt = _compose_prompt(
+            query=query,
+            episodes=selected_episodes,
+            semantic_hits=semantic_hits,
+            reused_skill=reused_skill,
+        )
 
         if decision.action == "retrieve_memory":
-            prompt = _compose_prompt(
-                query=query,
-                episodes=selected_episodes,
-                semantic_hits=semantic_hits,
-                reused_skill=reused_skill,
-            )
             response = self.backend.run(prompt)
         elif decision.action in {"creative_explore", "verify", "sandbox"}:
-            prompt = _compose_prompt(
-                query=query,
+            support_profile = self._build_support_profile(
                 episodes=selected_episodes,
                 semantic_hits=semantic_hits,
                 reused_skill=reused_skill,
             )
-            candidates = self.creative.generate_candidates(prompt, limit=3)
-            steps.append(f"candidates:{len(candidates)}")
+            creative_run = self.creative.generate_candidates(
+                query=query,
+                base_prompt=prompt,
+                route=decision.action,
+                support_profile=support_profile,
+                initial_model_summary=summarize_local_delib_for_creative_policy(
+                    getattr(self.backend.backend, "last_generation_metadata", None)
+                ),
+                limit=3,
+            )
+            strategy_text = ",".join(creative_run.plan.explored_strategy_ids)
+            if strategy_text:
+                steps.append(f"creative_strategies:{strategy_text}")
+            steps.append(f"candidates:{len(creative_run.candidates)}")
+
+            creative_metadata = creative_run.plan.as_trace_payload()
+            creative_metadata["candidates"] = [
+                candidate.as_trace_payload()
+                for candidate in creative_run.candidates
+            ]
+            creative_metadata["model_summary"] = dict(creative_run.model_summary)
+
+            selection = self.verifier.select(
+                query=query,
+                candidates=creative_run.candidates,
+                route=decision.action,
+                support_profile=support_profile,
+            )
+            verifier_metadata = {
+                "chosen_candidate_id": selection.chosen.candidate_id,
+                "chosen_strategy_id": selection.chosen.strategy_id,
+                "repair_required": selection.repair_required,
+                "repair_reason": selection.repair_reason,
+                "ranked_candidates": [
+                    ranked.as_trace_payload()
+                    for ranked in selection.ranked
+                ],
+            }
+            steps.append(f"verifier_score:{selection.chosen.total_score:.2f}")
+            if selection.repair_required:
+                steps.append(f"repair:{selection.repair_reason}")
             if decision.action == "sandbox":
-                outcomes = self.sandbox.explore(query, branches=candidates)
-                steps.append(f"sandbox_branches:{len(outcomes)}")
-                response = outcomes[0].branch if outcomes else ""
+                shortlist = self._select_sandbox_shortlist(
+                    creative_run.candidates,
+                    selection.ranked,
+                )
+                steps.append(f"sandbox_shortlist:{len(shortlist)}")
+                sandbox_report = self.sandbox.explore(
+                    query,
+                    shortlist,
+                    verifier_ranked=selection.ranked,
+                    support_profile=support_profile,
+                )
+                steps.append(f"sandbox_branches:{len(sandbox_report.outcomes)}")
+                selected_outcome = sandbox_report.selected
+                response = selected_outcome.branch if selected_outcome else selection.chosen.candidate
+                selected_strategy_id = selected_outcome.strategy_id if selected_outcome else selection.chosen.strategy_id
+                creative_metadata["handoff"] = "sandbox"
+                creative_metadata["selected_candidate_id"] = selected_outcome.candidate_id if selected_outcome else selection.chosen.candidate_id
+                sandbox_metadata = {
+                    "shortlist_candidate_ids": [
+                        candidate.candidate_id
+                        for candidate in shortlist
+                    ],
+                    "selected_candidate_id": selected_outcome.candidate_id if selected_outcome else selection.chosen.candidate_id,
+                    "selected_strategy_id": selected_strategy_id,
+                    "outcomes": [
+                        outcome.as_trace_payload()
+                        for outcome in sandbox_report.outcomes
+                    ],
+                }
             else:
-                best = self.verifier.choose(query=query, candidates=candidates)
-                steps.append(f"verifier_score:{best.score:.2f}")
-                response = best.candidate
+                response = selection.chosen.candidate
+                selected_strategy_id = selection.chosen.strategy_id
+                creative_metadata["handoff"] = "verifier"
+                creative_metadata["selected_candidate_id"] = selection.chosen.candidate_id
+            creative_metadata["selected_strategy_id"] = selected_strategy_id
+            creative_metadata["rejected_candidate_ids"] = [
+                candidate.candidate_id
+                for candidate in creative_run.candidates
+                if candidate.candidate_id != creative_metadata.get("selected_candidate_id")
+            ]
         elif decision.action == "consolidate":
             skill = self.consolidator.consolidate(self.episodic.recent(limit=50))
             if skill is None:
@@ -97,12 +172,6 @@ class CognitionAgent:
                 response = f"Consolidated skill: {skill.name} ({skill.skill_id})"
                 steps.append("consolidated:true")
         else:
-            prompt = _compose_prompt(
-                query=query,
-                episodes=selected_episodes,
-                semantic_hits=semantic_hits,
-                reused_skill=reused_skill,
-            )
             response = self.backend.run(prompt)
 
         if episodic_hits:
@@ -117,7 +186,11 @@ class CognitionAgent:
             prompt=query,
             response=response,
             tags=[decision.action],
-            metadata={"success": bool(response.strip()), "decision": decision.action},
+            metadata={
+                "success": bool(response.strip()),
+                "decision": decision.action,
+                **({"strategy": selected_strategy_id} if selected_strategy_id else {}),
+            },
         )
         self.episodic.write(episode)
 
@@ -131,10 +204,18 @@ class CognitionAgent:
             "retrieved_semantic_ids": [match.item.item_id for match in semantic_hits],
             "reused_skill_ids": [reused_skill.skill_id] if reused_skill else [],
         }
+        if creative_metadata is not None:
+            metadata["creative_workspace"] = creative_metadata
+        if verifier_metadata is not None:
+            metadata["verifier"] = verifier_metadata
+        if sandbox_metadata is not None:
+            metadata["sandbox"] = sandbox_metadata
         backend_metadata = getattr(self.backend.backend, "last_generation_metadata", None)
         if backend_metadata:
             if backend_metadata.get("local_deliberation_stats") is not None:
                 metadata["model_local_delib"] = backend_metadata["local_deliberation_stats"]
+            if backend_metadata.get("local_delib_runtime_override") is not None:
+                metadata["local_delib_runtime_override"] = backend_metadata["local_delib_runtime_override"]
             for key, value in backend_metadata.items():
                 if key.startswith("model_local_delib."):
                     metadata[key] = value
@@ -153,6 +234,54 @@ class CognitionAgent:
             reused_skill_id=reused_skill.skill_id if reused_skill else None,
             consolidated_skill=consolidated_skill,
         )
+
+    def _build_support_profile(
+        self,
+        *,
+        episodes: list[Episode],
+        semantic_hits: list[RankedMemory],
+        reused_skill: SkillArtifact | None,
+    ) -> dict[str, object]:
+        support_terms: set[str] = set()
+        for episode in episodes:
+            support_terms.update(term_set(episode.prompt, episode.response, episode.tags, episode.metadata))
+        for match in semantic_hits:
+            support_terms.update(_semantic_terms(match))
+        if reused_skill is not None:
+            support_terms.update(_skill_terms(reused_skill))
+        return {
+            "memory_heavy": bool(episodes or semantic_hits or reused_skill is not None),
+            "episodic_count": len(episodes),
+            "semantic_count": len(semantic_hits),
+            "skill_count": 1 if reused_skill is not None else 0,
+            "support_terms": sorted(support_terms),
+        }
+
+    def _select_sandbox_shortlist(
+        self,
+        candidates: list[CreativeCandidate],
+        ranked: list[RankedCandidate],
+    ) -> list[CreativeCandidate]:
+        if not candidates:
+            return []
+        candidates_by_id = {candidate.candidate_id: candidate for candidate in candidates}
+        shortlist: list[CreativeCandidate] = []
+        if ranked:
+            best = candidates_by_id.get(ranked[0].candidate_id)
+            if best is not None:
+                shortlist.append(best)
+            most_diverse = max(
+                ranked[1:],
+                key=lambda item: item.diversity_score,
+                default=None,
+            )
+            if most_diverse is not None:
+                candidate = candidates_by_id.get(most_diverse.candidate_id)
+                if candidate is not None and candidate.candidate_id not in {item.candidate_id for item in shortlist}:
+                    shortlist.append(candidate)
+        if not shortlist:
+            shortlist = candidates[:2]
+        return shortlist[:2]
 
     def _select_episodic_support(
         self,
@@ -226,7 +355,8 @@ def _compose_prompt(
 
     if not sections:
         return query
-    return f"{query}\n\n" + "\n\n".join(sections)
+    sections.append("User request:\n" + query)
+    return "\n\n".join(sections)
 
 
 def _episode_terms(match: RankedEpisode) -> set[str]:
