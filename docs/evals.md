@@ -174,6 +174,34 @@ Proof-pack engine path:
 python -m scripts.cognition_eval --backend engine --source sft --no-enforce-improvement --output artifacts/pretraining_proofs/engine/cognition_eval.json
 ```
 
+## One-command laptop snapshot
+
+For local qualitative inspection plus a small task check, use:
+
+```bash
+python -m scripts.chat_quality --source sft --device-type mps
+```
+
+This wrapper is intended for laptop-sized runs:
+- it loads the checkpoint once
+- runs a small built-in prompt suite and saves baseline vs cognition responses
+- runs a small task-grounded sweep by default over `GSM8K,SpellingBee`
+- writes a compact markdown report plus JSON artifacts under `artifacts/chat_quality/<timestamp>/`
+
+Saved files:
+- `REPORT.md` for quick reading
+- `chat_prompts.json` for baseline/cognition prompt outputs
+- `snapshot_summary.json` for machine-readable run metadata
+- `task_grounded.json` when the task-grounded portion completes
+
+Notes:
+- defaults are deterministic (`--temperature 0.0`) so repeated runs are easier to compare
+- on Apple Silicon, `--device-type mps` is the intended setting; leaving it empty will autodetect
+- if your checkpoints live outside the default cache, set `NANOCHAT_BASE_DIR` or pass `--base-dir`
+- if task-grounded eval cannot fetch its task assets, the prompt comparison report is still written and the failure is recorded unless you pass `--strict-task-grounded`
+- pass `--skip-task-grounded` if you only want chat-style outputs
+- pass multiple `--prompt "..."` flags to replace the built-in prompt set with your own
+
 Optional Prompt 9 smoke test:
 
 ```bash

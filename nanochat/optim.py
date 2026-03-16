@@ -17,8 +17,7 @@ Good old AdamW optimizer, fused kernel.
 https://arxiv.org/abs/1711.05101
 """
 
-@torch.compile(dynamic=False, fullgraph=True)
-def adamw_step_fused(
+def _adamw_step_impl(
     p: Tensor,              # (32768, 768) - parameter tensor
     grad: Tensor,           # (32768, 768) - gradient, same shape as p
     exp_avg: Tensor,        # (32768, 768) - first moment, same shape as p
@@ -47,6 +46,39 @@ def adamw_step_fused(
     denom = (exp_avg_sq / bias2).sqrt() + eps_t
     step_size = lr_t / bias1
     p.add_(exp_avg / denom, alpha=-step_size)
+
+
+adamw_step_compiled = torch.compile(_adamw_step_impl, dynamic=False, fullgraph=True)
+
+
+def adamw_step_fused(
+    p: Tensor,
+    grad: Tensor,
+    exp_avg: Tensor,
+    exp_avg_sq: Tensor,
+    step_t: Tensor,
+    lr_t: Tensor,
+    beta1_t: Tensor,
+    beta2_t: Tensor,
+    eps_t: Tensor,
+    wd_t: Tensor,
+) -> None:
+    if p.device.type == "mps":
+        step_t = step_t.to(device=p.device)
+        lr_t = lr_t.to(device=p.device)
+        beta1_t = beta1_t.to(device=p.device)
+        beta2_t = beta2_t.to(device=p.device)
+        eps_t = eps_t.to(device=p.device)
+        wd_t = wd_t.to(device=p.device)
+        _adamw_step_impl(
+            p, grad, exp_avg, exp_avg_sq,
+            step_t, lr_t, beta1_t, beta2_t, eps_t, wd_t,
+        )
+        return
+    adamw_step_compiled(
+        p, grad, exp_avg, exp_avg_sq,
+        step_t, lr_t, beta1_t, beta2_t, eps_t, wd_t,
+    )
 
 # -----------------------------------------------------------------------------
 """
@@ -87,8 +119,7 @@ polar_express_coeffs = [
     (2.3465413258596377, -1.7097828382687081, 0.42323551169305323),
 ]
 
-@torch.compile(dynamic=False, fullgraph=True)
-def muon_step_fused(
+def _muon_step_impl(
     stacked_grads: Tensor,          # (12, 768, 3072) - stacked gradients
     stacked_params: Tensor,         # (12, 768, 3072) - stacked parameters
     momentum_buffer: Tensor,        # (12, 768, 3072) - first moment buffer
@@ -112,7 +143,8 @@ def muon_step_fused(
     g = stacked_grads.lerp_(momentum_buffer, momentum)
 
     # Polar express
-    X = g.bfloat16()
+    # MPS is less reliable with bf16-heavy optimizer math, so keep the fallback in fp32 there.
+    X = g.float() if g.device.type == "mps" else g.bfloat16()
     X = X / (X.norm(dim=(-2, -1), keepdim=True) * 1.02 + 1e-6)
     if g.size(-2) > g.size(-1): # Tall matrix
         for a, b, c in polar_express_coeffs[:ns_steps]:
@@ -144,6 +176,53 @@ def muon_step_fused(
     wd = wd_t.to(g.dtype)
     mask = (g * stacked_params) >= 0
     stacked_params.sub_(lr * g + lr * wd * stacked_params * mask)
+
+
+muon_step_compiled = torch.compile(_muon_step_impl, dynamic=False, fullgraph=True)
+
+
+def muon_step_fused(
+    stacked_grads: Tensor,
+    stacked_params: Tensor,
+    momentum_buffer: Tensor,
+    second_momentum_buffer: Tensor,
+    momentum_t: Tensor,
+    lr_t: Tensor,
+    wd_t: Tensor,
+    beta2_t: Tensor,
+    ns_steps: int,
+    red_dim: int,
+) -> None:
+    if stacked_params.device.type == "mps":
+        momentum_t = momentum_t.to(device=stacked_params.device)
+        lr_t = lr_t.to(device=stacked_params.device)
+        wd_t = wd_t.to(device=stacked_params.device)
+        beta2_t = beta2_t.to(device=stacked_params.device)
+        _muon_step_impl(
+            stacked_grads,
+            stacked_params,
+            momentum_buffer,
+            second_momentum_buffer,
+            momentum_t,
+            lr_t,
+            wd_t,
+            beta2_t,
+            ns_steps,
+            red_dim,
+        )
+        return
+    muon_step_compiled(
+        stacked_grads,
+        stacked_params,
+        momentum_buffer,
+        second_momentum_buffer,
+        momentum_t,
+        lr_t,
+        wd_t,
+        beta2_t,
+        ns_steps,
+        red_dim,
+    )
 
 # -----------------------------------------------------------------------------
 # Single GPU version of the MuonAdamW optimizer.
