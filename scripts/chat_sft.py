@@ -21,6 +21,7 @@ from nanochat.common import compute_init, compute_cleanup, print0, DummyWandb, g
 from nanochat.tokenizer import get_token_bytes
 from nanochat.checkpoint_manager import save_checkpoint, load_model, load_optimizer_state
 from nanochat.loss_eval import evaluate_bpb
+from nanochat.sft_data import prepare_packed_conversation
 import torch.distributed as dist
 from nanochat.flash_attention import HAS_FA3
 from nanochat.engine import Engine
@@ -40,6 +41,12 @@ parser = argparse.ArgumentParser(description="Supervised fine-tuning (SFT) the m
 parser.add_argument("--run", type=str, default="dummy", help="wandb run name ('dummy' disables wandb logging)")
 # Runtime
 parser.add_argument("--device-type", type=str, default="", help="cuda|cpu|mps (empty = autodetect)")
+parser.add_argument(
+    "--compile",
+    action=argparse.BooleanOptionalAction,
+    default=None,
+    help="enable torch.compile for training (default: enabled except on MPS)",
+)
 # Model loading
 parser.add_argument("--model-tag", type=str, default=None, help="model tag to load from")
 parser.add_argument("--model-step", type=int, default=None, help="model step to load from")
@@ -118,7 +125,14 @@ for name, fallback, source in [
         print0(f"Using {name}={arg_val}")
 
 orig_model = model
-model = torch.compile(model, dynamic=False)
+use_torch_compile = args.compile if args.compile is not None else device_type != "mps"
+if use_torch_compile:
+    print0("torch.compile: enabled")
+    model = torch.compile(model, dynamic=False)
+else:
+    print0("torch.compile: disabled")
+    if device_type == "mps":
+        print0("Skipping torch.compile on MPS because the current compiler path is unstable for this training loop.")
 depth = model.config.n_layer
 num_flops_per_token = model.estimate_flops()
 tokens_per_fwdbwd = args.device_batch_size * args.max_seq_len # tokens per iteration for a single rank
@@ -215,15 +229,25 @@ def sft_data_generator_bos_bestfit(split, buffer_size=100):
 
     def refill_buffer():
         nonlocal cursor, epoch
+        skipped_since_append = 0
         while len(conv_buffer) < buffer_size:
             conversation = dataset[cursor]
-            ids, mask = tokenizer.render_conversation(conversation)
-            conv_buffer.append((ids, mask))
+            prepared = prepare_packed_conversation(tokenizer, conversation, row_capacity)
             cursor += ddp_world_size
             if cursor >= dataset_size:
                 cursor = cursor % dataset_size
                 epoch += 1
                 # Note: last_step is now triggered based on consumption, not fetching
+            if prepared is None:
+                skipped_since_append += 1
+                if skipped_since_append >= dataset_size and not conv_buffer:
+                    raise RuntimeError(
+                        "SFT dataloader could not find any conversations with supervised assistant tokens "
+                        f"under max_seq_len={args.max_seq_len}"
+                    )
+                continue
+            conv_buffer.append(prepared)
+            skipped_since_append = 0
 
     while True:
         rows = []
@@ -436,6 +460,11 @@ while True:
     t0 = time.time()
     for micro_step in range(grad_accum_steps):
         loss = model(x, y)
+        if not torch.isfinite(loss).item():
+            raise RuntimeError(
+                f"Non-finite SFT loss at optimizer step {step} micro-step {micro_step}. "
+                "This usually means the batch has no supervised assistant tokens or training became numerically unstable."
+            )
         train_loss = loss.detach() # for logging
         loss = loss / grad_accum_steps # each .backward() is a grad sum => normalize loss here
         if scaler is not None:

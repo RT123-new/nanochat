@@ -43,6 +43,12 @@ parser = argparse.ArgumentParser(description="Pretrain base model")
 parser.add_argument("--run", type=str, default="dummy", help="wandb run name ('dummy' disables wandb logging)")
 # Runtime
 parser.add_argument("--device-type", type=str, default="", help="cuda|cpu|mps (empty = autodetect)")
+parser.add_argument(
+    "--compile",
+    action=argparse.BooleanOptionalAction,
+    default=None,
+    help="enable torch.compile for training (default: enabled except on MPS)",
+)
 # FP8 training
 parser.add_argument("--fp8", action="store_true", help="enable FP8 training (requires H100+ GPU and torchao)")
 parser.add_argument("--fp8-recipe", type=str, default="tensorwise", choices=["rowwise", "tensorwise"], help="FP8 scaling recipe: tensorwise (faster, recommended) or rowwise (more accurate but slower)")
@@ -544,7 +550,14 @@ def disable_fp8(model):
 # Compile the model
 
 orig_model = model # original, uncompiled model, for saving raw model state_dict and for inference/evaluation (because the shapes may change shape)
-model = torch.compile(model, dynamic=False) # the inputs to model will never change shape so dynamic=False is safe
+use_torch_compile = args.compile if args.compile is not None else device_type != "mps"
+if use_torch_compile:
+    print0("torch.compile: enabled")
+    model = torch.compile(model, dynamic=False) # the inputs to model will never change shape so dynamic=False is safe
+else:
+    print0("torch.compile: disabled")
+    if device_type == "mps":
+        print0("Skipping torch.compile on MPS because the current compiler path is unstable for this training loop.")
 
 # -----------------------------------------------------------------------------
 # Scaling laws and muP extrapolations to determine the optimal training horizon, batch size, learning rates, weight decay.
