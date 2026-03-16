@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "base_dir": "/Users/RT1/.cache/nanochat",
+    "source": "sft",
+    "model_tag": "m1tiny",
+    "step": 199,
+    "device_type": "mps",
+    "output_dir": "artifacts/chat_quality/20260316_114339",
+    "temperature": 0.0,
+    "top_k": 50,
+    "max_tokens": 192,
+    "prompt_count": 4,
+    "task_names": [
+      "GSM8K",
+      "SpellingBee"
+    ],
+    "task_grounded_max_problems": 3
+  },
+  "prompt_rows": [
+    {
+      "prompt_id": "explain_gradient_clipping",
+      "prompt": "Explain gradient clipping in plain English and give one short example.",
+      "baseline_response": "We are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used that are used that are used and are used and are used and are used and are used and are used that are used and are used and are used and are used that are used that are used and are used and are used that are used that are used and are used that are used that are used and are used and are used and are used and are used that are used that are used that are used that are used and are used and are used that are used and are used that are used that are used that are used that are are",
+      "cognition_response": "We are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used that are used that are used and are used and are used and are used and are used and are used that are used and are used and are used and are used that are used that are used and are used and are used that are used that are used and are used that are used that are used and are used and are used and are used and are used that are used that are used that are used that are used and are used and are used that are used and are used that are used that are used that are used that are are",
+      "cognition_decision": "direct_answer",
+      "trace_steps": [
+        "route:direct_answer"
+      ]
+    },
+    {
+      "prompt_id": "debug_training_nan",
+      "prompt": "Give me a five-step plan to debug training loss suddenly becoming NaN.",
+      "baseline_response": "We are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used that are used and are used and are used and are used and are used that are used and are used that are used that are used and are used and are used that are used and are used and are used that are used that are used that are used",
+      "cognition_response": "We are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used that are used and are used and are used and are used and are used that are used and are used that are used that are used and are used and are used that are used and are used and are used that are used that are used that are used",
+      "cognition_decision": "direct_answer",
+      "trace_steps": [
+        "route:direct_answer"
+      ]
+    },
+    {
+      "prompt_id": "python_fibonacci",
+      "prompt": "Write a short Python function that returns Fibonacci numbers up to n.",
+      "baseline_response": "We are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used that are used and are used and are used and are used and are used and are used and are are are are are are are are are are are are are are used and are are are are are are are are used that are are used and are't and are't",
+      "cognition_response": "We are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used that are used and are used and are used and are used and are used and are used and are are are are are are are are are are are are are are used and are are are are are are are are used that are are used and are't and are't",
+      "cognition_decision": "direct_answer",
+      "trace_steps": [
+        "route:direct_answer"
+      ]
+    },
+    {
+      "prompt_id": "brainstorm_memory_features",
+      "prompt": "Brainstorm four practical memory features for a tiny chatbot.",
+      "baseline_response": "We are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used that are used and are used that are used that are used and are used and are used and are used that are used that are used and are used that are used that are used that are used and are used and are used and are used that are used that are used that are used that are used and are used that are used that are used and are used and are used that are used that are used that are used",
+      "cognition_response": "We are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used and are used",
+      "cognition_decision": "creative_explore",
+      "trace_steps": [
+        "route:creative_explore",
+        "creative_strategies:conservative_answer,divergent_ideas",
+        "candidates:2",
+        "verifier_score:0.17"
+      ]
+    }
+  ],
+  "task_grounded": null,
+  "task_grounded_error": null,
+  "artifacts": {
+    "prompt_json": "artifacts/chat_quality/20260316_114339/chat_prompts.json",
+    "task_grounded_json": null
+  }
+}

@@ -1,0 +1,45 @@
+[
+  {
+    "prompt_id": "explain_gradient_clipping",
+    "prompt": "Explain gradient clipping in plain English and give one short example.",
+    "baseline_response": "are\n, is are\n, is are",
+    "cognition_response": "are\n, is are\n, is are",
+    "cognition_decision": "direct_answer",
+    "trace_steps": [
+      "route:direct_answer"
+    ]
+  },
+  {
+    "prompt_id": "debug_training_nan",
+    "prompt": "Give me a five-step plan to debug training loss suddenly becoming NaN.",
+    "baseline_response": "the: the, is not\n, is not is not\n, is not",
+    "cognition_response": "the: the, is not\n, is not is not\n, is not",
+    "cognition_decision": "direct_answer",
+    "trace_steps": [
+      "route:direct_answer"
+    ]
+  },
+  {
+    "prompt_id": "python_fibonacci",
+    "prompt": "Write a short Python function that returns Fibonacci numbers up to n.",
+    "baseline_response": "the, is not be are\n are\n are",
+    "cognition_response": "the, is not be are\n are\n are",
+    "cognition_decision": "direct_answer",
+    "trace_steps": [
+      "route:direct_answer"
+    ]
+  },
+  {
+    "prompt_id": "brainstorm_memory_features",
+    "prompt": "Brainstorm four practical memory features for a tiny chatbot.",
+    "baseline_response": "are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are are",
+    "cognition_response": "We are\n are\n are",
+    "cognition_decision": "creative_explore",
+    "trace_steps": [
+      "route:creative_explore",
+      "creative_strategies:conservative_answer,divergent_ideas",
+      "candidates:2",
+      "verifier_score:0.17"
+    ]
+  }
+]

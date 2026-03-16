@@ -3,9 +3,9 @@
   "baseline_mean": 0.0,
   "checkpoint_identity": {
     "device_type": "cpu",
-    "model_tag": "d1",
-    "source": "sft",
-    "step": 1
+    "model_tag": "d2_tiny_smoke",
+    "source": "base",
+    "step": 5
   },
   "cognition_mean": 0.0,
   "delta": 0.0,
@@ -28,7 +28,7 @@
   "rows": [
     {
       "baseline_passed": false,
-      "baseline_response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "baseline_response": "emanusabled fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCod",
       "baseline_runtime_override_application_method": "none",
       "baseline_runtime_override_reason": null,
       "baseline_runtime_override_status": "not_requested",
@@ -36,7 +36,7 @@
       "benchmark_eligible": true,
       "cognition_decision": "direct_answer",
       "cognition_passed": false,
-      "cognition_response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "cognition_response": "emanusabled fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCod",
       "cognition_runtime_override_application_method": "none",
       "cognition_runtime_override_reason": null,
       "cognition_runtime_override_status": "not_requested",
@@ -53,7 +53,7 @@
     },
     {
       "baseline_passed": false,
-      "baseline_response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "baseline_response": "emanusabled fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCod",
       "baseline_runtime_override_application_method": "none",
       "baseline_runtime_override_reason": null,
       "baseline_runtime_override_status": "not_requested",
@@ -61,7 +61,7 @@
       "benchmark_eligible": true,
       "cognition_decision": "direct_answer",
       "cognition_passed": false,
-      "cognition_response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfF",
+      "cognition_response": "emanusabled fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCodireed fCod",
       "cognition_runtime_override_application_method": "none",
       "cognition_runtime_override_reason": null,
       "cognition_runtime_override_status": "not_requested",

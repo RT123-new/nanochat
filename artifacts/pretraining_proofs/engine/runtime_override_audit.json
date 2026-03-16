@@ -57,7 +57,7 @@
       "neighbor_graph_stats": {},
       "quality_per_compute": 0.0,
       "quality_proxy_score": 0.0,
-      "response": "\ufffd\ufffd\ufffd\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd\ufffd<|output_start|>\ufffd\ufffd_u\ufffd\u0014\ufffd>-\ufffd\u001cfFH\ufffd",
+      "response": "emanusabled fCodireed fCodireed fCodireed fCodireed f",
       "runtime_override_application_method": "loaded_checkpoint",
       "runtime_override_applied": true,
       "runtime_override_reason": "requested overrides already match the loaded checkpoint config",
